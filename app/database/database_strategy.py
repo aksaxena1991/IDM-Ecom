@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 
 class DatabaseStrategy(ABC):
     @abstractmethod
-    def connect(self):
+    async def connect(self):
         pass
+
     @abstractmethod
-    def disconnect(self):
+    async def disconnect(self):
         pass
+
     @abstractmethod
     def get_client(self):
         pass

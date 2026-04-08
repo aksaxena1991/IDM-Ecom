@@ -1,22 +1,24 @@
 from fastapi import FastAPI
 
-from app.config.db import engine,Base
 from app.database.database_manager import db_manager
 from app.database.postgres_strategy import PostgresStrategy
 from app.routes import user_routes
-from contextlib import async_contextmanager
+from contextlib import asynccontextmanager
 
-@async_contextmanager
-async def lifespan(app:FastAPI):
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     strategy = PostgresStrategy(url="postgresql://postgres:Postgres@localhost:5432/idm")
-    db_manager = db_manager(strategy)
-
+    db_manager.set_strategy(strategy)
     await db_manager.connect()
+    
+    # Create tables using the strategy's engine
+    from app.config.db import Base
+    Base.metadata.create_all(bind=strategy.engine)
+    
     yield
     await db_manager.disconnect()
 
 
 app = FastAPI(lifespan=lifespan)
 
-Base.metadata.create_all(bind=engine)
 app.include_router(user_routes.router)
