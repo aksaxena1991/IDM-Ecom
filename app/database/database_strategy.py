@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
-class DatabaseFactory(ABC):
+class DatabaseStrategy(ABC):
     @abstractmethod
-    def get_connection(self):
+    def connect(self):
         pass
     @abstractmethod
-    def get_repository(self):
+    def disconnect(self):
         pass
     @abstractmethod
-    def get_user(self):
+    def get_client(self):
         pass

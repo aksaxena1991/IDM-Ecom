@@ -10,6 +10,9 @@ from typing import List
 router = APIRouter(
     prefix="/users",
 )
+@router.get("/db")
+def read_data(db=Depends(get_db)):
+    return {"database": db}
 @router.post("", response_model=UserResponse)
 def create_user(name: str = Form(...), email: str = Form(...), db: Session = Depends(get_db)):
     return UserService.create_user(db, name, email)
