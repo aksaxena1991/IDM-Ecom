@@ -8,7 +8,7 @@ Base = declarative_base()
 
 async def get_db():
     from app.database.database_manager import db_manager
-    client = db_manager.client()
+    client = db_manager.client("postgres")
     try:
         yield client
     finally:

@@ -9,12 +9,12 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     pgStrategy = PostgresStrategy(url="postgresql://postgres:Postgres@localhost:5432/idm")
-    db_manager.set_strategy(pgStrategy)
-    await db_manager.connect()
+    db_manager.register_strategy("postgres", pgStrategy)
+    await db_manager.connect("postgres")
 
     redisStrategy = RedisStrategy(url="redis://localhost:6379/0")
-    # Redis strategy is separate, don't overwrite db_manager
-    await redisStrategy.connect()
+    db_manager.register_strategy("redis", redisStrategy)
+    await db_manager.connect("redis")
 
     # Create tables using the strategy's engine
     from app.config.db import Base
@@ -22,8 +22,8 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    await redisStrategy.disconnect()
-    await db_manager.disconnect()
+    await db_manager.disconnect("redis")
+    await db_manager.disconnect("postgres")
 
 
 app = FastAPI(lifespan=lifespan)

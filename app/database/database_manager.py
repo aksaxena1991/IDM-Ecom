@@ -3,29 +3,32 @@ from app.database.database_strategy import DatabaseStrategy
 
 class DatabaseManager:
     _instance = None
-    _strategy: DatabaseStrategy = None
+    _strategies: dict[str, DatabaseStrategy] = {}
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseManager, cls).__new__(cls)
         return cls._instance
 
-    def set_strategy(self, strategy: DatabaseStrategy):
-        self._strategy = strategy
+    def register_strategy(self, name: str, strategy: DatabaseStrategy):
+        self._strategies[name] = strategy
 
-    async def connect(self):
-        if not self._strategy:
-            raise ValueError("Strategy not set!")
-        await self._strategy.connect()
+    def get_strategy(self, name: str) -> DatabaseStrategy:
+        if name not in self._strategies:
+            raise KeyError(f"No strategy registered with name '{name}'")
+        return self._strategies[name]
 
-    async def disconnect(self):
-        if self._strategy:
-            await self._strategy.disconnect()
+    async def connect(self, name: str):
+        strategy = self.get_strategy(name)
+        await strategy.connect()
 
-    def client(self):
-        if not self._strategy:
-            raise RuntimeError("No database strategy set. Call set_strategy() first.")
-        return self._strategy.get_client()
+    async def disconnect(self, name: str):
+        strategy = self.get_strategy(name)
+        await strategy.disconnect()
+
+    def client(self, name: str):
+        strategy = self.get_strategy(name)
+        return strategy.get_client()
 
 
 # Global access point
