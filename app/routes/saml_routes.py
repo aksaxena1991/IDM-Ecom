@@ -44,11 +44,15 @@ async def sso_entrypoint(
         text=user.email,
         format="urn:oasis:names:tc:SAML:2.0:nameid-format:emailAddress"
     )
+    # Use the SP entity ID from metadata, or default for testing
+    sp_entity_id = "http://localhost:8080/saml/sp"
+    acs_url = "http://localhost:8080/saml/acs"
+
     saml_response = saml_service.server.create_authn_response(
         identity=identity,
         name_id=name_id,
-        destination="https://sp.example.com/saml/acs",  # The SP's Assertion Consumer Service
-        sp_entity_id="https://sp.example.com/metadata",
+        destination=acs_url,
+        sp_entity_id=sp_entity_id,
         in_response_to=None  # In production, extract this from the SAMLRequest
     )
 
@@ -56,7 +60,7 @@ async def sso_entrypoint(
     content = f"""
     <html>
         <body onload="document.forms[0].submit()">
-            <form method="post" action="https://sp.example.com/saml/acs">
+            <form method="post" action="{acs_url}">
                 <input type="hidden" name="SAMLResponse" value="{saml_response}" />
                 <input type="submit" value="Redirecting to Service..." />
             </form>
