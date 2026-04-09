@@ -26,13 +26,10 @@ async def send_message(topic:str, message:dict):
 
 @router.post("", response_model=UserResponse)
 async def create_user(
-    tenant_id: str = Form(...),
-    email: str = Form(...),
-    password_hash: str = Form(...),
+    user: UserCreate = Form(...),
     db: Session = Depends(get_db)
 ):
-    from uuid import UUID
-    return UserService.create_user(db, password_hash, email, UUID(tenant_id))
+    return UserService.create_user(db, user.password_hash, user.email, user.tenant_id)
 
 @router.get("", response_model=List[UserResponse])
 async def get_all_users(db:Session = Depends(get_db)):
