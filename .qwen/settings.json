@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew *)",
+      "Bash(mkdir *)",
+      "Bash(openssl *)"
+    ]
+  },
+  "$version": 3
+}

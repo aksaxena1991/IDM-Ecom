@@ -7,3 +7,4 @@ pydantic[email]
 redis
 motor
 aiokafka
+saml2

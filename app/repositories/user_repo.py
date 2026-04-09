@@ -1,7 +1,8 @@
 from sqlalchemy import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.user_model import User
 import uuid
+from app.models.role_model import Role
 
 class UserRepository:
     @staticmethod
@@ -22,3 +23,10 @@ class UserRepository:
         users = db.query(User).all()
         return users
 
+    @staticmethod
+    def get_user_with_security_context(db: Session, email: str):
+        """Fetches user with roles, permissions, and attributes in one query."""
+        return db.query(User).options(
+            joinedload(User.roles).joinedload(Role.permissions),
+            joinedload(User.attributes)
+        ).filter(User.email == email).first()

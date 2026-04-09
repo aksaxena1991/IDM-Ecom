@@ -5,7 +5,7 @@ from app.database.kafka_strategy import KafkaStrategy
 from app.database.postgres_strategy import PostgresStrategy
 from app.database.redis_strategy import RedisStrategy
 from app.database.mongodb_strategy import MongodbStrategy
-from app.routes import user_routes
+from app.routes import user_routes, saml_routes
 from contextlib import asynccontextmanager
 
 # Import all models so SQLAlchemy knows about all tables and relationships
@@ -51,3 +51,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(user_routes.router)
+app.include_router(saml_routes.router)
