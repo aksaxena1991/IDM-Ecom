@@ -1,9 +1,8 @@
-from app.database.kafka_strategy import KafkaStrategy
 from app.database.database_manager import db_manager
 from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from app.config.db import get_db
-from app.schemas.user_schema import UserResponse
+from app.schemas.user_schema import UserCreate, UserResponse
 
 from app.services.user_service import UserService
 
@@ -22,12 +21,18 @@ async def send_message(topic:str, message:dict):
     import json
     payload = json.dumps(message).encode("utf-8")
     await producer.send_and_wait(topic, payload)
-    return {"Status":"Message sent to kafka topic"} 
-    
+    return {"Status":"Message sent to kafka topic"}
+
 
 @router.post("", response_model=UserResponse)
-async def create_user(name: str = Form(...), email: str = Form(...), db: Session = Depends(get_db)):
-    return UserService.create_user(db, name, email)
+async def create_user(
+    tenant_id: str = Form(...),
+    email: str = Form(...),
+    password_hash: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    from uuid import UUID
+    return UserService.create_user(db, password_hash, email, UUID(tenant_id))
 
 @router.get("", response_model=List[UserResponse])
 async def get_all_users(db:Session = Depends(get_db)):

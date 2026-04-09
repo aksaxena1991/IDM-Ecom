@@ -1,12 +1,14 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
+from uuid import UUID
 
 class UserCreate(BaseModel):
-    name:str
-    email:EmailStr
+    tenant_id: UUID
+    email: EmailStr
+    password_hash: str
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id:int
-    name:str
-    email:EmailStr
+    id: UUID
+    tenant_id: UUID
+    email: EmailStr
