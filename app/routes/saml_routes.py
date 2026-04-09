@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.config.db import get_db
 from app.services.SAMLIDPService import SAMLIdPService
 from app.repositories.user_repo import UserRepository
+from saml2.saml import NameID
 
 router = APIRouter(prefix="/saml", tags=["SAML SSO"])
 saml_service = SAMLIdPService()
@@ -20,15 +21,16 @@ async def get_metadata():
 async def sso_entrypoint(
         request: Request,
         SAMLRequest: str = None,
+        user_email: str = Form(None),
         db: Session = Depends(get_db)
 ):
-    # 1. Check if user is logged into the IdM System (Session check)
-    # For this example, we assume we've identified the user 'test@example.com'
-    user_email = "test@example.com"
+    # 1. Use provided email or default for testing
+    if not user_email:
+        user_email = "aksaxena1991@gmail.com"
 
     user = UserRepository.get_user_with_security_context(db, user_email)
     if not user:
-        raise HTTPException(status_code=401, detail="Identity not found")
+        raise HTTPException(status_code=401, detail=f"Identity not found: {user_email}")
 
     # 2. Extract SP info and validate PBAC
     # (Optional: check Policy model to see if this user/tenant is allowed for this SP)
@@ -38,9 +40,13 @@ async def sso_entrypoint(
 
     # 4. Create the SAML Response
     # This signs the assertion with your private key
+    name_id = NameID(
+        text=user.email,
+        format="urn:oasis:names:tc:SAML:2.0:nameid-format:emailAddress"
+    )
     saml_response = saml_service.server.create_authn_response(
         identity=identity,
-        name_id=user.email,
+        name_id=name_id,
         destination="https://sp.example.com/saml/acs",  # The SP's Assertion Consumer Service
         sp_entity_id="https://sp.example.com/metadata",
         in_response_to=None  # In production, extract this from the SAMLRequest

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.database.database_manager import db_manager
 from app.database.kafka_strategy import KafkaStrategy
@@ -49,6 +50,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(SessionMiddleware, secret_key="your-secret-key-change-in-production")
 
 app.include_router(user_routes.router)
 app.include_router(saml_routes.router)
