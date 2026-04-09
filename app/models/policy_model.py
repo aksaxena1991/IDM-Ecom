@@ -1,5 +1,7 @@
-from sqlalchemy import String,UUID,Column,ForeignKey,Integer
+from sqlalchemy import Column, Integer, String, UUID, ForeignKey, Index
+from sqlalchemy.dialects.postgresql import JSONB
 from app.config.db import Base
+import uuid
 class Policy(Base):
     __tablename__ = 'policies'
 
@@ -9,7 +11,11 @@ class Policy(Base):
     tenant_id = Column(UUID(as_uuid=True), ForeignKey('tenants.id'), nullable=False)
     priority = Column(Integer, default=0, nullable=False)
 
-    # Optional: Add index on tenant_id for better performance
+    # GIN Index on JSONB column (exactly equivalent to your SQL)
     __table_args__ = (
-        {"schema": "public"},  # if you're using a specific schema
+        Index(
+            'idx_policy_json', 
+            'policy', 
+            postgresql_using='gin'
+        ),
     )
