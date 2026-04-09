@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database.database_manager import db_manager
+from app.database.kafka_strategy import KafkaStrategy
 from app.database.postgres_strategy import PostgresStrategy
 from app.database.redis_strategy import RedisStrategy
 from app.database.mongodb_strategy import MongodbStrategy
@@ -20,6 +21,10 @@ async def lifespan(app: FastAPI):
     mongodbStrategy = MongodbStrategy(url="mongodb://localhost:27017/idm")
     db_manager.register_strategy("mongodb", mongodbStrategy)
     await db_manager.connect("mongodb")
+
+    kafkaStrategy = KafkaStrategy(url="localhost:9092")
+    db_manager.register_strategy("kafka", kafkaStrategy)
+    await db_manager.connect("kafka")
     
 
     # Create tables using the strategy's engine
@@ -31,6 +36,7 @@ async def lifespan(app: FastAPI):
     await db_manager.disconnect("redis")
     await db_manager.disconnect("postgres")
     await db_manager.disconnect("mongodb")
+    await db_manager.disconnect("kafka")
 
 
 app = FastAPI(lifespan=lifespan)
