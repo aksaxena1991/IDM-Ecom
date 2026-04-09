@@ -8,6 +8,15 @@ from app.database.mongodb_strategy import MongodbStrategy
 from app.routes import user_routes
 from contextlib import asynccontextmanager
 
+# Import all models so SQLAlchemy knows about all tables and relationships
+from app.models.user_model import User
+from app.models.role_model import Role
+from app.models.user_role_model import UserRole
+from app.models.role_permission_model import RolePermission
+from app.models.permission_model import Permission
+from app.models.policy_model import Policy
+from app.models.user_attribute_model import UserAttribute
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     pgStrategy = PostgresStrategy(url="postgresql://postgres:Postgres@localhost:5432/idm")
