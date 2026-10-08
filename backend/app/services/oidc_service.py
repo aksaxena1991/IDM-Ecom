@@ -191,21 +191,8 @@ class OidcService:
         user_result = await db.execute(select(User).where(User.id == existing.user_id))
         user = user_result.scalar_one()
 
-        # Mark old token as rotated
-        new_plain = generate_token(48)
-        new_row = RefreshToken(
-            token_hash=hash_token(new_plain),
-            user_id=existing.user_id,
-            application_id=existing.application_id,
-            session_id=existing.session_id,
-            family_id=existing.family_id,
-            expires_at=existing.expires_at,
-        )
-        db.add(new_row)
-        await db.flush()
-        existing.replaced_by = new_row.id
         existing.revoked_at = datetime.now(timezone.utc)
-        await db.commit()
+        await db.flush()
 
         tokens = await self.issue_tokens(
             db,
@@ -217,9 +204,14 @@ class OidcService:
             nonce=None,
             family_id=existing.family_id,
         )
-        # Replace the refresh from issue_tokens with the rotated one already created —
-        # issue_tokens creates another refresh; simplify by returning tokens with new_plain
-        tokens["refresh_token"] = new_plain
+        # Link old token to the newly issued refresh family member
+        new_hash = hash_token(tokens["refresh_token"])
+        new_result = await db.execute(
+            select(RefreshToken).where(RefreshToken.token_hash == new_hash)
+        )
+        new_row = new_result.scalar_one()
+        existing.replaced_by = new_row.id
+        await db.commit()
         return tokens
 
     async def _user_groups(self, db: AsyncSession, user_id: uuid.UUID) -> list[str]:
