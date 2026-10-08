@@ -12,8 +12,8 @@ from sqlalchemy import select
 from app.api.deps import DbDep, RedisDep, get_bearer_claims, get_current_session
 from app.core.config import get_settings
 from app.core.errors import ProblemDetail
-from app.core.security import generate_token, verify_password
-from app.models.entities import User, UserStatus
+from app.core.security import generate_token, hash_password, verify_password
+from app.models.entities import Tenant, User, UserStatus
 from app.services.audit_service import audit_service
 from app.services.mfa_service import mfa_service
 from app.services.oidc_service import oidc_service
@@ -21,6 +21,8 @@ from app.services.rate_limit import rate_limiter
 from app.services.session_service import session_service
 
 router = APIRouter(tags=["auth"])
+
+MIN_PASSWORD_LENGTH = 8
 
 
 class LoginRequest(BaseModel):
@@ -36,12 +38,32 @@ class LoginResponse(BaseModel):
     user_id: str | None = None
 
 
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str | None = None
+    tenant_slug: str = "demo"
+
+
+class SignupResponse(BaseModel):
+    session_id: str
+    user_id: str
+    email: EmailStr
+
+
+PAGE_STYLES = """
+body{font-family:system-ui,sans-serif;max-width:420px;margin:4rem auto;padding:0 1rem}
+input,button{display:block;width:100%;margin:.5rem 0;padding:.6rem}
+p.muted{color:#555;font-size:.95rem}
+a{color:#0b57d0}
+.error{color:#b00020}
+"""
+
 LOGIN_HTML = """
 <!DOCTYPE html>
 <html><head><title>SSO Login</title>
 <style>
-body{{font-family:system-ui,sans-serif;max-width:420px;margin:4rem auto;padding:0 1rem}}
-input,button{{display:block;width:100%;margin:.5rem 0;padding:.6rem}}
+{styles}
 </style></head>
 <body>
 <h1>Sign in</h1>
@@ -53,14 +75,120 @@ input,button{{display:block;width:100%;margin:.5rem 0;padding:.6rem}}
   <button type="submit">Continue</button>
 </form>
 {error}
+<p class="muted">No account? <a href="/signup?redirect={redirect}">Sign up</a></p>
+</body></html>
+"""
+
+SIGNUP_HTML = """
+<!DOCTYPE html>
+<html><head><title>SSO Sign up</title>
+<style>
+{styles}
+</style></head>
+<body>
+<h1>Create account</h1>
+<form method="post" action="/signup">
+  <input type="hidden" name="redirect" value="{redirect}"/>
+  <label>Name <input name="name" type="text" autocomplete="name"/></label>
+  <label>Email <input name="email" type="email" required autocomplete="email"/></label>
+  <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password"/></label>
+  <label>Confirm password <input name="confirm_password" type="password" required minlength="8" autocomplete="new-password"/></label>
+  <button type="submit">Create account</button>
+</form>
+{error}
+<p class="muted">Already have an account? <a href="/login?redirect={redirect}">Sign in</a></p>
 </body></html>
 """
 
 
+def _login_html(redirect: str = "/", error: str = "") -> str:
+    return LOGIN_HTML.format(styles=PAGE_STYLES, redirect=redirect, error=error)
+
+
+def _signup_html(redirect: str = "/", error: str = "") -> str:
+    return SIGNUP_HTML.format(styles=PAGE_STYLES, redirect=redirect, error=error)
+
+
+def _validate_password(password: str) -> str | None:
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return f"Password must be at least {MIN_PASSWORD_LENGTH} characters"
+    return None
+
+
+async def _get_tenant_by_slug(db: DbDep, tenant_slug: str) -> Tenant | None:
+    result = await db.execute(select(Tenant).where(Tenant.slug == tenant_slug))
+    return result.scalar_one_or_none()
+
+
+async def _create_user(
+    db: DbDep,
+    *,
+    email: str,
+    password: str,
+    name: str | None,
+    tenant_slug: str,
+) -> tuple[User | None, str | None]:
+    password_error = _validate_password(password)
+    if password_error:
+        return None, password_error
+
+    tenant = await _get_tenant_by_slug(db, tenant_slug)
+    if tenant is None:
+        return None, "Unknown organization"
+
+    email_norm = email.lower().strip()
+    existing = await db.execute(
+        select(User).where(User.tenant_id == tenant.id).where(User.email == email_norm)
+    )
+    if existing.scalar_one_or_none() is not None:
+        return None, "An account with this email already exists"
+
+    user = User(
+        tenant_id=tenant.id,
+        email=email_norm,
+        name=(name or "").strip() or None,
+        password_hash=hash_password(password),
+        status=UserStatus.active,
+        is_admin=False,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user, None
+
+
+def _session_cookie_response(
+    *,
+    settings,
+    session_id: str,
+    body: dict | None = None,
+    redirect: str | None = None,
+    status_code: int = 200,
+):
+    if redirect is not None:
+        response = RedirectResponse(url=redirect or "/", status_code=303)
+    else:
+        response = JSONResponse(body or {}, status_code=status_code)
+    response.set_cookie(
+        key=settings.cookie_name,
+        value=session_id,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        max_age=settings.session_absolute_hours * 3600,
+        path="/",
+    )
+    return response
+
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(redirect: str = "/") -> HTMLResponse:
-    return HTMLResponse(LOGIN_HTML.format(redirect=redirect, error=""))
+    return HTMLResponse(_login_html(redirect=redirect))
 
+
+@router.get("/signup", response_class=HTMLResponse)
+async def signup_page(redirect: str = "/") -> HTMLResponse:
+    return HTMLResponse(_signup_html(redirect=redirect))
 
 async def _authenticate(
     db: DbDep,
@@ -108,12 +236,12 @@ async def login_form(
         raise ProblemDetail(status=429, title="Too Many Requests", detail="Account temporarily locked")
     if err == "invalid":
         return HTMLResponse(
-            LOGIN_HTML.format(redirect=redirect, error="<p style='color:red'>Invalid credentials</p>"),
+            _login_html(redirect=redirect, error="<p class='error'>Invalid credentials</p>"),
             status_code=401,
         )
     if err == "mfa":
         return HTMLResponse(
-            LOGIN_HTML.format(redirect=redirect, error="<p>MFA code required</p>"),
+            _login_html(redirect=redirect, error="<p class='error'>MFA code required</p>"),
             status_code=401,
         )
     assert user is not None
@@ -124,17 +252,9 @@ async def login_form(
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
     )
-    response = RedirectResponse(url=redirect or "/", status_code=303)
-    response.set_cookie(
-        key=settings.cookie_name,
-        value=str(session.id),
-        httponly=True,
-        secure=settings.cookie_secure,
-        samesite="lax",
-        max_age=settings.session_absolute_hours * 3600,
-        path="/",
+    return _session_cookie_response(
+        settings=settings, session_id=str(session.id), redirect=redirect or "/"
     )
-    return response
 
 
 @router.post("/login/json", response_model=LoginResponse)
@@ -148,7 +268,10 @@ async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep):
     if err == "invalid":
         raise ProblemDetail(status=401, title="Unauthorized", detail="Invalid credentials")
     if err == "mfa":
-        return JSONResponse({"session_id": "", "mfa_required": True, "user_id": str(user.id) if user else None}, status_code=401)
+        return JSONResponse(
+            {"session_id": "", "mfa_required": True, "user_id": str(user.id) if user else None},
+            status_code=401,
+        )
     assert user is not None
     await rate_limiter.clear_login_failures(redis, body.email.lower())
     session = await session_service.create(
@@ -157,19 +280,76 @@ async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep):
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
     )
-    response = JSONResponse(
-        {"session_id": str(session.id), "mfa_required": False, "user_id": str(user.id)}
+    return _session_cookie_response(
+        settings=settings,
+        session_id=str(session.id),
+        body={"session_id": str(session.id), "mfa_required": False, "user_id": str(user.id)},
     )
-    response.set_cookie(
-        key=settings.cookie_name,
-        value=str(session.id),
-        httponly=True,
-        secure=settings.cookie_secure,
-        samesite="lax",
-        max_age=settings.session_absolute_hours * 3600,
-        path="/",
+
+
+@router.post("/signup")
+async def signup_form(
+    db: DbDep,
+    redis: RedisDep,
+    email: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    name: str | None = Form(None),
+    tenant_slug: str = Form("demo"),
+    redirect: str = Form("/"),
+):
+    settings = get_settings()
+    if password != confirm_password:
+        return HTMLResponse(
+            _signup_html(redirect=redirect, error="<p class='error'>Passwords do not match</p>"),
+            status_code=400,
+        )
+    user, err = await _create_user(
+        db, email=email, password=password, name=name, tenant_slug=tenant_slug
     )
-    return response
+    if err:
+        return HTMLResponse(
+            _signup_html(redirect=redirect, error=f"<p class='error'>{err}</p>"),
+            status_code=400,
+        )
+    assert user is not None
+    session = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    )
+    await audit_service.record(
+        db, redis, tenant_id=user.tenant_id, actor=user.email, action="signup.success", target=str(user.id)
+    )
+    return _session_cookie_response(
+        settings=settings, session_id=str(session.id), redirect=redirect or "/"
+    )
+
+
+@router.post("/signup/json", response_model=SignupResponse, status_code=201)
+async def signup_json(body: SignupRequest, db: DbDep, redis: RedisDep):
+    settings = get_settings()
+    user, err = await _create_user(
+        db,
+        email=body.email,
+        password=body.password,
+        name=body.name,
+        tenant_slug=body.tenant_slug,
+    )
+    if err:
+        status = 409 if "already exists" in err else 400
+        raise ProblemDetail(status=status, title="Signup Failed", detail=err)
+    assert user is not None
+    session = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    )
+    await audit_service.record(
+        db, redis, tenant_id=user.tenant_id, actor=user.email, action="signup.success", target=str(user.id)
+    )
+    return _session_cookie_response(
+        settings=settings,
+        session_id=str(session.id),
+        body={"session_id": str(session.id), "user_id": str(user.id), "email": user.email},
+        status_code=201,
+    )
 
 
 @router.get("/oauth2/authorize")

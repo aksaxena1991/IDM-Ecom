@@ -24,6 +24,8 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 - API docs: http://localhost:8000/docs
+- Login: http://localhost:8000/login
+- Sign up: http://localhost:8000/signup
 - Health: http://localhost:8000/healthz
 - OIDC discovery: http://localhost:8000/.well-known/openid-configuration
 
