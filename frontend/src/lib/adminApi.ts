@@ -48,6 +48,21 @@ export type EvaluateResult = {
   user_id: string
 }
 
+export type RoleItem = {
+  id: string
+  name: string
+  description: string | null
+  is_system: boolean
+  permissions: string[]
+}
+
+export type UserRolesResult = {
+  user_id: string
+  roles: RoleItem[]
+  role_ids: string[]
+  permissions: string[]
+}
+
 type StepUpHandler = () => Promise<void>
 
 let stepUpHandler: StepUpHandler | null = null
@@ -177,5 +192,30 @@ export const adminApi = {
     ssoJson<EvaluateResult>('/v1/access/evaluate', token, {
       method: 'POST',
       body: JSON.stringify({ action: 'app:access', ...body }),
+    }),
+
+  listRoles: (token: string) => ssoJson<{ items: RoleItem[] }>('/v1/roles', token),
+
+  createRole: (
+    token: string,
+    body: { name: string; description?: string; permissions: string[] },
+  ) => adminJson<RoleItem>('/v1/roles', token, { method: 'POST', body: JSON.stringify(body) }),
+
+  patchRole: (
+    token: string,
+    id: string,
+    body: { description?: string | null; permissions?: string[] },
+  ) => adminJson<RoleItem>(`/v1/roles/${id}`, token, { method: 'PATCH', body: JSON.stringify(body) }),
+
+  deleteRole: (token: string, id: string) =>
+    adminJson<{ ok: boolean }>(`/v1/roles/${id}`, token, { method: 'DELETE' }),
+
+  getUserRoles: (token: string, userId: string) =>
+    ssoJson<UserRolesResult>(`/v1/users/${userId}/roles`, token),
+
+  putUserRoles: (token: string, userId: string, roleIds: string[]) =>
+    adminJson<UserRolesResult>(`/v1/users/${userId}/roles`, token, {
+      method: 'PUT',
+      body: JSON.stringify({ role_ids: roleIds }),
     }),
 }

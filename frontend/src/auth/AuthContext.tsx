@@ -57,6 +57,12 @@ function tokenIsAdmin(tokens: TokenSet | null): boolean {
   const claims = decodeJwtPayload(tokens.access_token)
   if (!claims) return false
   if (claims.is_admin) return true
+  const roles = Array.isArray(claims.roles) ? claims.roles.map(String) : []
+  if (roles.includes('admin')) return true
+  const permissions = Array.isArray(claims.permissions)
+    ? claims.permissions.map(String)
+    : []
+  if (permissions.includes('admin:access') || permissions.includes('admin:*')) return true
   return String(claims.scope || '')
     .split(/\s+/)
     .includes('admin')
