@@ -8,6 +8,7 @@ import { AccessEvaluatePage } from './pages/admin/AccessEvaluatePage'
 import { AppsPage } from './pages/admin/AppsPage'
 import { AuditPage } from './pages/admin/AuditPage'
 import { PoliciesPage } from './pages/admin/PoliciesPage'
+import { RolesPage } from './pages/admin/RolesPage'
 import { UsersPage } from './pages/admin/UsersPage'
 import { CallbackPage } from './pages/CallbackPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -56,6 +57,14 @@ export default function App() {
                 element={
                   <AdminRoute>
                     <PoliciesPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/roles"
+                element={
+                  <AdminRoute>
+                    <RolesPage />
                   </AdminRoute>
                 }
               />

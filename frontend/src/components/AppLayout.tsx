@@ -16,6 +16,7 @@ export function AppLayout() {
               <>
                 <NavLink to="/admin/apps">Apps</NavLink>
                 <NavLink to="/admin/users">Users</NavLink>
+                <NavLink to="/admin/roles">Roles</NavLink>
                 <NavLink to="/admin/policies">Policies</NavLink>
                 <NavLink to="/admin/access">Evaluate</NavLink>
                 <NavLink to="/admin/audit">Audit</NavLink>

@@ -3,7 +3,8 @@ import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type PolicyItem } from '../../lib/adminApi'
 
 const DEFAULT_CONDITIONS = `{
-  "all": [
+  "any": [
+    { "attr": "subject.roles", "op": "contains", "value": "app_operator" },
     { "attr": "subject.department", "op": "eq", "value": "engineering" }
   ]
 }`
@@ -82,8 +83,9 @@ export function PoliciesPage() {
     <main className="dashboard">
       <h1>Access policies</h1>
       <p className="lede">
-        PBAC rules evaluated on <code>app:access</code> with deny-overrides. Conditions use subject,
-        resource, and environment attributes.
+        PBAC rules evaluated on <code>app:access</code> with deny-overrides. Conditions may use RBAC
+        fields (<code>subject.roles</code>, <code>subject.permissions</code>), ABAC attributes, and
+        environment.
       </p>
       {error && <p className="form-error">{error}</p>}
 

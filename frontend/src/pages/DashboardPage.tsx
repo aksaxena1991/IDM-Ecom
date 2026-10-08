@@ -3,13 +3,15 @@ import { useAuth } from '../auth/AuthContext'
 export function DashboardPage() {
   const { user, tokens, isAdmin } = useAuth()
   const attrs = user?.attributes || {}
+  const roles = user?.roles || []
+  const permissions = user?.permissions || []
 
   return (
     <main className="dashboard">
       <h1>Dashboard</h1>
       <p className="lede">
         Signed in via SSO. Profile comes from <code>/oauth2/userinfo</code>
-        {isAdmin ? ', including ABAC attributes.' : '.'}
+        {isAdmin ? ', including roles, permissions, and ABAC attributes.' : '.'}
       </p>
 
       <section className="detail-grid" aria-label="Logged in user details">
@@ -37,8 +39,22 @@ export function DashboardPage() {
               <dd>{user?.groups?.length ? user.groups.join(', ') : 'None'}</dd>
             </div>
             <div>
-              <dt>Role</dt>
+              <dt>Console</dt>
               <dd>{isAdmin ? 'Administrator' : 'User'}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div>
+          <h2>RBAC</h2>
+          <dl className="detail-list">
+            <div>
+              <dt>Roles</dt>
+              <dd>{roles.length ? roles.join(', ') : 'None'}</dd>
+            </div>
+            <div>
+              <dt>Permissions</dt>
+              <dd className="mono">{permissions.length ? permissions.join(', ') : 'None'}</dd>
             </div>
           </dl>
         </div>
