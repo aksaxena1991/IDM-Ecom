@@ -9,6 +9,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.security import generate_token, hash_token
 from app.models.entities import RefreshToken, Session
 
 
@@ -30,13 +31,15 @@ class SessionService:
         user_id: uuid.UUID,
         tenant_id: uuid.UUID,
         mfa_verified: bool = False,
-    ) -> Session:
+    ) -> tuple[Session, str]:
         now = self._now()
         idle = timedelta(minutes=self.settings.session_idle_minutes)
         absolute = timedelta(hours=self.settings.session_absolute_hours)
+        plain = generate_token(32)
         session = Session(
             user_id=user_id,
             tenant_id=tenant_id,
+            token_hash=hash_token(plain),
             created_at=now,
             last_seen_at=now,
             expires_at=now + idle,
@@ -48,7 +51,7 @@ class SessionService:
         await db.commit()
         await db.refresh(session)
         await self._write_redis(redis, session)
-        return session
+        return session, plain
 
     async def _write_redis(self, redis: Redis, session: Session) -> None:
         payload = {
@@ -80,6 +83,21 @@ class SessionService:
 
         result = await db.execute(select(Session).where(Session.id == session_id))
         session = result.scalar_one_or_none()
+        return self._validate(session)
+
+    async def get_by_token(self, db: AsyncSession, redis: Redis, token: str) -> Session | None:
+        """Resolve opaque cookie token (preferred) or legacy raw session UUID."""
+        hashed = hash_token(token)
+        result = await db.execute(select(Session).where(Session.token_hash == hashed))
+        session = result.scalar_one_or_none()
+        if session is None:
+            try:
+                return await self.get(db, redis, uuid.UUID(token))
+            except ValueError:
+                return None
+        return self._validate(session)
+
+    def _validate(self, session: Session | None) -> Session | None:
         if session is None:
             return None
         if session.revoked_at is not None:

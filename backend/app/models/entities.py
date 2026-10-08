@@ -305,6 +305,7 @@ class MfaFactor(Base):
     type: Mapped[MfaType] = mapped_column(Enum(MfaType, name="mfa_type"), nullable=False)
     secret_ref: Mapped[str] = mapped_column(Text, nullable=False)
     label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped[User] = relationship(back_populates="mfa_factors")
@@ -315,6 +316,7 @@ class Session(Base):
     __table_args__ = (Index("ix_sessions_user_id", "user_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    token_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True, index=True)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
