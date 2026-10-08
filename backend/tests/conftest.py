@@ -24,9 +24,11 @@ from app.core.redis import close_redis, get_redis
 from app.core.security import hash_password, hash_token
 from app.main import create_app
 from app.models.entities import (
+    AccessPolicy,
     Application,
     AppProtocol,
     AppStatus,
+    PolicyEffect,
     ScimToken,
     Tenant,
     User,
@@ -81,6 +83,19 @@ async def seeded(db_session: AsyncSession):
     db_session.add(app)
     db_session.add(
         ScimToken(tenant_id=tenant.id, token_hash=hash_token("scim-test-token"), label="test")
+    )
+    db_session.add(
+        AccessPolicy(
+            tenant_id=tenant.id,
+            name="allow-active-users",
+            description="Baseline allow for tests",
+            effect=PolicyEffect.allow,
+            priority=1,
+            enabled=True,
+            actions=["app:access"],
+            resource_match={},
+            conditions={"all": [{"attr": "subject.status", "op": "eq", "value": "active"}]},
+        )
     )
     await db_session.commit()
     return {"tenant": tenant, "user": user, "app": app}

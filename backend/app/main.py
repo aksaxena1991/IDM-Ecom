@@ -33,24 +33,25 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title=settings.app_name, lifespan=lifespan)
+    docs_enabled = settings.debug
+    app = FastAPI(
+        title=settings.app_name,
+        lifespan=lifespan,
+        docs_url="/docs" if docs_enabled else None,
+        redoc_url="/redoc" if docs_enabled else None,
+        openapi_url="/openapi.json" if docs_enabled else None,
+    )
     origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=origins if origins else [],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Request-Id"],
     )
     app.add_middleware(CookieCsrfMiddleware)
     app.add_middleware(RequestIdMiddleware)
     register_exception_handlers(app)
-
-    if not settings.debug:
-        # Hide interactive docs outside debug/local
-        app.docs_url = None
-        app.redoc_url = None
-        app.openapi_url = None
 
     app.include_router(health_router)
     app.include_router(well_known_router)

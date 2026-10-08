@@ -452,6 +452,7 @@ async def authorize(
 
 @router.post("/oauth2/token")
 async def token(
+    request: Request,
     db: DbDep,
     redis: RedisDep,
     grant_type: str = Form(...),
@@ -461,6 +462,19 @@ async def token(
     code_verifier: str | None = Form(None),
     refresh_token: str | None = Form(None),
 ):
+    settings = get_settings()
+    allowed, retry = await rate_limiter.hit(
+        redis,
+        f"sso:rl:token:{request.client.host if request.client else 'unknown'}:{client_id}",
+        settings.token_rate_limit_per_minute,
+        60,
+    )
+    if not allowed:
+        return JSONResponse(
+            {"error": "temporarily_unavailable", "error_description": "Rate limit exceeded"},
+            status_code=429,
+            headers={"Retry-After": str(retry)},
+        )
     if grant_type == "authorization_code":
         if not code or not redirect_uri or not code_verifier:
             return JSONResponse(
