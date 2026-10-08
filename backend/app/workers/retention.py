@@ -52,6 +52,7 @@ async def ensure_rls_policies() -> None:
 
 async def main() -> None:
     logging.basicConfig(level=logging.INFO)
+    await ensure_rls_policies()
     await run_retention_once()
 
 

@@ -139,17 +139,23 @@ async def create_user(body: ScimUserIn, db: DbDep, tenant_id: TenantDep):
     name = None
     if body.name:
         name = body.name.get("formatted")
+    # Invite flow: generate a one-time temporary password so the account can sign in
+    temp_password = generate_token(12)
     user = User(
         tenant_id=tenant_id,
         email=email,
         name=name,
         external_id=body.externalId,
+        password_hash=hash_password(temp_password),
         status=UserStatus.active if body.active else UserStatus.suspended,
     )
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    return scim_user(user)
+    metrics.incr("scim_create_users")
+    payload = scim_user(user)
+    payload["password"] = temp_password  # returned once for invite/onboarding
+    return payload
 
 
 @router.get("/Users/{user_id}")

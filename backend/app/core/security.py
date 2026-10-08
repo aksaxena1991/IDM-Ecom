@@ -47,13 +47,13 @@ def verify_pkce(verifier: str, challenge: str, method: str) -> bool:
     return hmac.compare_digest(pkce_challenge_s256(verifier), challenge)
 
 
-def _fernet() -> Fernet:
+def _fernet(salt: bytes) -> Fernet:
     settings = get_settings()
     raw = settings.mfa_encryption_key.encode("utf-8")
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=b"sso-mfa-v1",
+        salt=salt,
         iterations=100_000,
     )
     key = base64.urlsafe_b64encode(kdf.derive(raw))
@@ -61,11 +61,19 @@ def _fernet() -> Fernet:
 
 
 def encrypt_secret(plaintext: str) -> str:
-    return _fernet().encrypt(plaintext.encode("utf-8")).decode("utf-8")
+    """Encrypt with current key version (v2). Prefer KMS in production deployments."""
+    token = _fernet(b"sso-mfa-v2").encrypt(plaintext.encode("utf-8")).decode("utf-8")
+    return f"v2:{token}"
 
 
 def decrypt_secret(ciphertext: str) -> str:
-    return _fernet().decrypt(ciphertext.encode("utf-8")).decode("utf-8")
+    if ciphertext.startswith("v2:"):
+        return _fernet(b"sso-mfa-v2").decrypt(ciphertext[3:].encode("utf-8")).decode("utf-8")
+    # Legacy v1 (no prefix)
+    try:
+        return _fernet(b"sso-mfa-v1").decrypt(ciphertext.encode("utf-8")).decode("utf-8")
+    except Exception:
+        return _fernet(b"sso-mfa-v2").decrypt(ciphertext.encode("utf-8")).decode("utf-8")
 
 
 def constant_time_equals(a: str, b: str) -> bool:

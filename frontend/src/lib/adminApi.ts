@@ -56,6 +56,13 @@ export type RoleItem = {
   permissions: string[]
 }
 
+export type GroupItem = {
+  id: string
+  name: string
+  source: string
+  member_ids: string[]
+}
+
 export type UserRolesResult = {
   user_id: string
   roles: RoleItem[]
@@ -223,5 +230,16 @@ export const adminApi = {
     adminJson<UserRolesResult>(`/v1/users/${userId}/roles`, token, {
       method: 'PUT',
       body: JSON.stringify({ role_ids: roleIds }),
+    }),
+
+  listGroups: (token: string) => ssoJson<{ items: GroupItem[] }>('/v1/groups', token),
+
+  createGroup: (token: string, body: { name: string }) =>
+    adminJson<GroupItem>('/v1/groups', token, { method: 'POST', body: JSON.stringify(body) }),
+
+  putGroupMembers: (token: string, groupId: string, userIds: string[]) =>
+    adminJson<{ ok: boolean; member_ids: string[] }>(`/v1/groups/${groupId}/members`, token, {
+      method: 'PUT',
+      body: JSON.stringify({ user_ids: userIds }),
     }),
 }
