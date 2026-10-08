@@ -52,9 +52,17 @@ Policies are data. On `app:access` (OIDC authorize, token issue, and SAML SSO) t
 - No enabled policy targets the action: allow (existing tenants keep working).
 - A matching deny wins over any allow.
 - Otherwise a matching allow grants access.
-- If policies exist for the action and none match: deny.
+- If policies exist for the action and none match: deny (`No access policy allows this request`).
 
-Demo seed creates both sample policies, sets the admin's department to `engineering` with clearance `5`, and marks demo apps `sensitivity=internal`, `owner_department=engineering`.
+Demo seed creates:
+
+1. **`allow-active-users`** (priority 1) — baseline allow for `subject.status == active`
+2. **`deny-restricted-without-clearance`** (priority 100) — deny when app `sensitivity=restricted` and `clearance < 3`
+3. **`allow-admin-or-owning-department`** (priority 10) — allow admins or matching department
+
+It also sets the admin's department to `engineering` with clearance `5`, and marks demo apps `sensitivity=internal`, `owner_department=engineering`.
+
+If login/authorize fails with **No access policy allows this request**, either disable/remove tenant policies for `app:access`, or ensure an allow policy matches (re-run `python scripts/seed.py` to add `allow-active-users`).
 
 ```http
 PUT /v1/users/{user_id}/attributes

@@ -41,13 +41,13 @@ async def seed() -> None:
             await db.flush()
 
         user_result = await db.execute(
-            select(User).where(User.tenant_id == tenant.id).where(User.email == "aksaxena1991@gmail")
+            select(User).where(User.tenant_id == tenant.id).where(User.email == "aksaxena1991@gmail.com")
         )
         user = user_result.scalar_one_or_none()
         if user is None:
             user = User(
                 tenant_id=tenant.id,
-                email="aksaxena1991@gmail",
+                email="aksaxena1991@gmail.com",
                 name="Anubhav Saxena",
                 password_hash=hash_password("@Admin2026"),
                 status=UserStatus.active,
@@ -140,6 +140,22 @@ async def seed() -> None:
                 {"sensitivity": "internal", "owner_department": "engineering"},
             )
 
+        # Baseline: any active user may access apps unless a higher-priority deny matches.
+        # Without this, enable policies for app:access cause default-deny for normal signups.
+        await _ensure_policy(
+            db,
+            tenant_id=tenant.id,
+            name="allow-active-users",
+            description="Allow app:access for any active user (baseline). Deny policies still override.",
+            effect=PolicyEffect.allow,
+            priority=1,
+            actions=["app:access"],
+            conditions={
+                "all": [
+                    {"attr": "subject.status", "op": "eq", "value": "active"},
+                ]
+            },
+        )
         await _ensure_policy(
             db,
             tenant_id=tenant.id,
@@ -183,7 +199,7 @@ async def seed() -> None:
         await keystore.ensure_active_es256_key(db)
         await keystore.ensure_active_rs256_key(db)
         print("Seed complete.")
-        print("Admin: aksaxena1991@gmail / @Admin2026")
+        print("Admin: aksaxena1991@gmail.com / @Admin2026")
         print("OIDC client_id: demo-oidc-app")
         print("SAML client_id: demo-saml-app")
 
