@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso"
     redis_url: str = "redis://localhost:6379/0"
 
+    # Used for production boot checks; reserved for CSRF HMAC / cookie signing helpers.
     secret_key: str = "change-me"
     cookie_secure: bool = False
     cookie_name: str = "sso_session"

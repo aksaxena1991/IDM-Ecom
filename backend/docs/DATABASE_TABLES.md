@@ -56,7 +56,7 @@ tenants
   └── sync_cursors
 
 auth_codes                  (OIDC auth codes; Redis is primary)
-saml_assertion_replays      (SAML anti-replay)
+saml_assertion_replays      (SAML anti-replay durable; Redis is primary)
 ```
 
 ---

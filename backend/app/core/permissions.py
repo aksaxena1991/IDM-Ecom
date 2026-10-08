@@ -15,6 +15,9 @@ AUDIT_READ = "audit:read"
 GROUPS_READ = "groups:read"
 GROUPS_WRITE = "groups:write"
 
+# System permissions are the only ones wired to `require_permission` routes.
+# Custom permissions may still be stored on roles for app-specific claims.
+
 # Having write implies read for the same resource family.
 READ_IMPLIED_BY_WRITE: dict[str, tuple[str, ...]] = {
     APPS_READ: (APPS_WRITE,),

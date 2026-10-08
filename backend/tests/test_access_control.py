@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from sqlalchemy import delete
 
 from app.models.entities import AccessPolicy, PolicyEffect
 from app.services.access_service import APP_ACCESS, access_service
@@ -8,6 +9,10 @@ from app.services.access_service import APP_ACCESS, access_service
 
 @pytest.mark.asyncio
 async def test_no_policies_deny_app_access(db_session, seeded):
+    await db_session.execute(
+        delete(AccessPolicy).where(AccessPolicy.tenant_id == seeded["tenant"].id)
+    )
+    await db_session.commit()
     decision = await access_service.decide(
         db_session,
         user=seeded["user"],

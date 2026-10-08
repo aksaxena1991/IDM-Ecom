@@ -147,7 +147,7 @@ Sessions track idle expiry, absolute expiry, `mfa_verified_at`, and `admin_step_
 | `GET` / `POST /saml/sso` | SAML SSO |
 
 Register apps with `protocol: "saml"` and config keys such as `acs_url`, `entity_id`, `audience`.  
-`app:access` (RBAC/ABAC/PBAC) applies before issuing assertions. Assertion IDs are stored in `saml_assertion_replays` to prevent reuse.
+`app:access` (assignments → RBAC/ABAC/PBAC) applies before issuing assertions. Assertion IDs are cached in Redis (`sso:saml:replay:*`) and also written to `saml_assertion_replays` for durability.
 
 ---
 
