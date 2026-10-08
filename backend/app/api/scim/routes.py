@@ -298,4 +298,5 @@ async def get_group(group_id: uuid.UUID, db: DbDep, tenant_id: TenantDep):
 
 @router.api_route("/Bulk", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 async def bulk_disabled():
+    metrics.incr("scim_errors")
     raise ProblemDetail(status=501, title="Not Implemented", detail="Bulk operations disabled in v1")

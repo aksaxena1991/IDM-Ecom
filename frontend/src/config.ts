@@ -5,6 +5,9 @@ export const OIDC_REDIRECT_URI =
 export const OIDC_SCOPE =
   import.meta.env.VITE_OIDC_SCOPE ?? 'openid profile email groups admin'
 
-export const TOKEN_STORAGE_KEY = 'sso_portal_tokens'
+/** Only the refresh token is persisted (sessionStorage). Access tokens stay in memory. */
+export const REFRESH_STORAGE_KEY = 'sso_portal_refresh'
+export const TOKEN_STORAGE_KEY = 'sso_portal_tokens' // legacy key cleared on load
 export const PKCE_VERIFIER_KEY = 'sso_pkce_verifier'
 export const OAUTH_STATE_KEY = 'sso_oauth_state'
+export const DEFAULT_TENANT_SLUG = import.meta.env.VITE_DEFAULT_TENANT_SLUG ?? 'demo'

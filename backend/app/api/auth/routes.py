@@ -278,8 +278,10 @@ async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep, request: Re
         db, redis, email=body.email, password=body.password, mfa_code=body.mfa_code
     )
     if err == "locked":
+        metrics.incr("login_failures")
         raise ProblemDetail(status=429, title="Too Many Requests", detail="Account temporarily locked")
     if err == "invalid":
+        metrics.incr("login_failures")
         raise ProblemDetail(status=401, title="Unauthorized", detail="Invalid credentials")
     if err == "mfa":
         return JSONResponse(
@@ -512,6 +514,7 @@ async def token(
         user = user_result.scalar_one()
         decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
         if not decision.allowed:
+            metrics.incr("access_denies")
             return JSONResponse(
                 {"error": "access_denied", "error_description": decision.message},
                 status_code=403,
@@ -525,6 +528,7 @@ async def token(
             scope=stored.get("scope") or "openid",
             nonce=stored.get("nonce"),
         )
+        metrics.incr("token_issues")
         return tokens
 
     if grant_type == "refresh_token":

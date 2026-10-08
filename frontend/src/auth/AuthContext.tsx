@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { TOKEN_STORAGE_KEY } from '../config'
+import { REFRESH_STORAGE_KEY, TOKEN_STORAGE_KEY } from '../config'
 import {
   exchangeCodeForTokens,
   fetchUserInfo,
@@ -36,25 +36,32 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function loadStoredTokens(): TokenSet | null {
+/** In-memory access token; only refresh_token is persisted to reduce XSS blast radius. */
+let memoryAccess: TokenSet | null = null
+
+function loadStoredRefresh(): string | null {
   try {
-    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as TokenSet
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+    return sessionStorage.getItem(REFRESH_STORAGE_KEY)
   } catch {
     return null
   }
 }
 
-function persistTokens(tokens: TokenSet | null) {
-  if (!tokens) {
-    sessionStorage.removeItem(TOKEN_STORAGE_KEY)
-    return
+function persistRefresh(refreshToken: string | null) {
+  try {
+    if (!refreshToken) {
+      sessionStorage.removeItem(REFRESH_STORAGE_KEY)
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+      return
+    }
+    sessionStorage.setItem(REFRESH_STORAGE_KEY, refreshToken)
+  } catch {
+    /* ignore quota */
   }
-  sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens))
 }
 
-function tokenIsAdmin(tokens: TokenSet | null): boolean {
+export function tokenIsAdmin(tokens: TokenSet | null): boolean {
   if (!tokens?.access_token) return false
   const claims = decodeJwtPayload(tokens.access_token)
   if (!claims) return false
@@ -71,7 +78,7 @@ function tokenIsAdmin(tokens: TokenSet | null): boolean {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [tokens, setTokens] = useState<TokenSet | null>(() => loadStoredTokens())
+  const [tokens, setTokens] = useState<TokenSet | null>(() => memoryAccess)
   const [user, setUser] = useState<UserInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -82,7 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const expiresMs = (current.expires_in || 900) * 1000
     if (ageMs > expiresMs - 30_000 && current.refresh_token) {
       current = await refreshTokens(current.refresh_token)
-      persistTokens(current)
+      memoryAccess = current
+      persistRefresh(current.refresh_token)
       setTokens(current)
     }
     const info = await fetchUserInfo(current.access_token)
@@ -92,7 +100,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      if (!tokens) {
+      if (tokens) {
+        try {
+          await hydrateUser(tokens)
+        } catch (err) {
+          if (!cancelled) {
+            memoryAccess = null
+            persistRefresh(null)
+            setTokens(null)
+            setUser(null)
+            setError(err instanceof Error ? err.message : 'Session expired')
+          }
+        } finally {
+          if (!cancelled) setLoading(false)
+        }
+        return
+      }
+      const refresh = loadStoredRefresh()
+      if (!refresh) {
         if (!cancelled) {
           setUser(null)
           setLoading(false)
@@ -100,10 +125,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
       try {
-        await hydrateUser(tokens)
+        const next = await refreshTokens(refresh)
+        if (cancelled) return
+        memoryAccess = next
+        persistRefresh(next.refresh_token)
+        setTokens(next)
+        await hydrateUser(next)
       } catch (err) {
         if (!cancelled) {
-          persistTokens(null)
+          persistRefresh(null)
+          memoryAccess = null
           setTokens(null)
           setUser(null)
           setError(err instanceof Error ? err.message : 'Session expired')
@@ -119,7 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setSessionFromTokens = useCallback(
     async (next: TokenSet) => {
-      persistTokens(next)
+      memoryAccess = next
+      persistRefresh(next.refresh_token)
       setTokens(next)
       setError(null)
       await hydrateUser(next)
@@ -142,7 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await logoutRemote()
-    persistTokens(null)
+    memoryAccess = null
+    persistRefresh(null)
     setTokens(null)
     setUser(null)
     setError(null)

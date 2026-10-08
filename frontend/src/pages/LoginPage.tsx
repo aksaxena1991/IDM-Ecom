@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { DEFAULT_TENANT_SLUG } from '../config'
 import { ApiError, beginSsoLogin, continueOidcAfterSession, loginWithPassword } from '../lib/api'
 
 export function LoginPage() {
   const { isAuthenticated, loading } = useAuth()
+  const [tenantSlug, setTenantSlug] = useState(DEFAULT_TENANT_SLUG)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mfaCode, setMfaCode] = useState('')
@@ -21,7 +23,7 @@ export function LoginPage() {
     setError(null)
     setSubmitting(true)
     try {
-      await loginWithPassword(email, password, 'demo', mfaCode || undefined)
+      await loginWithPassword(email, password, tenantSlug.trim() || DEFAULT_TENANT_SLUG, mfaCode || undefined)
       // Session cookie is on the SSO host; continue OIDC to get SPA tokens.
       await continueOidcAfterSession()
     } catch (err) {

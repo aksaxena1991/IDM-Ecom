@@ -1,4 +1,8 @@
-"""Consumes Redis Streams audit events (already written sync in v1; worker for durability/retry)."""
+"""Consumes Redis Streams audit events.
+
+System of record: Postgres `audit_events` written synchronously by `audit_service.record`.
+This worker ACKs the Redis stream for fan-out/hygiene; it is not the primary write path.
+"""
 
 from __future__ import annotations
 
