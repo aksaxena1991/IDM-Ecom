@@ -14,6 +14,7 @@ from app.core.keystore import keystore
 from app.core.security import generate_token, hash_token, verify_pkce
 from app.models.entities import Application, AppStatus, RefreshToken, User
 from app.services.access_service import APP_ACCESS, AccessDenied, access_service
+from app.services.role_service import role_service
 
 
 class OidcService:
@@ -98,6 +99,9 @@ class OidcService:
 
         groups = await self._user_groups(db, user.id)
         attributes = await access_service.subject_custom_attributes(db, user.id)
+        roles = await role_service.user_role_names(db, user.id)
+        permissions = await role_service.user_permissions(db, user.id)
+        is_admin = await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin)
 
         id_claims = {
             "iss": self.settings.base_url,
@@ -109,6 +113,8 @@ class OidcService:
             "email": user.email,
             "name": user.name or user.email,
             "groups": groups,
+            "roles": roles,
+            "permissions": permissions,
             "attributes": attributes,
             "tenant_id": str(user.tenant_id),
             "jti": jti_id,
@@ -127,11 +133,13 @@ class OidcService:
             "email": user.email,
             "name": user.name or user.email,
             "groups": groups,
+            "roles": roles,
+            "permissions": permissions,
             "attributes": attributes,
             "jti": jti_access,
             "sid": str(session_id),
             "token_use": "access",
-            "is_admin": user.is_admin,
+            "is_admin": is_admin,
         }
 
         id_token = keystore.sign_jwt(signing_key, id_claims)

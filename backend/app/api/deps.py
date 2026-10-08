@@ -16,6 +16,7 @@ from app.core.redis import get_redis
 from app.core.security import hash_token
 from app.models.entities import ScimToken, Session, User, UserStatus
 from app.services.oidc_service import oidc_service
+from app.services.role_service import role_service
 from app.services.session_service import session_service
 
 DbDep = Annotated[AsyncSession, Depends(get_db)]
@@ -86,16 +87,14 @@ async def require_admin(
     claims: Annotated[dict, Depends(get_bearer_claims)],
     request: Request,
 ) -> User:
-    if not claims.get("is_admin"):
-        # Also allow scope-based admin
-        scope = claims.get("scope", "")
-        if "admin" not in str(scope).split():
-            raise ProblemDetail(status=403, title="Forbidden", detail="Admin scope required")
-
     user_id = uuid.UUID(claims["sub"])
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    if user is None or not user.is_admin or user.status != UserStatus.active:
+    if user is None or user.status != UserStatus.active:
+        raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
+
+    is_admin = await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin)
+    if not is_admin:
         raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
 
     # Step-up MFA for writes older than 15 minutes

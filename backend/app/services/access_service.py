@@ -24,6 +24,7 @@ from app.services.policy_engine import (
     evaluate,
     validate_attribute_map,
 )
+from app.services.role_service import role_service
 
 APP_ACCESS = "app:access"
 
@@ -101,14 +102,19 @@ class AccessService:
     async def _subject(self, db: AsyncSession, user: User) -> dict[str, Any]:
         custom = await self.subject_custom_attributes(db, user.id)
         groups = await self._groups(db, user.id)
+        roles = await role_service.user_role_names(db, user.id)
+        permissions = await role_service.user_permissions(db, user.id)
+        is_admin = await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin)
         return {
             **custom,
             "id": str(user.id),
             "email": user.email,
             "name": user.name or user.email,
-            "is_admin": user.is_admin,
+            "is_admin": is_admin,
             "status": user.status.value,
             "groups": groups,
+            "roles": roles,
+            "permissions": permissions,
         }
 
     async def _resource(self, db: AsyncSession, application: Application) -> dict[str, Any]:
