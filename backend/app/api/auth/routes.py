@@ -252,20 +252,25 @@ async def login_form(
         )
     assert user is not None
     await rate_limiter.clear_login_failures(redis, email.lower())
-    session = await session_service.create(
-        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    session, token = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=bool(mfa_code)
     )
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
     )
     return _session_cookie_response(
-        settings=settings, session_id=str(session.id), redirect=redirect or "/"
+        settings=settings, session_token=token, redirect=safe_redirect_path(redirect)
     )
 
 
 @router.post("/login/json", response_model=LoginResponse)
-async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep):
+async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep, request: Request):
     settings = get_settings()
+    allowed, retry = await rate_limiter.hit(
+        redis, f"sso:rl:login:{request.client.host if request.client else 'unknown'}", 30, 60
+    )
+    if not allowed:
+        raise ProblemDetail(status=429, title="Too Many Requests", detail="Rate limit exceeded", extensions={"retry_after": retry})
     user, err, mfa_required = await _authenticate(
         db, redis, email=body.email, password=body.password, mfa_code=body.mfa_code
     )
@@ -280,15 +285,16 @@ async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep):
         )
     assert user is not None
     await rate_limiter.clear_login_failures(redis, body.email.lower())
-    session = await session_service.create(
-        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    mfa_ok = bool(body.mfa_code) or not await mfa_service.has_mfa(db, user.id)
+    session, token = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=mfa_ok
     )
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
     )
     return _session_cookie_response(
         settings=settings,
-        session_id=str(session.id),
+        session_token=token,
         body={"session_id": str(session.id), "mfa_required": False, "user_id": str(user.id)},
     )
 
@@ -319,20 +325,33 @@ async def signup_form(
             status_code=400,
         )
     assert user is not None
-    session = await session_service.create(
-        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    session, token = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=False
     )
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="signup.success", target=str(user.id)
     )
     return _session_cookie_response(
-        settings=settings, session_id=str(session.id), redirect=redirect or "/"
+        settings=settings, session_token=token, redirect=safe_redirect_path(redirect)
     )
 
 
 @router.post("/signup/json", response_model=SignupResponse, status_code=201)
-async def signup_json(body: SignupRequest, db: DbDep, redis: RedisDep):
+async def signup_json(body: SignupRequest, db: DbDep, redis: RedisDep, request: Request):
     settings = get_settings()
+    allowed, retry = await rate_limiter.hit(
+        redis,
+        f"sso:rl:signup:{request.client.host if request.client else 'unknown'}",
+        settings.signup_rate_limit_per_minute,
+        60,
+    )
+    if not allowed:
+        raise ProblemDetail(
+            status=429,
+            title="Too Many Requests",
+            detail="Signup rate limit exceeded",
+            extensions={"retry_after": retry},
+        )
     user, err = await _create_user(
         db,
         email=body.email,
@@ -344,15 +363,15 @@ async def signup_json(body: SignupRequest, db: DbDep, redis: RedisDep):
         status = 409 if "already exists" in err else 400
         raise ProblemDetail(status=status, title="Signup Failed", detail=err)
     assert user is not None
-    session = await session_service.create(
-        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    session, token = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=False
     )
     await audit_service.record(
         db, redis, tenant_id=user.tenant_id, actor=user.email, action="signup.success", target=str(user.id)
     )
     return _session_cookie_response(
         settings=settings,
-        session_id=str(session.id),
+        session_token=token,
         body={"session_id": str(session.id), "user_id": str(user.id), "email": user.email},
         status_code=201,
     )

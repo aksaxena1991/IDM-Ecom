@@ -16,6 +16,7 @@ from app.api.scim import router as scim_router
 from app.api.session import router as session_router
 from app.api.well_known import router as well_known_router
 from app.core.config import get_settings
+from app.core.csrf import CookieCsrfMiddleware
 from app.core.errors import register_exception_handlers
 from app.core.logging import RequestIdMiddleware, setup_logging
 from app.core.redis import close_redis, get_redis
@@ -41,8 +42,15 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(CookieCsrfMiddleware)
     app.add_middleware(RequestIdMiddleware)
     register_exception_handlers(app)
+
+    if not settings.debug:
+        # Hide interactive docs outside debug/local
+        app.docs_url = None
+        app.redoc_url = None
+        app.openapi_url = None
 
     app.include_router(health_router)
     app.include_router(well_known_router)
