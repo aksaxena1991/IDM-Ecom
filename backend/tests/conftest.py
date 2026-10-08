@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import os
 from collections.abc import AsyncGenerator
 
@@ -10,7 +9,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Ensure test env before app import
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://sso:sso_dev_password@localhost:5432/sso")
+os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/1")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("COOKIE_SECURE", "false")
@@ -33,13 +32,6 @@ from app.models.entities import (
 )
 
 get_settings.cache_clear()
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest_asyncio.fixture
@@ -69,7 +61,7 @@ async def seeded(db_session: AsyncSession):
     await db_session.flush()
     user = User(
         tenant_id=tenant.id,
-        email="admin@test.local",
+        email="admin@example.com",
         name="Admin",
         password_hash=hash_password("Admin123!"),
         status=UserStatus.active,

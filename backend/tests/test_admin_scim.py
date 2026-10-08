@@ -19,7 +19,7 @@ async def _access_token(client: AsyncClient) -> str:
     verifier, challenge = _pkce()
     await client.post(
         "/login/json",
-        json={"email": "admin@test.local", "password": "Admin123!"},
+        json={"email": "admin@example.com", "password": "Admin123!"},
     )
     r = await client.get(
         "/oauth2/authorize",
@@ -90,7 +90,7 @@ async def test_scim_user_lifecycle(client: AsyncClient):
         headers=headers,
         json={
             "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
-            "userName": "alice@test.local",
+            "userName": "alice@example.com",
             "externalId": "ext-alice",
             "active": True,
         },
@@ -103,7 +103,7 @@ async def test_scim_user_lifecycle(client: AsyncClient):
         "/scim/v2/Users",
         headers=headers,
         json={
-            "userName": "alice@test.local",
+            "userName": "alice@example.com",
             "externalId": "ext-alice",
             "active": True,
         },

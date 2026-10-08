@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     debug: bool = True
     base_url: str = "http://localhost:8000"
 
-    database_url: str = "postgresql+asyncpg://sso:sso_dev_password@localhost:5432/sso"
+    database_url: str = "postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso"
     redis_url: str = "redis://localhost:6379/0"
 
     secret_key: str = "change-me"

@@ -17,7 +17,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-docker compose up -d
+docker compose up -d   # Postgres on localhost:5433, Redis on 6379
 alembic upgrade head
 python scripts/seed.py
 uvicorn app.main:app --reload --port 8000
@@ -31,7 +31,7 @@ uvicorn app.main:app --reload --port 8000
 
 | Item | Value |
 |------|-------|
-| Admin email | `admin@demo.local` |
+| Admin email | `admin@example.com` |
 | Password | `Admin123!` |
 | OIDC client_id | `demo-oidc-app` |
 | Redirect URI | `http://localhost:3000/callback` |

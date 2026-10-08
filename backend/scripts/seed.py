@@ -37,13 +37,13 @@ async def seed() -> None:
             await db.flush()
 
         user_result = await db.execute(
-            select(User).where(User.tenant_id == tenant.id).where(User.email == "admin@demo.local")
+            select(User).where(User.tenant_id == tenant.id).where(User.email == "admin@example.com")
         )
         user = user_result.scalar_one_or_none()
         if user is None:
             user = User(
                 tenant_id=tenant.id,
-                email="admin@demo.local",
+                email="admin@example.com",
                 name="Demo Admin",
                 password_hash=hash_password("Admin123!"),
                 status=UserStatus.active,
@@ -117,7 +117,7 @@ async def seed() -> None:
         await keystore.ensure_active_es256_key(db)
         await keystore.ensure_active_rs256_key(db)
         print("Seed complete.")
-        print("Admin: admin@demo.local / Admin123!")
+        print("Admin: admin@example.com / Admin123!")
         print("OIDC client_id: demo-oidc-app")
         print("SAML client_id: demo-saml-app")
 
