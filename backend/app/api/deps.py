@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, Header, Request
 from redis.asyncio import Redis
@@ -12,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.errors import ProblemDetail
+from app.core.permissions import ADMIN_ACCESS, READ_IMPLIED_BY_WRITE
 from app.core.redis import get_redis
 from app.core.security import hash_token
 from app.models.entities import ScimToken, Session, User, UserStatus
@@ -81,42 +83,101 @@ async def get_bearer_claims(
     return claims
 
 
+async def _load_active_user(db: AsyncSession, claims: dict) -> User:
+    user_id = uuid.UUID(claims["sub"])
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if user is None or user.status != UserStatus.active:
+        raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
+    return user
+
+
+async def _enforce_admin_step_up(db: AsyncSession, redis: Redis, claims: dict, request: Request) -> None:
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return
+    settings = get_settings()
+    if getattr(settings, "require_admin_mfa", True) and settings.debug is False:
+        # Non-debug: require MFA enrollment for admin writes (checked in phase 2; step-up always)
+        pass
+    sid = claims.get("sid")
+    if not sid:
+        raise ProblemDetail(
+            status=401,
+            title="Step-up required",
+            detail="MFA step-up required for admin writes",
+            extensions={"challenge": "mfa_step_up"},
+        )
+    session = await session_service.get(db, redis, uuid.UUID(sid))
+    if session is None or session.admin_step_up_at is None:
+        raise ProblemDetail(
+            status=401,
+            title="Step-up required",
+            detail="MFA step-up required for admin writes",
+            extensions={"challenge": "mfa_step_up"},
+        )
+    if session.admin_step_up_at < datetime.now(timezone.utc) - timedelta(minutes=15):
+        raise ProblemDetail(
+            status=401,
+            title="Step-up required",
+            detail="MFA step-up required for admin writes",
+            extensions={"challenge": "mfa_step_up"},
+        )
+
+
+async def _user_has_any_permission(db: AsyncSession, user: User, permissions: tuple[str, ...]) -> bool:
+    if await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin):
+        return True
+    held = set(await role_service.user_permissions(db, user.id))
+    if ADMIN_ACCESS in held or "admin:*" in held or "*" in held:
+        return True
+    for perm in permissions:
+        if perm in held:
+            return True
+        for writer in READ_IMPLIED_BY_WRITE.get(perm, ()):
+            if writer in held:
+                return True
+        prefix = perm.split(":")[0] + ":*"
+        if prefix in held:
+            return True
+    return False
+
+
 async def require_admin(
     db: DbDep,
     redis: RedisDep,
     claims: Annotated[dict, Depends(get_bearer_claims)],
     request: Request,
 ) -> User:
-    user_id = uuid.UUID(claims["sub"])
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if user is None or user.status != UserStatus.active:
+    """Any admin-console principal (is_admin or admin:access)."""
+    user = await _load_active_user(db, claims)
+    if not await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin):
         raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
-
-    is_admin = await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin)
-    if not is_admin:
-        raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
-
-    # Step-up MFA for writes older than 15 minutes
-    if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-        sid = claims.get("sid")
-        if sid:
-            session = await session_service.get(db, redis, uuid.UUID(sid))
-            if session is None or session.admin_step_up_at is None:
-                raise ProblemDetail(
-                    status=401,
-                    title="Step-up required",
-                    detail="MFA step-up required for admin writes",
-                    extensions={"challenge": "mfa_step_up"},
-                )
-            if session.admin_step_up_at < datetime.now(timezone.utc) - timedelta(minutes=15):
-                raise ProblemDetail(
-                    status=401,
-                    title="Step-up required",
-                    detail="MFA step-up required for admin writes",
-                    extensions={"challenge": "mfa_step_up"},
-                )
+    await _enforce_admin_step_up(db, redis, claims, request)
     return user
+
+
+def require_permission(
+    *permissions: str,
+) -> Callable[..., Coroutine[Any, Any, User]]:
+    """Allow if superuser (is_admin / admin:access) or user holds any listed permission."""
+
+    async def _dep(
+        db: DbDep,
+        redis: RedisDep,
+        claims: Annotated[dict, Depends(get_bearer_claims)],
+        request: Request,
+    ) -> User:
+        user = await _load_active_user(db, claims)
+        if not await _user_has_any_permission(db, user, permissions):
+            raise ProblemDetail(
+                status=403,
+                title="Forbidden",
+                detail=f"Permission required: {' or '.join(permissions)}",
+            )
+        await _enforce_admin_step_up(db, redis, claims, request)
+        return user
+
+    return _dep
 
 
 async def require_scim_token(

@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.api.admin.routes import AdminDep
+from app.api.admin.routes import AdminDep, AppsReadDep, AppsWriteDep, PoliciesWriteDep, UsersWriteDep
 from app.api.deps import DbDep, RedisDep
 from app.core.errors import ProblemDetail
 from app.models.entities import AccessPolicy, Application, PolicyEffect, User
@@ -87,7 +87,7 @@ async def _app_in_tenant(db: DbDep, admin_tenant: uuid.UUID, app_id: uuid.UUID) 
 
 
 @router.get("/users/{user_id}/attributes")
-async def get_user_attributes(user_id: uuid.UUID, db: DbDep, admin: AdminDep):
+async def get_user_attributes(user_id: uuid.UUID, db: DbDep, admin: UsersWriteDep):
     await _user_in_tenant(db, admin.tenant_id, user_id)
     attributes = await access_service.subject_custom_attributes(db, user_id)
     return {"user_id": str(user_id), "attributes": attributes}
@@ -95,7 +95,7 @@ async def get_user_attributes(user_id: uuid.UUID, db: DbDep, admin: AdminDep):
 
 @router.put("/users/{user_id}/attributes")
 async def put_user_attributes(
-    user_id: uuid.UUID, body: AttributeBody, db: DbDep, redis: RedisDep, admin: AdminDep
+    user_id: uuid.UUID, body: AttributeBody, db: DbDep, redis: RedisDep, admin: UsersWriteDep
 ):
     await _user_in_tenant(db, admin.tenant_id, user_id)
     try:
@@ -116,7 +116,7 @@ async def put_user_attributes(
 
 
 @router.get("/apps/{app_id}/attributes")
-async def get_app_attributes(app_id: uuid.UUID, db: DbDep, admin: AdminDep):
+async def get_app_attributes(app_id: uuid.UUID, db: DbDep, admin: AppsReadDep):
     await _app_in_tenant(db, admin.tenant_id, app_id)
     attributes = await access_service.resource_custom_attributes(db, app_id)
     return {"application_id": str(app_id), "attributes": attributes}
@@ -124,7 +124,7 @@ async def get_app_attributes(app_id: uuid.UUID, db: DbDep, admin: AdminDep):
 
 @router.put("/apps/{app_id}/attributes")
 async def put_app_attributes(
-    app_id: uuid.UUID, body: AttributeBody, db: DbDep, redis: RedisDep, admin: AdminDep
+    app_id: uuid.UUID, body: AttributeBody, db: DbDep, redis: RedisDep, admin: AppsWriteDep
 ):
     await _app_in_tenant(db, admin.tenant_id, app_id)
     try:
@@ -145,7 +145,7 @@ async def put_app_attributes(
 
 
 @router.get("/policies")
-async def list_policies(db: DbDep, admin: AdminDep):
+async def list_policies(db: DbDep, admin: PoliciesWriteDep):
     result = await db.execute(
         select(AccessPolicy)
         .where(AccessPolicy.tenant_id == admin.tenant_id)
@@ -155,7 +155,7 @@ async def list_policies(db: DbDep, admin: AdminDep):
 
 
 @router.post("/policies", status_code=201)
-async def create_policy(body: PolicyIn, db: DbDep, redis: RedisDep, admin: AdminDep):
+async def create_policy(body: PolicyIn, db: DbDep, redis: RedisDep, admin: PoliciesWriteDep):
     try:
         validate_policy(actions=body.actions, resource_match=body.resource_match, conditions=body.conditions)
     except PolicyValidationError as exc:
@@ -195,7 +195,7 @@ async def create_policy(body: PolicyIn, db: DbDep, redis: RedisDep, admin: Admin
 
 @router.patch("/policies/{policy_id}")
 async def patch_policy(
-    policy_id: uuid.UUID, body: PolicyPatch, db: DbDep, redis: RedisDep, admin: AdminDep
+    policy_id: uuid.UUID, body: PolicyPatch, db: DbDep, redis: RedisDep, admin: PoliciesWriteDep
 ):
     result = await db.execute(
         select(AccessPolicy).where(AccessPolicy.id == policy_id).where(AccessPolicy.tenant_id == admin.tenant_id)
@@ -246,7 +246,7 @@ async def patch_policy(
 
 
 @router.delete("/policies/{policy_id}")
-async def delete_policy(policy_id: uuid.UUID, db: DbDep, redis: RedisDep, admin: AdminDep):
+async def delete_policy(policy_id: uuid.UUID, db: DbDep, redis: RedisDep, admin: PoliciesWriteDep):
     result = await db.execute(
         select(AccessPolicy).where(AccessPolicy.id == policy_id).where(AccessPolicy.tenant_id == admin.tenant_id)
     )

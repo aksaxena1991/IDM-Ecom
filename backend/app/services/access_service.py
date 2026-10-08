@@ -9,9 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.entities import (
     AccessPolicy,
+    AppAssignment,
     Application,
     Group,
     GroupMembership,
+    PrincipalType,
     ResourceAttribute,
     User,
     UserAttribute,
@@ -86,6 +88,15 @@ class AccessService:
                 message="User is not active",
             )
 
+        if action == APP_ACCESS:
+            assigned = await self._assignment_allows(db, user=user, application=application)
+            if assigned is False:
+                return AccessDecision(
+                    allowed=False,
+                    reason="not_assigned",
+                    message="User is not assigned to this application",
+                )
+
         subject = await self._subject(db, user)
         resource = await self._resource(db, application)
         moment = now or datetime.now(timezone.utc)
@@ -98,6 +109,30 @@ class AccessService:
             resource=resource,
             environment=environment,
         )
+
+    async def _assignment_allows(
+        self, db: AsyncSession, *, user: User, application: Application
+    ) -> bool | None:
+        """Return False if denied by assignments, True if assigned, None if no assignments (open)."""
+        result = await db.execute(
+            select(AppAssignment).where(AppAssignment.application_id == application.id)
+        )
+        rows = list(result.scalars().all())
+        if not rows:
+            return None
+        group_ids = await self._group_ids(db, user.id)
+        for row in rows:
+            if row.principal_type == PrincipalType.user and row.principal_id == user.id:
+                return True
+            if row.principal_type == PrincipalType.group and row.principal_id in group_ids:
+                return True
+        return False
+
+    async def _group_ids(self, db: AsyncSession, user_id: uuid.UUID) -> set[uuid.UUID]:
+        result = await db.execute(
+            select(GroupMembership.group_id).where(GroupMembership.user_id == user_id)
+        )
+        return set(result.scalars().all())
 
     async def _subject(self, db: AsyncSession, user: User) -> dict[str, Any]:
         custom = await self.subject_custom_attributes(db, user.id)

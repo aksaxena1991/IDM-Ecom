@@ -11,9 +11,17 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 
-from app.api.deps import DbDep, RedisDep, require_admin
+from app.api.deps import DbDep, RedisDep, require_admin, require_permission
 from app.core.config import get_settings
 from app.core.errors import ProblemDetail
+from app.core.permissions import (
+    APPS_READ,
+    APPS_WRITE,
+    AUDIT_READ,
+    POLICIES_WRITE,
+    ROLES_WRITE,
+    USERS_WRITE,
+)
 from app.core.security import decode_cursor, encode_cursor, generate_token
 from app.models.entities import (
     AppAssignment,
@@ -63,25 +71,37 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-async def _rate_limit_admin(redis: RedisDep, admin: User = Depends(require_admin)) -> User:
-    settings = get_settings()
-    allowed, retry = await rate_limiter.hit(
-        redis,
-        f"sso:admin:rl:{admin.id}",
-        settings.admin_rate_limit_per_minute,
-        60,
-    )
-    if not allowed:
-        raise ProblemDetail(
-            status=429,
-            title="Too Many Requests",
-            detail="Admin rate limit exceeded",
-            extensions={"retry_after": retry},
+def _rate_limited(permission_dep):
+    async def _inner(redis: RedisDep, admin: User = Depends(permission_dep)) -> User:
+        settings = get_settings()
+        allowed, retry = await rate_limiter.hit(
+            redis,
+            f"sso:admin:rl:{admin.id}",
+            settings.admin_rate_limit_per_minute,
+            60,
         )
-    return admin
+        if not allowed:
+            raise ProblemDetail(
+                status=429,
+                title="Too Many Requests",
+                detail="Admin rate limit exceeded",
+                extensions={"retry_after": retry},
+            )
+        return admin
+
+    return _inner
 
 
-AdminDep = Annotated[User, Depends(_rate_limit_admin)]
+AppsReadDep = Annotated[User, Depends(_rate_limited(require_permission(APPS_READ, APPS_WRITE)))]
+AppsWriteDep = Annotated[User, Depends(_rate_limited(require_permission(APPS_WRITE)))]
+UsersWriteDep = Annotated[User, Depends(_rate_limited(require_permission(USERS_WRITE)))]
+UsersReadDep = Annotated[User, Depends(_rate_limited(require_permission(USERS_WRITE, APPS_READ)))]
+AuditReadDep = Annotated[User, Depends(_rate_limited(require_permission(AUDIT_READ)))]
+PoliciesWriteDep = Annotated[User, Depends(_rate_limited(require_permission(POLICIES_WRITE)))]
+RolesWriteDep = Annotated[User, Depends(_rate_limited(require_permission(ROLES_WRITE)))]
+RolesReadDep = Annotated[User, Depends(_rate_limited(require_permission(ROLES_WRITE, USERS_WRITE)))]
+# Superuser / any admin:access principal (evaluate + shared helpers)
+AdminDep = Annotated[User, Depends(_rate_limited(require_admin))]
 
 
 def _reject_wildcards(uris: list[str]) -> None:
@@ -94,7 +114,7 @@ def _reject_wildcards(uris: list[str]) -> None:
 
 
 @router.get("/apps")
-async def list_apps(db: DbDep, admin: AdminDep):
+async def list_apps(db: DbDep, admin: AppsReadDep):
     result = await db.execute(
         select(Application).where(Application.tenant_id == admin.tenant_id).order_by(Application.name)
     )
@@ -115,7 +135,7 @@ async def list_apps(db: DbDep, admin: AdminDep):
 
 
 @router.post("/apps", status_code=201)
-async def create_app(body: AppCreate, db: DbDep, redis: RedisDep, admin: AdminDep):
+async def create_app(body: AppCreate, db: DbDep, redis: RedisDep, admin: AppsWriteDep):
     _reject_wildcards(body.redirect_uris)
     config: dict[str, Any] = {"redirect_uris": body.redirect_uris}
     if body.protocol == AppProtocol.saml:
@@ -157,7 +177,7 @@ async def create_app(body: AppCreate, db: DbDep, redis: RedisDep, admin: AdminDe
 
 
 @router.patch("/apps/{app_id}")
-async def patch_app(app_id: uuid.UUID, body: AppUpdate, db: DbDep, redis: RedisDep, admin: AdminDep):
+async def patch_app(app_id: uuid.UUID, body: AppUpdate, db: DbDep, redis: RedisDep, admin: AppsWriteDep):
     result = await db.execute(
         select(Application)
         .where(Application.id == app_id)
@@ -199,9 +219,32 @@ async def patch_app(app_id: uuid.UUID, body: AppUpdate, db: DbDep, redis: RedisD
     }
 
 
+@router.get("/apps/{app_id}/assignments")
+async def get_assignments(app_id: uuid.UUID, db: DbDep, admin: AppsReadDep):
+    result = await db.execute(
+        select(Application)
+        .where(Application.id == app_id)
+        .where(Application.tenant_id == admin.tenant_id)
+    )
+    app = result.scalar_one_or_none()
+    if app is None:
+        raise ProblemDetail(status=404, title="Not Found", detail="Application not found")
+    existing = await db.execute(select(AppAssignment).where(AppAssignment.application_id == app_id))
+    return {
+        "application_id": str(app_id),
+        "assignments": [
+            {
+                "principal_type": row.principal_type.value,
+                "principal_id": str(row.principal_id),
+            }
+            for row in existing.scalars().all()
+        ],
+    }
+
+
 @router.put("/apps/{app_id}/assignments")
 async def set_assignments(
-    app_id: uuid.UUID, body: AssignmentBody, db: DbDep, redis: RedisDep, admin: AdminDep
+    app_id: uuid.UUID, body: AssignmentBody, db: DbDep, redis: RedisDep, admin: AppsWriteDep
 ):
     result = await db.execute(
         select(Application)
@@ -236,7 +279,7 @@ async def set_assignments(
 @router.get("/users")
 async def list_users(
     db: DbDep,
-    admin: AdminDep,
+    admin: UsersReadDep,
     q: str | None = Query(None),
     page_size: int = Query(50, ge=1, le=200),
     cursor: str | None = Query(None),
@@ -276,7 +319,7 @@ async def list_users(
 async def list_audit_events(
     request: Request,
     db: DbDep,
-    admin: AdminDep,
+    admin: AuditReadDep,
     format: str | None = Query(None),
     action: str | None = Query(None),
     actor: str | None = Query(None),

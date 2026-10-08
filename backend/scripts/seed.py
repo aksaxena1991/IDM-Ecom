@@ -15,6 +15,7 @@ from app.core.keystore import keystore
 from app.core.security import hash_password, hash_token
 from app.models.entities import (
     AccessPolicy,
+    AppAssignment,
     Application,
     AppProtocol,
     AppStatus,
@@ -22,6 +23,7 @@ from app.models.entities import (
     GroupMembership,
     GroupSource,
     PolicyEffect,
+    PrincipalType,
     ResourceAttribute,
     Role,
     RolePermission,
@@ -220,7 +222,17 @@ async def seed() -> None:
             tenant_id=tenant.id,
             name=SYSTEM_ADMIN_ROLE,
             description="Tenant administrator with full console access",
-            permissions=[ADMIN_PERMISSION, "apps:write", "users:write", "policies:write", "roles:write"],
+            permissions=[
+                ADMIN_PERMISSION,
+                "apps:read",
+                "apps:write",
+                "users:write",
+                "policies:write",
+                "roles:write",
+                "audit:read",
+                "groups:read",
+                "groups:write",
+            ],
             is_system=True,
         )
         user_role = await _ensure_role(
@@ -242,6 +254,11 @@ async def seed() -> None:
 
         await _ensure_user_role(db, user.id, admin_role.id)
         await _ensure_user_role(db, user.id, user_role.id)
+
+        # Entitlements: assign admin user + Admins group to demo apps
+        for application in apps:
+            await _ensure_assignment(db, application.id, PrincipalType.user, user.id)
+            await _ensure_assignment(db, application.id, PrincipalType.group, group.id)
 
         await db.commit()
         await keystore.ensure_active_es256_key(db)
@@ -311,6 +328,25 @@ async def _ensure_user_role(db, user_id, role_id) -> None:
     ).scalar_one_or_none()
     if existing is None:
         db.add(UserRole(user_id=user_id, role_id=role_id))
+
+
+async def _ensure_assignment(db, application_id, principal_type: PrincipalType, principal_id) -> None:
+    existing = (
+        await db.execute(
+            select(AppAssignment)
+            .where(AppAssignment.application_id == application_id)
+            .where(AppAssignment.principal_type == principal_type)
+            .where(AppAssignment.principal_id == principal_id)
+        )
+    ).scalar_one_or_none()
+    if existing is None:
+        db.add(
+            AppAssignment(
+                application_id=application_id,
+                principal_type=principal_type,
+                principal_id=principal_id,
+            )
+        )
 
 
 if __name__ == "__main__":

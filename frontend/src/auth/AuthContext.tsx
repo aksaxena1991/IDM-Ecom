@@ -25,6 +25,8 @@ type AuthContextValue = {
   error: string | null
   isAuthenticated: boolean
   isAdmin: boolean
+  permissions: string[]
+  hasPermission: (...perms: string[]) => boolean
   accessToken: string | null
   completeOidcCallback: (code: string, state: string) => Promise<void>
   setSessionFromTokens: (tokens: TokenSet) => Promise<void>
@@ -146,6 +148,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
   }, [])
 
+  const permissions = useMemo(() => {
+    const fromUser = user?.permissions || []
+    if (fromUser.length) return fromUser.map(String)
+    if (!tokens?.access_token) return []
+    const claims = decodeJwtPayload(tokens.access_token)
+    return Array.isArray(claims?.permissions) ? claims.permissions.map(String) : []
+  }, [user, tokens])
+
+  const hasPermission = useCallback(
+    (...perms: string[]) => {
+      if (tokenIsAdmin(tokens)) return true
+      if (permissions.includes('admin:access') || permissions.includes('admin:*')) return true
+      return perms.some((p) => {
+        if (permissions.includes(p)) return true
+        const [family] = p.split(':')
+        if (p.endsWith(':read') && permissions.includes(`${family}:write`)) return true
+        return false
+      })
+    },
+    [tokens, permissions],
+  )
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -153,14 +177,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       isAuthenticated: Boolean(user && tokens),
-      isAdmin: tokenIsAdmin(tokens),
+      isAdmin: tokenIsAdmin(tokens) || hasPermission('admin:access'),
+      permissions,
+      hasPermission,
       accessToken: tokens?.access_token ?? null,
       completeOidcCallback,
       setSessionFromTokens,
       logout,
       clearError: () => setError(null),
     }),
-    [user, tokens, loading, error, completeOidcCallback, setSessionFromTokens, logout],
+    [
+      user,
+      tokens,
+      loading,
+      error,
+      permissions,
+      hasPermission,
+      completeOidcCallback,
+      setSessionFromTokens,
+      logout,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

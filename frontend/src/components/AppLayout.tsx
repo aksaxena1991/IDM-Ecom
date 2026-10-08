@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 export function AppLayout() {
-  const { user, isAdmin, logout } = useAuth()
+  const { user, isAdmin, hasPermission, logout } = useAuth()
 
   return (
     <div className="app-shell">
@@ -12,16 +12,19 @@ export function AppLayout() {
           <nav className="nav">
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/security">Security</NavLink>
-            {isAdmin && (
-              <>
-                <NavLink to="/admin/apps">Apps</NavLink>
-                <NavLink to="/admin/users">Users</NavLink>
-                <NavLink to="/admin/roles">Roles</NavLink>
-                <NavLink to="/admin/policies">Policies</NavLink>
-                <NavLink to="/admin/access">Evaluate</NavLink>
-                <NavLink to="/admin/audit">Audit</NavLink>
-              </>
+            {hasPermission('apps:read', 'apps:write') && (
+              <NavLink to="/admin/apps">Apps</NavLink>
             )}
+            {hasPermission('users:write') && <NavLink to="/admin/users">Users</NavLink>}
+            {hasPermission('roles:write') && <NavLink to="/admin/roles">Roles</NavLink>}
+            {hasPermission('groups:read', 'groups:write') && (
+              <NavLink to="/admin/groups">Groups</NavLink>
+            )}
+            {hasPermission('policies:write') && (
+              <NavLink to="/admin/policies">Policies</NavLink>
+            )}
+            {isAdmin && <NavLink to="/admin/access">Evaluate</NavLink>}
+            {hasPermission('audit:read') && <NavLink to="/admin/audit">Audit</NavLink>}
           </nav>
         </div>
         <div className="header-right">

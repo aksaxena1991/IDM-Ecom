@@ -121,6 +121,12 @@ export const adminApi = {
     body: Partial<{ name: string; status: string; redirect_uris: string[]; acs_url: string; entity_id: string; audience: string }>,
   ) => adminJson<AppItem>(`/v1/apps/${id}`, token, { method: 'PATCH', body: JSON.stringify(body) }),
 
+  getAssignments: (token: string, appId: string) =>
+    ssoJson<{
+      application_id: string
+      assignments: { principal_type: string; principal_id: string }[]
+    }>(`/v1/apps/${appId}/assignments`, token),
+
   setAssignments: (
     token: string,
     appId: string,

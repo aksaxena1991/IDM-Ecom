@@ -9,7 +9,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.api.admin.routes import AdminDep
+from app.api.admin.routes import RolesReadDep, RolesWriteDep, UsersWriteDep
 from app.api.deps import DbDep, RedisDep
 from app.core.errors import ProblemDetail
 from app.models.entities import User
@@ -47,13 +47,13 @@ async def _user_in_tenant(db: DbDep, admin_tenant: uuid.UUID, user_id: uuid.UUID
 
 
 @router.get("/roles")
-async def list_roles(db: DbDep, admin: AdminDep) -> dict[str, Any]:
+async def list_roles(db: DbDep, admin: RolesReadDep) -> dict[str, Any]:
     roles = await role_service.list_roles(db, admin.tenant_id)
     return {"items": [role_service.role_out(r) for r in roles]}
 
 
 @router.post("/roles", status_code=201)
-async def create_role(body: RoleCreate, db: DbDep, redis: RedisDep, admin: AdminDep) -> dict[str, Any]:
+async def create_role(body: RoleCreate, db: DbDep, redis: RedisDep, admin: RolesWriteDep) -> dict[str, Any]:
     try:
         role = await role_service.create_role(
             db,
@@ -78,7 +78,7 @@ async def create_role(body: RoleCreate, db: DbDep, redis: RedisDep, admin: Admin
 
 
 @router.get("/roles/{role_id}")
-async def get_role(role_id: uuid.UUID, db: DbDep, admin: AdminDep) -> dict[str, Any]:
+async def get_role(role_id: uuid.UUID, db: DbDep, admin: RolesReadDep) -> dict[str, Any]:
     role = await role_service.get_role(db, admin.tenant_id, role_id)
     if role is None:
         raise ProblemDetail(status=404, title="Not Found", detail="Role not found")
@@ -87,7 +87,7 @@ async def get_role(role_id: uuid.UUID, db: DbDep, admin: AdminDep) -> dict[str, 
 
 @router.patch("/roles/{role_id}")
 async def patch_role(
-    role_id: uuid.UUID, body: RolePatch, db: DbDep, redis: RedisDep, admin: AdminDep
+    role_id: uuid.UUID, body: RolePatch, db: DbDep, redis: RedisDep, admin: RolesWriteDep
 ) -> dict[str, Any]:
     role = await role_service.get_role(db, admin.tenant_id, role_id)
     if role is None:
@@ -112,7 +112,7 @@ async def patch_role(
 
 
 @router.delete("/roles/{role_id}")
-async def delete_role(role_id: uuid.UUID, db: DbDep, redis: RedisDep, admin: AdminDep) -> dict[str, bool]:
+async def delete_role(role_id: uuid.UUID, db: DbDep, redis: RedisDep, admin: RolesWriteDep) -> dict[str, bool]:
     role = await role_service.get_role(db, admin.tenant_id, role_id)
     if role is None:
         raise ProblemDetail(status=404, title="Not Found", detail="Role not found")
@@ -133,7 +133,7 @@ async def delete_role(role_id: uuid.UUID, db: DbDep, redis: RedisDep, admin: Adm
 
 
 @router.get("/users/{user_id}/roles")
-async def get_user_roles(user_id: uuid.UUID, db: DbDep, admin: AdminDep) -> dict[str, Any]:
+async def get_user_roles(user_id: uuid.UUID, db: DbDep, admin: UsersWriteDep) -> dict[str, Any]:
     await _user_in_tenant(db, admin.tenant_id, user_id)
     roles = await role_service.list_user_roles(db, user_id)
     return {
@@ -146,7 +146,7 @@ async def get_user_roles(user_id: uuid.UUID, db: DbDep, admin: AdminDep) -> dict
 
 @router.put("/users/{user_id}/roles")
 async def put_user_roles(
-    user_id: uuid.UUID, body: UserRolesBody, db: DbDep, redis: RedisDep, admin: AdminDep
+    user_id: uuid.UUID, body: UserRolesBody, db: DbDep, redis: RedisDep, admin: UsersWriteDep
 ) -> dict[str, Any]:
     await _user_in_tenant(db, admin.tenant_id, user_id)
     try:
