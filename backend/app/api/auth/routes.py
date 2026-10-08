@@ -19,6 +19,7 @@ from app.services.audit_service import audit_service
 from app.services.mfa_service import mfa_service
 from app.services.oidc_service import oidc_service
 from app.services.rate_limit import rate_limiter
+from app.services.role_service import role_service
 from app.services.session_service import session_service
 
 router = APIRouter(tags=["auth"])
@@ -153,6 +154,8 @@ async def _create_user(
         is_admin=False,
     )
     db.add(user)
+    await db.flush()
+    await role_service.assign_default_user_role(db, user.id, tenant.id)
     await db.commit()
     await db.refresh(user)
     return user, None
@@ -515,14 +518,21 @@ async def userinfo(
 ):
     claims = await get_bearer_claims(db, redis, authorization)
     attributes: dict = {}
+    roles: list[str] = list(claims.get("roles") or [])
+    permissions: list[str] = list(claims.get("permissions") or [])
     sub = claims.get("sub")
     if sub:
-        attributes = await access_service.subject_custom_attributes(db, uuid.UUID(sub))
+        user_id = uuid.UUID(sub)
+        attributes = await access_service.subject_custom_attributes(db, user_id)
+        roles = await role_service.user_role_names(db, user_id)
+        permissions = await role_service.user_permissions(db, user_id)
     return {
         "sub": sub,
         "email": claims.get("email"),
         "name": claims.get("name"),
         "groups": claims.get("groups", []),
+        "roles": roles,
+        "permissions": permissions,
         "attributes": attributes,
         "tenant_id": claims.get("tenant_id"),
     }

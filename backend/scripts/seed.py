@@ -23,12 +23,16 @@ from app.models.entities import (
     GroupSource,
     PolicyEffect,
     ResourceAttribute,
+    Role,
+    RolePermission,
     ScimToken,
     Tenant,
     User,
     UserAttribute,
+    UserRole,
     UserStatus,
 )
+from app.services.role_service import ADMIN_PERMISSION, DEFAULT_USER_ROLE, SYSTEM_ADMIN_ROLE
 
 
 async def seed() -> None:
