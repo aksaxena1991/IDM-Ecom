@@ -32,14 +32,36 @@ def setup_logging(debug: bool = False) -> None:
     root.setLevel(level)
 
 
+def set_tenant_context(tenant_id: str | None) -> None:
+    """Set tenant id for structured logs (called from auth/deps when known)."""
+    if tenant_id:
+        tenant_id_ctx.set(tenant_id)
+
+
 class RequestIdMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
-        token = request_id_ctx.set(request_id)
+        rid_token = request_id_ctx.set(request_id)
+        tenant_hint = request.headers.get("x-tenant-id") or request.headers.get("x-tenant-slug")
+        auth = request.headers.get("authorization") or ""
+        if auth.lower().startswith("bearer ") and "." in auth:
+            try:
+                import base64
+                import json
+
+                payload_b64 = auth.split(" ", 1)[1].split(".")[1]
+                pad = "=" * (-len(payload_b64) % 4)
+                claims = json.loads(base64.urlsafe_b64decode(payload_b64 + pad))
+                if claims.get("tenant_id"):
+                    tenant_hint = str(claims["tenant_id"])
+            except Exception:  # noqa: BLE001
+                pass
+        tid_token = tenant_id_ctx.set(tenant_hint)
         request.state.request_id = request_id
         try:
             response = await call_next(request)
             response.headers["X-Request-ID"] = request_id
             return response
         finally:
-            request_id_ctx.reset(token)
+            request_id_ctx.reset(rid_token)
+            tenant_id_ctx.reset(tid_token)

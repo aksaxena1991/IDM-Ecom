@@ -17,6 +17,7 @@ from app.models.entities import Tenant, User, UserStatus
 from app.core.redirects import safe_redirect_path
 from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 from app.services.audit_service import audit_service
+from app.services.metrics import metrics
 from app.services.mfa_service import mfa_service
 from app.services.oidc_service import oidc_service
 from app.services.rate_limit import rate_limiter
@@ -239,8 +240,10 @@ async def login_form(
         db, redis, email=email, password=password, mfa_code=mfa_code
     )
     if err == "locked":
+        metrics.incr("login_failures")
         raise ProblemDetail(status=429, title="Too Many Requests", detail="Account temporarily locked")
     if err == "invalid":
+        metrics.incr("login_failures")
         return HTMLResponse(
             _login_html(redirect=redirect, error="<p class='error'>Invalid credentials</p>"),
             status_code=401,

@@ -65,6 +65,7 @@ def create_app() -> FastAPI:
     app.include_router(access_router)
     app.include_router(roles_router)
     app.include_router(groups_router)
+    app.include_router(scim_tokens_router)
     app.include_router(sync_router)
     app.include_router(scim_router)
     app.include_router(metrics_router)
