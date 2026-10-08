@@ -23,26 +23,22 @@ export function AuditPage() {
     void load()
   }, [load])
 
-  function downloadCsv() {
+  async function downloadCsv() {
     if (!accessToken) return
-    window.open(`${SSO_BASE_URL}/v1/audit-events?format=csv`, '_blank')
-    // Note: CSV via window.open won't send Bearer; use fetch blob instead
-    void (async () => {
-      const res = await fetch(`${SSO_BASE_URL}/v1/audit-events?format=csv`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      if (!res.ok) {
-        setError('CSV export failed')
-        return
-      }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'audit-events.csv'
-      a.click()
-      URL.revokeObjectURL(url)
-    })()
+    const res = await fetch(`${SSO_BASE_URL}/v1/audit-events?format=csv`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    if (!res.ok) {
+      setError('CSV export failed')
+      return
+    }
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'audit-events.csv'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -52,7 +48,7 @@ export function AuditPage() {
           <h1>Audit log</h1>
           <p className="lede">Admin actions and sign-in events for this tenant.</p>
         </div>
-        <button type="button" className="btn btn-secondary" onClick={downloadCsv}>
+        <button type="button" className="btn btn-secondary" onClick={() => void downloadCsv()}>
           Export CSV
         </button>
       </div>

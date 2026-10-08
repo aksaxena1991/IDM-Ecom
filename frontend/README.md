@@ -1,35 +1,44 @@
 # SSO Portal (React + TypeScript)
 
-Frontend for the custom SSO backend: login (SSO or email/password), register, and a dashboard that shows the signed-in user from `/oauth2/userinfo`.
+Frontend for the custom SSO backend.
 
-## Prerequisites
+## Features
 
-1. SSO backend running on `http://localhost:8000`
-2. Demo OIDC app seeded with redirect `http://localhost:3000/callback`
+- **Login** — SSO (OIDC + PKCE) or email/password (+ MFA code when enrolled)
+- **Register** — signup then OIDC token handshake
+- **Dashboard** — userinfo profile, groups, ABAC attributes, token scopes
+- **Security** — TOTP enroll/verify and session MFA status
+- **Admin** (users with `is_admin` / `admin` scope):
+  - Apps (create OIDC app, enable/disable, resource attributes)
+  - Users (search, subject attributes)
+  - Policies (PBAC CRUD)
+  - Access evaluate (dry-run `app:access`)
+  - Audit log + CSV export
+- **MFA step-up modal** — retries admin writes after `challenge: mfa_step_up`
 
 ## Run
 
 ```bash
-cd frontend
+# Backend on :8000 first
+cd ../backend && source .venv/bin/activate
+docker compose up -d
+uvicorn app.main:app --reload --port 8000
+
+# Frontend
+cd ../frontend
 npm install
 npm run dev
 ```
 
 Open http://localhost:3000
 
-## Auth flows
-
-- **Continue with SSO** — OIDC Authorization Code + PKCE against the backend
-- **Email / password** — `POST /login/json` (sets SSO session), then the same OIDC redirect to obtain tokens
-- **Register** — `POST /signup/json`, then OIDC redirect
-- **Dashboard** — loads claims from `GET /oauth2/userinfo`
+Demo admin (from backend seed): see backend README.
 
 ## Config
-
-See `.env`:
 
 | Variable | Default |
 |----------|---------|
 | `VITE_SSO_BASE_URL` | `http://localhost:8000` |
 | `VITE_OIDC_CLIENT_ID` | `demo-oidc-app` |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:3000/callback` |
+| `VITE_OIDC_SCOPE` | `openid profile email groups admin` |

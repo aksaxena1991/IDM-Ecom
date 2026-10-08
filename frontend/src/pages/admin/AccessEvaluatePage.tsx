@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type AppItem, type EvaluateResult, type UserItem } from '../../lib/adminApi'
 
@@ -7,31 +7,29 @@ export function AccessEvaluatePage() {
   const [users, setUsers] = useState<UserItem[]>([])
   const [apps, setApps] = useState<AppItem[]>([])
   const [userId, setUserId] = useState('')
-  const [clientId, setClientId] = useState('demo-oidc-app')
+  const [clientId, setClientId] = useState('')
   const [result, setResult] = useState<EvaluateResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const load = useCallback(async () => {
-    if (!accessToken) return
-    const [u, a] = await Promise.all([
-      adminApi.listUsers(accessToken),
-      adminApi.listApps(accessToken),
-    ])
-    setUsers(u.items)
-    setApps(a.items)
-    if (!userId && u.items[0]) setUserId(u.items[0].id)
-    if (a.items[0] && clientId === 'demo-oidc-app') {
-      const demo = a.items.find((x) => x.client_id === 'demo-oidc-app')
-      setClientId(demo?.client_id || a.items[0].client_id)
-    }
-  }, [accessToken, userId, clientId])
-
   useEffect(() => {
-    void load().catch((err: unknown) =>
-      setError(err instanceof Error ? err.message : 'Failed to load catalogs'),
-    )
-  }, [load])
+    if (!accessToken) return
+    void (async () => {
+      try {
+        const [u, a] = await Promise.all([
+          adminApi.listUsers(accessToken),
+          adminApi.listApps(accessToken),
+        ])
+        setUsers(u.items)
+        setApps(a.items)
+        setUserId((prev) => prev || u.items[0]?.id || '')
+        const demo = a.items.find((x) => x.client_id === 'demo-oidc-app')
+        setClientId((prev) => prev || demo?.client_id || a.items[0]?.client_id || '')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load catalogs')
+      }
+    })()
+  }, [accessToken])
 
   async function onEvaluate(e: FormEvent) {
     e.preventDefault()
@@ -80,7 +78,7 @@ export function AccessEvaluatePage() {
             ))}
           </select>
         </label>
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <button type="submit" className="btn btn-primary" disabled={busy || !userId || !clientId}>
           {busy ? 'Evaluating…' : 'Evaluate app:access'}
         </button>
       </form>
@@ -99,9 +97,7 @@ export function AccessEvaluatePage() {
             <div>
               <dt>Matched policies</dt>
               <dd>
-                {result.matched_policies?.length
-                  ? result.matched_policies.join(', ')
-                  : 'None'}
+                {result.matched_policies?.length ? result.matched_policies.join(', ') : 'None'}
               </dd>
             </div>
           </dl>
