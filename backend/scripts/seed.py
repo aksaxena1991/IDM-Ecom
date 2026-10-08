@@ -179,13 +179,15 @@ async def seed() -> None:
             db,
             tenant_id=tenant.id,
             name="allow-admin-or-owning-department",
-            description="Allow app access for admins, or when the user department owns the application.",
+            description="Allow app access for admins (flag/role/permission), or matching department.",
             effect=PolicyEffect.allow,
             priority=10,
             actions=["app:access"],
             conditions={
                 "any": [
                     {"attr": "subject.is_admin", "op": "eq", "value": True},
+                    {"attr": "subject.roles", "op": "contains", "value": SYSTEM_ADMIN_ROLE},
+                    {"attr": "subject.permissions", "op": "contains", "value": ADMIN_PERMISSION},
                     {
                         "all": [
                             {
@@ -198,6 +200,48 @@ async def seed() -> None:
                 ]
             },
         )
+        await _ensure_policy(
+            db,
+            tenant_id=tenant.id,
+            name="allow-app-operator-role",
+            description="Allow app:access when the user holds the app_operator RBAC role.",
+            effect=PolicyEffect.allow,
+            priority=15,
+            actions=["app:access"],
+            conditions={
+                "all": [
+                    {"attr": "subject.roles", "op": "contains", "value": "app_operator"},
+                ]
+            },
+        )
+
+        admin_role = await _ensure_role(
+            db,
+            tenant_id=tenant.id,
+            name=SYSTEM_ADMIN_ROLE,
+            description="Tenant administrator with full console access",
+            permissions=[ADMIN_PERMISSION, "apps:write", "users:write", "policies:write", "roles:write"],
+            is_system=True,
+        )
+        user_role = await _ensure_role(
+            db,
+            tenant_id=tenant.id,
+            name=DEFAULT_USER_ROLE,
+            description="Default role for signed-up users",
+            permissions=["portal:access"],
+            is_system=True,
+        )
+        await _ensure_role(
+            db,
+            tenant_id=tenant.id,
+            name="app_operator",
+            description="Can access applications; useful for PBAC role checks",
+            permissions=["apps:read"],
+            is_system=False,
+        )
+
+        await _ensure_user_role(db, user.id, admin_role.id)
+        await _ensure_user_role(db, user.id, user_role.id)
 
         await db.commit()
         await keystore.ensure_active_es256_key(db)
@@ -206,6 +250,7 @@ async def seed() -> None:
         print("Admin: aksaxena1991@gmail.com / @Admin2026")
         print("OIDC client_id: demo-oidc-app")
         print("SAML client_id: demo-saml-app")
+        print(f"RBAC roles: {SYSTEM_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
 
 
 async def _ensure_attributes(db, model, owner_field: str, owner_id, attributes: dict) -> None:
@@ -230,6 +275,42 @@ async def _ensure_policy(db, **fields) -> None:
                 **fields,
             )
         )
+
+
+async def _ensure_role(db, *, tenant_id, name: str, description: str, permissions: list[str], is_system: bool):
+    stmt = select(Role).where(Role.tenant_id == tenant_id).where(Role.name == name)
+    role = (await db.execute(stmt)).scalar_one_or_none()
+    if role is None:
+        role = Role(
+            tenant_id=tenant_id,
+            name=name,
+            description=description,
+            is_system=is_system,
+        )
+        db.add(role)
+        await db.flush()
+    for perm in permissions:
+        existing = (
+            await db.execute(
+                select(RolePermission)
+                .where(RolePermission.role_id == role.id)
+                .where(RolePermission.permission == perm)
+            )
+        ).scalar_one_or_none()
+        if existing is None:
+            db.add(RolePermission(role_id=role.id, permission=perm))
+    await db.flush()
+    return role
+
+
+async def _ensure_user_role(db, user_id, role_id) -> None:
+    existing = (
+        await db.execute(
+            select(UserRole).where(UserRole.user_id == user_id).where(UserRole.role_id == role_id)
+        )
+    ).scalar_one_or_none()
+    if existing is None:
+        db.add(UserRole(user_id=user_id, role_id=role_id))
 
 
 if __name__ == "__main__":
