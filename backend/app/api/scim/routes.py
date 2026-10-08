@@ -3,13 +3,17 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.api.deps import DbDep, RedisDep, require_scim_token
+from app.core.config import get_settings
 from app.core.errors import ProblemDetail
+from app.core.security import generate_token, hash_password
 from app.models.entities import Group, GroupMembership, GroupSource, User, UserStatus
+from app.services.metrics import metrics
+from app.services.rate_limit import rate_limiter
 from app.services.session_service import session_service
 
 router = APIRouter(prefix="/scim/v2", tags=["scim"])
@@ -64,30 +68,57 @@ class ScimGroupIn(BaseModel):
     members: list[dict[str, Any]] | None = None
 
 
+def _parse_scim_filter(filter: str | None):
+    """Return SQLAlchemy filters for a small SCIM filter subset."""
+    if not filter:
+        return []
+    clauses = []
+    parts = [p.strip() for p in filter.split(" and ")]
+    for part in parts:
+        if 'userName eq "' in part:
+            value = part.split('userName eq "')[1].rstrip('"')
+            clauses.append(User.email == value.lower())
+        elif 'externalId eq "' in part:
+            value = part.split('externalId eq "')[1].rstrip('"')
+            clauses.append(User.external_id == value)
+    return clauses
+
+
 @router.get("/Users")
 async def list_users(
+    request: Request,
     db: DbDep,
+    redis: RedisDep,
     tenant_id: TenantDep,
     filter: str | None = Query(None),
     startIndex: int = Query(1, ge=1),
     count: int = Query(100, ge=1, le=200),
 ):
+    settings = get_settings()
+    allowed, retry = await rate_limiter.hit(
+        redis,
+        f"sso:rl:scim:{tenant_id}",
+        settings.scim_rate_limit_per_minute,
+        60,
+    )
+    if not allowed:
+        raise ProblemDetail(
+            status=429, title="Too Many Requests", detail="SCIM rate limit", extensions={"retry_after": retry}
+        )
     stmt = select(User).where(User.tenant_id == tenant_id)
-    if filter:
-        # Support userName eq "x" and externalId eq "x"
-        if 'userName eq "' in filter:
-            value = filter.split('userName eq "')[1].rstrip('"')
-            stmt = stmt.where(User.email == value.lower())
-        elif 'externalId eq "' in filter:
-            value = filter.split('externalId eq "')[1].rstrip('"')
-            stmt = stmt.where(User.external_id == value)
+    count_stmt = select(func.count()).select_from(User).where(User.tenant_id == tenant_id)
+    for clause in _parse_scim_filter(filter):
+        stmt = stmt.where(clause)
+        count_stmt = count_stmt.where(clause)
+    total = (await db.execute(count_stmt)).scalar_one()
     result = await db.execute(stmt.offset(startIndex - 1).limit(count))
     users = list(result.scalars().all())
+    metrics.incr("scim_list_users")
     return {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-        "totalResults": len(users),
+        "totalResults": int(total),
         "startIndex": startIndex,
-        "itemsPerPage": count,
+        "itemsPerPage": len(users),
         "Resources": [scim_user(u) for u in users],
     }
 

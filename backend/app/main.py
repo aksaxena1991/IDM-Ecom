@@ -7,8 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.admin import router as admin_router
 from app.api.admin.access import router as access_router
+from app.api.admin.groups import router as groups_router
 from app.api.admin.roles import router as roles_router
 from app.api.admin.sync import router as sync_router
+from app.api.metrics import router as metrics_router
 from app.api.auth import router as auth_router
 from app.api.auth.saml import router as saml_router
 from app.api.health import router as health_router
@@ -61,8 +63,10 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(access_router)
     app.include_router(roles_router)
+    app.include_router(groups_router)
     app.include_router(sync_router)
     app.include_router(scim_router)
+    app.include_router(metrics_router)
 
     @app.get("/")
     async def root():
