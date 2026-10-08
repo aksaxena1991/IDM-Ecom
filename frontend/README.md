@@ -2,6 +2,9 @@
 
 Frontend for the custom SSO backend.
 
+**Full client integration guide** (web / mobile / Electron / Polymer):  
+[../backend/docs/CLIENT_INTEGRATION_GUIDE.md](../backend/docs/CLIENT_INTEGRATION_GUIDE.md)
+
 ## Features
 
 - **Login** — SSO (OIDC + PKCE) or email/password (+ MFA code when enrolled)

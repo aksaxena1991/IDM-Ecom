@@ -1,56 +1,94 @@
-# Integrating Your App with the Custom SSO Backend
+# Integrate Your App with This Custom SSO Backend
 
-This guide explains how to connect any client—**web**, **mobile**, **Electron**, or **Polymer**—to this SSO backend.
+Step-by-step guide for connecting **web**, **mobile**, **Electron**, or **Polymer** clients to the SSO API.
 
-**Default SSO base URL (local):** `http://localhost:8000`
-
----
-
-## 1. Choose the right protocol
-
-| Client type | Recommended protocol | Why |
-|-------------|----------------------|-----|
-| Modern web SPA (React, Vue, Angular, Polymer) | **OIDC Authorization Code + PKCE** | Browser-safe; no client secret |
-| Electron desktop app | **OIDC Authorization Code + PKCE** | Same as SPA; use system browser or in-app BrowserWindow |
-| Native mobile (iOS / Android) | **OIDC Authorization Code + PKCE** | Standard AppAuth / ASWebAuthenticationSession |
-| Legacy enterprise SaaS that only speaks SAML | **SAML 2.0** | SP-initiated or IdP-initiated |
-| Backend / directory sync tools | **SCIM 2.0** | User/group provisioning (not end-user login) |
-
-For almost all new apps, use **OIDC + PKCE**.
+| | |
+|---|---|
+| **SSO base URL (local)** | `http://localhost:8000` |
+| **API docs** | `http://localhost:8000/docs` |
+| **OIDC discovery** | `GET /.well-known/openid-configuration` |
+| **Reference SPA** | [`frontend/`](../../frontend/) (React + TypeScript) |
 
 ---
 
-## 2. Prerequisites (SSO server)
+## Contents
 
-1. Start the backend (from `backend/`):
+1. [Choose a protocol](#1-choose-a-protocol)
+2. [Start and configure SSO](#2-start-and-configure-sso)
+3. [Register your application](#3-register-your-application)
+4. [OIDC + PKCE (recommended for all modern clients)](#4-oidc--pkce-recommended-for-all-modern-clients)
+5. [Platform guides](#5-platform-guides)
+6. [Optional first-party login / signup JSON](#6-optional-first-party-login--signup-json)
+7. [MFA (TOTP)](#7-mfa-totp)
+8. [Using tokens in your app](#8-using-tokens-in-your-app)
+9. [Access control (ABAC / PBAC)](#9-access-control-abac--pbac)
+10. [Admin API (tenant operators)](#10-admin-api-tenant-operators)
+11. [SAML (enterprise apps)](#11-saml-enterprise-apps)
+12. [SCIM (provisioning)](#12-scim-provisioning)
+13. [Checklist and common errors](#13-checklist-and-common-errors)
+14. [Endpoint quick reference](#14-endpoint-quick-reference)
+
+---
+
+## 1. Choose a protocol
+
+| Client | Use | Why |
+|--------|-----|-----|
+| Web SPA (React, Vue, Angular, Polymer) | **OIDC Authorization Code + PKCE** | No client secret in the browser |
+| Electron desktop | **OIDC + PKCE** | Same flow; open system browser or `BrowserWindow` |
+| Native mobile (iOS / Android) | **OIDC + PKCE** | AppAuth / `ASWebAuthenticationSession` |
+| Legacy SaaS that only supports SAML | **SAML 2.0** | SP- or IdP-initiated |
+| HR / IdM sync tools | **SCIM 2.0** | User/group provisioning (not end-user login) |
+
+**Default for new work: OIDC + PKCE.**
+
+---
+
+## 2. Start and configure SSO
+
+From `backend/`:
 
 ```bash
 source .venv/bin/activate
-docker compose up -d
+docker compose up -d          # Postgres :5433, Redis :6379
 alembic upgrade head
 python scripts/seed.py
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-2. Confirm discovery works:
+Verify:
 
 ```bash
-curl http://localhost:8000/.well-known/openid-configuration
+curl -s http://localhost:8000/healthz
+curl -s http://localhost:8000/.well-known/openid-configuration | head
 ```
 
-3. Register your application in SSO (admin API or seed). You need:
-   - `client_id` (e.g. `demo-oidc-app`)
-   - Exact `redirect_uri` (wildcards are rejected)
-   - Protocol: `oidc` or `saml`
+### Demo values (after seed)
 
-**Demo OIDC app (from seed):**
-
-| Field | Value |
-|-------|-------|
-| `client_id` | `demo-oidc-app` |
+| Item | Value |
+|------|-------|
+| Admin email | See [README.md](../README.md) (seeded admin) |
+| OIDC `client_id` | `demo-oidc-app` |
 | Redirect URIs | `http://localhost:3000/callback`, `http://127.0.0.1:3000/callback` |
+| Session cookie | `sso_session` (HttpOnly) |
+| CORS (SPA) | `http://localhost:3000` (configure via `CORS_ORIGINS`) |
 
-To register a new OIDC app via admin API (after logging in as admin and getting an access token with admin claims):
+Set `BASE_URL` in `.env` to the public URL of SSO in each environment (used as OIDC `issuer`).
+
+---
+
+## 3. Register your application
+
+Every client needs an **application** record with:
+
+- `client_id` (returned on create, or use seed `demo-oidc-app`)
+- Protocol: `oidc` or `saml`
+- **Exact** redirect URI(s) — wildcards are rejected
+
+### Create via Admin API
+
+1. Sign in as an admin and obtain an access token with `is_admin` / `admin` scope (see §4).
+2. Call:
 
 ```http
 POST /v1/apps
@@ -58,70 +96,66 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "name": "My Frontend",
+  "name": "My App",
   "protocol": "oidc",
-  "redirect_uris": ["http://localhost:3000/callback"]
+  "redirect_uris": [
+    "http://localhost:3000/callback",
+    "myapp://auth/callback"
+  ]
 }
 ```
 
-Save the returned `client_id`.
+3. Store the returned `client_id` in your client config.
+
+**Admin writes** may require MFA step-up (`POST /mfa/totp/verify`) if the session’s step-up is older than 15 minutes. Response: `401` with `"challenge": "mfa_step_up"`.
 
 ---
 
-## 3. Core concepts
+## 4. OIDC + PKCE (recommended for all modern clients)
+
+### Flow overview
 
 ```
-┌─────────────┐     1. Redirect to authorize (+ PKCE)
-│  Your App   │ ──────────────────────────────────────►  SSO
-│ (web/mobile │
-│  /Electron) │ ◄──────────────────────────────────────  SSO
-└─────────────┘     2. Redirect back with ?code=
-        │
-        │  3. POST /oauth2/token (code + code_verifier)
-        ▼
-   access_token + id_token + refresh_token
-        │
-        ▼
-   Call your APIs / GET /oauth2/userinfo
+Your app                    SSO
+   |                         |
+   |-- GET /oauth2/authorize (+ PKCE) -->
+   |                         |  (login / MFA if needed)
+   |                         |  (ABAC/PBAC app:access check)
+   |<-- 302 ?code=&state= ---|
+   |                         |
+   |-- POST /oauth2/token (code + verifier) -->
+   |<-- access_token, id_token, refresh_token --|
+   |                         |
+   |-- GET /oauth2/userinfo (Bearer) --------->
+   |<-- sub, email, name, groups, attributes --|
 ```
 
-Important rules enforced by this SSO:
+### Rules enforced by this server
 
-1. **PKCE is required** — `code_challenge` + `code_challenge_method=S256` on authorize; `code_verifier` on token exchange.
-2. **Redirect URI must match exactly** — no wildcards.
-3. **Refresh tokens rotate** — each use returns a new refresh token; reusing an old one revokes the family.
-4. **Sessions** use an HttpOnly cookie (`sso_session`) on the SSO domain after login/signup.
-5. **Tokens:** ID token ~5 minutes, access token ~15 minutes (configurable).
+1. **PKCE required** — `code_challenge` + `code_challenge_method=S256` on authorize; `code_verifier` on token exchange.
+2. **Exact redirect URI** — must match registration character-for-character.
+3. **Refresh tokens rotate** — each refresh returns a new refresh token; reusing an old one revokes the family.
+4. **Access may be denied by policy** — even after login, authorize/token can return `access_denied` if PBAC/ABAC denies `app:access`.
+5. **Token lifetimes (defaults)** — ID ~5 min, access ~15 min (configurable).
 
----
+### Step A — Discovery (optional)
 
-## 4. Step-by-step: OIDC + PKCE (all modern clients)
-
-### Step 1 — Read discovery (optional but recommended)
-
-```
-GET {SSO_BASE}/.well-known/openid-configuration
+```http
+GET {SSO}/.well-known/openid-configuration
 ```
 
-Use these endpoints from the response:
+Use `authorization_endpoint`, `token_endpoint`, `userinfo_endpoint`, `jwks_uri`.
 
-- `authorization_endpoint` → `/oauth2/authorize`
-- `token_endpoint` → `/oauth2/token`
-- `userinfo_endpoint` → `/oauth2/userinfo`
-- `jwks_uri` → `/.well-known/jwks.json`
-
-### Step 2 — Generate PKCE values
-
-In your client (browser, Electron, or mobile):
+### Step B — Generate PKCE
 
 ```text
-code_verifier  = high-entropy random string (43–128 chars, URL-safe)
-code_challenge = BASE64URL( SHA256(code_verifier) )
+code_verifier  = URL-safe random string (43–128 chars)
+code_challenge = BASE64URL( SHA-256(code_verifier) )
 ```
 
-Store `code_verifier` securely until the token exchange (memory, secure storage, or sessionStorage for SPAs).
+Store `code_verifier` and a random `state` until the callback.
 
-**JavaScript example:**
+**Browser / Electron renderer example:**
 
 ```javascript
 function randomVerifier(length = 64) {
@@ -131,8 +165,10 @@ function randomVerifier(length = 64) {
 }
 
 async function s256Challenge(verifier) {
-  const data = new TextEncoder().encode(verifier);
-  const digest = await crypto.subtle.digest("SHA-256", data);
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(verifier),
+  );
   return btoa(String.fromCharCode(...new Uint8Array(digest)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -140,53 +176,48 @@ async function s256Challenge(verifier) {
 }
 ```
 
-### Step 3 — Send the user to authorize
-
-Build this URL and open it (full redirect or system browser):
+### Step C — Redirect to authorize
 
 ```
-{SSO_BASE}/oauth2/authorize
+{SSO}/oauth2/authorize
   ?client_id=YOUR_CLIENT_ID
   &redirect_uri=YOUR_EXACT_REDIRECT_URI
   &response_type=code
   &scope=openid%20profile%20email%20groups
-  &state=RANDOM_CSRF_TOKEN
-  &nonce=RANDOM_NONCE
-  &code_challenge=CODE_CHALLENGE
+  &state=RANDOM
+  &nonce=RANDOM
+  &code_challenge=CHALLENGE
   &code_challenge_method=S256
 ```
 
 | Param | Required | Notes |
 |-------|----------|--------|
-| `client_id` | Yes | Registered app id |
-| `redirect_uri` | Yes | Must match registration exactly |
-| `response_type` | Yes | Always `code` |
-| `scope` | Yes | At least `openid` |
-| `code_challenge` | Yes | S256 challenge |
-| `code_challenge_method` | Yes | Must be `S256` |
-| `state` | Recommended | CSRF protection; verify on return |
+| `client_id` | Yes | Registered app |
+| `redirect_uri` | Yes | Exact match |
+| `response_type` | Yes | `code` only |
+| `scope` | Yes | At least `openid`; add `admin` for admin APIs |
+| `code_challenge` / `code_challenge_method` | Yes | `S256` |
+| `state` | Recommended | CSRF; verify on return |
 | `nonce` | Recommended | Bound into ID token |
 
-If the user is not logged into SSO, they are redirected to `/login` (or can use `/signup`), then returned to authorize to complete the flow.
+If the user has no SSO session, they are sent to `/login` (or `/signup`), then back to authorize.
 
-### Step 4 — Handle the callback
+### Step D — Handle callback
 
 SSO redirects to:
 
 ```
-YOUR_REDIRECT_URI?code=AUTH_CODE&state=...
+YOUR_REDIRECT_URI?code=...&state=...
 ```
 
-Your app must:
+1. Verify `state`.
+2. Exchange `code` (next step).
+3. Do not put tokens in the URL.
 
-1. Verify `state` matches what you stored.
-2. Exchange `code` for tokens (next step).
-3. Never put tokens in the URL hash for this flow (code is one-time; tokens stay in app storage).
-
-### Step 5 — Exchange code for tokens
+### Step E — Exchange code for tokens
 
 ```http
-POST {SSO_BASE}/oauth2/token
+POST {SSO}/oauth2/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=authorization_code
@@ -196,7 +227,7 @@ grant_type=authorization_code
 &code_verifier=CODE_VERIFIER
 ```
 
-**Success response:**
+**Success:**
 
 ```json
 {
@@ -209,16 +240,10 @@ grant_type=authorization_code
 }
 ```
 
-Store:
-
-- `access_token` — call APIs / userinfo
-- `refresh_token` — get new tokens when access expires (keep secret)
-- `id_token` — identity claims (optional to display user info)
-
-### Step 6 — Call userinfo (or decode ID token)
+### Step F — Userinfo
 
 ```http
-GET {SSO_BASE}/oauth2/userinfo
+GET {SSO}/oauth2/userinfo
 Authorization: Bearer <access_token>
 ```
 
@@ -228,16 +253,17 @@ Authorization: Bearer <access_token>
   "email": "user@example.com",
   "name": "User Name",
   "groups": ["Admins"],
+  "attributes": { "department": "engineering", "clearance": 5 },
   "tenant_id": "tenant-uuid"
 }
 ```
 
-Supported claims in v1: `sub`, `email`, `name`, `groups`, `tenant_id`.
+`attributes` are ABAC subject attributes.
 
-### Step 7 — Refresh tokens
+### Step G — Refresh
 
 ```http
-POST {SSO_BASE}/oauth2/token
+POST {SSO}/oauth2/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=refresh_token
@@ -245,29 +271,29 @@ grant_type=refresh_token
 &client_id=YOUR_CLIENT_ID
 ```
 
-Always **replace** the stored refresh token with the new one from the response. Do not reuse the old refresh token.
+Always replace the stored refresh token with the new one.
 
-### Step 8 — Logout
+### Step H — Logout
 
 ```http
-POST {SSO_BASE}/session/logout
+POST {SSO}/session/logout
 ```
 
-This revokes the SSO session cookie and associated refresh tokens (cookie must be sent if same-site / credentialed). Also clear local tokens in your app.
+Clears the SSO session cookie and revokes refresh tokens tied to that session. Also clear local tokens in your app. Use `credentials: "include"` when calling from a browser if you rely on the cookie.
 
 ---
 
-## 5. Platform-specific guides
+## 5. Platform guides
 
-### A. Web SPA (React / Vue / Angular / plain JS)
+### A. Web SPA (React, Vue, Angular, plain JS)
 
 1. Register redirect URI, e.g. `http://localhost:3000/callback`.
-2. On “Login”, generate PKCE + `state`, save verifier/state, redirect to authorize.
-3. On `/callback` route, exchange code → tokens.
-4. Keep `access_token` in memory (preferred) or sessionStorage; keep `refresh_token` in the most secure storage you can use in a SPA.
-5. Attach `Authorization: Bearer <access_token>` to your own backend APIs (or call SSO userinfo).
+2. On Login: generate PKCE + `state` → full-page redirect to authorize.
+3. On `/callback`: exchange code → store tokens (memory or `sessionStorage`).
+4. Call your APIs with `Authorization: Bearer <access_token>`, or call SSO userinfo.
+5. Enable CORS on SSO (`CORS_ORIGINS`) for your SPA origin if you call SSO with `fetch` from the browser.
 
-**Minimal redirect start:**
+Minimal start:
 
 ```javascript
 const SSO = "http://localhost:8000";
@@ -293,141 +319,61 @@ async function login() {
 }
 ```
 
-**Callback exchange:**
-
-```javascript
-async function handleCallback() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("state") !== sessionStorage.getItem("oauth_state")) {
-    throw new Error("Invalid state");
-  }
-  const body = new URLSearchParams({
-    grant_type: "authorization_code",
-    code: params.get("code"),
-    redirect_uri: REDIRECT_URI,
-    client_id: CLIENT_ID,
-    code_verifier: sessionStorage.getItem("pkce_verifier"),
-  });
-  const res = await fetch(`${SSO}/oauth2/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-  const tokens = await res.json();
-  // persist tokens, then navigate into the app
-  return tokens;
-}
-```
-
-Libraries you can use instead of hand-rolling: `oidc-client-ts`, `oauth4webapi`.
+Libraries: `oidc-client-ts`, `oauth4webapi`.  
+Working reference: the repo’s [`frontend/`](../../frontend/) React app.
 
 ---
 
 ### B. Polymer (web components)
 
-Polymer apps are still browser SPAs. Use the **same OIDC + PKCE flow** as section A.
+Polymer apps are browser SPAs — use the **same OIDC + PKCE** flow as §5A.
 
-Suggested structure:
+Suggested pattern:
 
-1. Create an `<sso-auth>` element that owns login/logout and token refresh.
-2. On `connectedCallback`, check for `?code=` on the callback path.
-3. Expose methods: `login()`, `logout()`, `getAccessToken()`.
-4. Other elements request the token via events or a shared service.
+1. Create an `<sso-auth>` element that owns login/logout and token storage.
+2. On `ready` / `connectedCallback`, if the path is your callback and `code` is present, exchange tokens.
+3. Expose `login()`, `logout()`, `getAccessToken()`, `getUser()`.
+4. Other elements consume tokens via events or a shared service.
 
-Example sketch:
-
-```javascript
-class SsoAuth extends PolymerElement {
-  static get properties() {
-    return {
-      accessToken: { type: String, notify: true },
-      user: { type: Object, notify: true },
-    };
-  }
-
-  login() { /* same as SPA login() above */ }
-
-  async ready() {
-    super.ready();
-    if (location.pathname === "/callback" && location.search.includes("code=")) {
-      const tokens = await handleCallback();
-      this.accessToken = tokens.access_token;
-      const ui = await fetch(`${SSO}/oauth2/userinfo`, {
-        headers: { Authorization: `Bearer ${tokens.access_token}` },
-      });
-      this.user = await ui.json();
-      history.replaceState({}, "", "/");
-    }
-  }
-}
-customElements.define("sso-auth", SsoAuth);
-```
-
-Register a dedicated redirect URI for your Polymer app origin, e.g. `http://localhost:8081/callback`.
+Register a dedicated redirect URI for the Polymer origin (e.g. `http://localhost:8081/callback`).
 
 ---
 
-### C. Electron (desktop)
+### C. Electron
 
-Prefer opening the **system browser** or a dedicated `BrowserWindow` for authorize, then deep-link back into the app.
+Prefer the **system browser** or a dedicated auth window, then return via loopback or custom protocol.
 
-#### Recommended pattern
+1. Register one of:
+   - Loopback: `http://127.0.0.1:53100/callback` (tiny local HTTP server in main process), or
+   - Custom protocol: `myapp://auth/callback` (`app.setAsDefaultProtocolClient`)
+2. Generate PKCE in the **main** process when possible.
+3. Open authorize with `shell.openExternal()` or `BrowserWindow`.
+4. Capture `code` → exchange in main → store tokens with `safeStorage` / OS keychain.
+5. Pass only what the renderer needs (or use a privileged preload API).
 
-1. Register a custom redirect URI, e.g.:
-   - Loopback: `http://127.0.0.1:53100/callback` (start a tiny local HTTP server in Electron), or
-   - Custom protocol: `myapp://auth/callback` (register protocol in Electron)
-2. Generate PKCE in the main process (more secure than renderer).
-3. Open authorize URL with `shell.openExternal()` or `BrowserWindow`.
-4. Capture `code` on callback.
-5. Exchange for tokens in the main process.
-6. Store tokens with Electron `safeStorage` / OS keychain; never in plain localStorage if avoidable.
-
-**Register custom protocol (main process):**
-
-```javascript
-const { app, shell } = require("electron");
-
-if (process.defaultApp) {
-  if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("myapp", process.execPath, [path.resolve(process.argv[1])]);
-  }
-} else {
-  app.setAsDefaultProtocolClient("myapp");
-}
-
-// Redirect URI registered in SSO: myapp://auth/callback
-```
-
-**Important:** Whatever redirect URI you use in Electron must be added exactly in the SSO app config (`POST /v1/apps` or seed).
-
-For local development, loopback HTTP is often easier than custom protocols on all OSes.
+Do **not** embed a password form that talks to SSO with a password grant — this server does not expose ROPC for third-party apps. Users authenticate on SSO’s hosted login during authorize.
 
 ---
 
 ### D. Mobile (iOS / Android)
 
-Use the platform’s official browser-based auth:
-
-| Platform | Recommended API |
-|----------|-----------------|
+| Platform | Recommended |
+|----------|-------------|
 | iOS | `ASWebAuthenticationSession` / AppAuth |
-| Android | AppAuth for Android / Chrome Custom Tabs |
+| Android | AppAuth + Chrome Custom Tabs |
 
-Flow is identical to OIDC + PKCE:
-
-1. Register redirect URI, e.g. `com.example.myapp:/oauth2redirect` or HTTPS app link.
+1. Register a redirect URI (app link or custom scheme), e.g. `com.example.app:/oauth2redirect`.
 2. Start authorize in the system browser session.
-3. App receives `code` via redirect.
-4. Exchange code in the app with `code_verifier`.
-5. Store tokens in Keychain (iOS) / EncryptedSharedPreferences or Keystore (Android).
+3. Receive `code` → exchange with `code_verifier`.
+4. Store tokens in Keychain / EncryptedSharedPreferences.
 
-Do **not** embed a username/password form inside a WebView that talks to SSO with a password grant — this backend does not expose a resource-owner password grant for apps. Users authenticate on SSO’s `/login` page during the authorize redirect.
+Same OIDC steps as §4.
 
 ---
 
-## 6. Optional: direct signup / login JSON (same origin or trusted first-party UI)
+## 6. Optional first-party login / signup JSON
 
-If your UI is first-party and can call SSO APIs directly (CORS/cookies configured as needed):
+Use these only for a **first-party** UI that can call SSO with cookies (`credentials: "include"`) and correct CORS.
 
 ### Sign up
 
@@ -443,7 +389,7 @@ Content-Type: application/json
 }
 ```
 
-Returns `201` + sets `sso_session` cookie; body includes `session_id`, `user_id`, `email`.
+`201` + sets `sso_session` cookie.
 
 ### Login
 
@@ -459,80 +405,192 @@ Content-Type: application/json
 }
 ```
 
-These endpoints are useful for a custom branded login screen hosted with SSO. For third-party or Electron/mobile apps, prefer the **authorize redirect** so the password never enters your app process.
+If MFA is enrolled and code is missing/wrong: `401` with `"mfa_required": true`.
 
-After session cookie exists, continue with `/oauth2/authorize` (PKCE) to obtain tokens for your `client_id`.
+After cookie login/signup, still run **OIDC authorize + PKCE** (full-page redirect to `{SSO}/oauth2/authorize`) so your app receives access/refresh tokens for your `client_id`. The session cookie is sent on that navigation to the SSO host.
 
----
-
-## 7. SAML apps (enterprise)
-
-Use SAML when the application only supports SAML assertions.
-
-1. Register app with `protocol: "saml"` and config:
-   - `acs_url` — Assertion Consumer Service URL of your app
-   - `entity_id` / `audience` — your SP entity ID
-2. IdP metadata: `GET {SSO_BASE}/saml/metadata/{tenant_slug}`
-3. SSO endpoint: `GET|POST {SSO_BASE}/saml/sso`
-   - **SP-initiated:** POST/Redirect `SAMLRequest` (+ optional `RelayState`)
-   - **IdP-initiated:** `GET /saml/sso?client_id=demo-saml-app`
-
-Your app receives a form POST to `acs_url` with `SAMLResponse` (Base64). Validate signature, audience, recipient, and freshness (assertions are short-lived and single-use on the IdP side).
+For third-party, Electron, and mobile clients, prefer pure authorize redirect (hosted `/login`) so passwords never enter your process.
 
 ---
 
-## 8. Checklist for a new client
+## 7. MFA (TOTP)
 
-1. [ ] Decide OIDC (default) vs SAML  
-2. [ ] Register app in SSO with exact redirect / ACS URLs  
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `POST` | `/mfa/totp/enroll` | Session cookie | Returns `{ factor_id, secret, otpauth_uri }` |
+| `POST` | `/mfa/totp/verify` | Session cookie | Body `{ "code" }` → `{ "verified": true }`; refreshes admin step-up |
+
+Enrollment is bound to the SSO session cookie. After enroll, show `otpauth_uri` / secret in an authenticator app, then verify.
+
+Admin API **writes** need a recent MFA step-up (within 15 minutes). If stale:
+
+```json
+{
+  "title": "Step-up required",
+  "status": 401,
+  "detail": "MFA step-up required for admin writes",
+  "challenge": "mfa_step_up"
+}
+```
+
+Prompt for a TOTP code → `POST /mfa/totp/verify` → retry the admin call.
+
+---
+
+## 8. Using tokens in your app
+
+1. Attach `Authorization: Bearer <access_token>` to your own APIs, or to SSO userinfo/admin endpoints.
+2. Decode the access token (JWT) only for UX hints (`email`, `is_admin`, `groups`). **Always validate** on a backend with JWKS if you enforce authorization server-side:
+
+```http
+GET {SSO}/.well-known/jwks.json
+```
+
+3. On `401` / expiry, use refresh rotation; on refresh failure, send the user through authorize again.
+4. Claims of interest: `sub`, `email`, `name`, `groups`, `tenant_id`, `is_admin`, `scope`, `sid`.
+
+---
+
+## 9. Access control (ABAC / PBAC)
+
+On `app:access` (OIDC authorize, token issue, SAML SSO), SSO evaluates enabled policies with **deny-overrides**:
+
+- No enabled policy for the action → allow (backward compatible).
+- Matching **deny** wins.
+- Else matching **allow** grants.
+- Else deny if policies exist for the action.
+
+**Subject attributes** (user): e.g. `department`, `clearance` — returned in userinfo as `attributes`.  
+**Resource attributes** (app): e.g. `sensitivity`, `owner_department`.  
+Built-ins also available in policies: `subject.email`, `subject.is_admin`, `subject.groups`, `env.hour`, etc.
+
+Dry-run (admin):
+
+```http
+POST /v1/access/evaluate
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+
+{
+  "user_id": "<uuid>",
+  "client_id": "demo-oidc-app",
+  "action": "app:access"
+}
+```
+
+If your user’s authorize fails with `access_denied`, check policies and attributes — not only credentials.
+
+---
+
+## 10. Admin API (tenant operators)
+
+Requires Bearer access token for a user with `is_admin` and typically `admin` in scope. Request scope:
+
+```text
+openid profile email groups admin
+```
+
+| Area | Endpoints |
+|------|-----------|
+| Apps | `GET/POST /v1/apps`, `PATCH /v1/apps/{id}`, `PUT /v1/apps/{id}/assignments` |
+| Users | `GET /v1/users` (cursor pagination) |
+| Attributes | `GET/PUT /v1/users/{id}/attributes`, `GET/PUT /v1/apps/{id}/attributes` |
+| Policies | `GET/POST /v1/policies`, `PATCH/DELETE /v1/policies/{id}` |
+| Evaluate | `POST /v1/access/evaluate` |
+| Audit | `GET /v1/audit-events` (`format=csv` for export) |
+| Sync stubs | `GET/PUT /v1/sync-cursors` |
+
+Writes require MFA step-up when the session’s `admin_step_up_at` is missing or older than 15 minutes (§7).
+
+---
+
+## 11. SAML (enterprise apps)
+
+1. Register app with `protocol: "saml"` and config: `acs_url`, `entity_id`, `audience`.
+2. IdP metadata: `GET {SSO}/saml/metadata/{tenant_slug}`
+3. SSO: `GET|POST {SSO}/saml/sso`
+   - **SP-initiated:** `SAMLRequest` (+ optional `RelayState`)
+   - **IdP-initiated:** `GET /saml/sso?client_id=your-saml-client-id`
+4. Your ACS receives `SAMLResponse` (Base64). Validate signature, audience, recipient, and time window. Assertions are short-lived and single-use on the IdP.
+
+PBAC/ABAC `app:access` applies to SAML SSO as well.
+
+---
+
+## 12. SCIM (provisioning)
+
+Machine clients use a per-tenant SCIM bearer (seed prints a demo token).
+
+| Path | Notes |
+|------|--------|
+| `/scim/v2/Users` | Create/read/PUT/PATCH/delete; filter `userName` / `externalId` |
+| `/scim/v2/Groups` | List/create/get |
+| Bulk | Returns `501` in v1 |
+
+Deactivating a user revokes sessions. Idempotent create on `externalId`.
+
+---
+
+## 13. Checklist and common errors
+
+### New client checklist
+
+1. [ ] Choose OIDC (default) or SAML  
+2. [ ] Register app with exact redirect / ACS URLs  
 3. [ ] Implement PKCE authorize → callback → token  
 4. [ ] Verify `state` (and optionally `nonce`)  
-5. [ ] Store tokens securely; refresh with rotation  
-6. [ ] Call `/oauth2/userinfo` or trust validated ID token claims  
+5. [ ] Store tokens securely; handle refresh rotation  
+6. [ ] Call `/oauth2/userinfo` (includes `attributes`)  
 7. [ ] Implement logout (local clear + `/session/logout`)  
-8. [ ] Test failure cases: missing PKCE, wrong redirect, reused refresh token  
+8. [ ] Handle `access_denied` from authorize/token (policies)  
+9. [ ] If admin UI: request `admin` scope + MFA step-up UX  
+10. [ ] Test missing PKCE, wrong redirect, reused refresh token  
 
----
-
-## 9. Common errors
+### Common errors
 
 | Symptom | Cause | Fix |
 |---------|--------|-----|
-| `400` on authorize: PKCE required | Missing `code_challenge` / not `S256` | Always send S256 PKCE |
+| Authorize `400` PKCE required | Missing / non-S256 challenge | Always send S256 PKCE |
 | `redirect_uri mismatch` | URI not exact | Register and use identical string |
-| `invalid_grant` on token | Bad/expired code or wrong verifier | Complete exchange quickly; match PKCE |
-| `invalid_grant` on refresh | Reused rotated refresh token | Use only the latest refresh token |
-| Login page instead of code | No SSO session | User must sign in/sign up first |
-| CORS errors from SPA | Browser cross-origin | Prefer full-page redirect for authorize; token call may need CORS or a BFF |
+| Token `invalid_grant` | Bad/expired code or wrong verifier | Exchange quickly; match PKCE |
+| Refresh `invalid_grant` | Reused rotated refresh | Keep only the latest refresh token |
+| `access_denied` | PBAC/ABAC denied `app:access` | Adjust policies/attributes or evaluate dry-run |
+| Login page instead of code | No SSO session | User must sign in / sign up |
+| Admin write `401` + `mfa_step_up` | Stale step-up | `POST /mfa/totp/verify` then retry |
+| CORS errors from SPA | Cross-origin `fetch` | Set `CORS_ORIGINS`; prefer full-page authorize redirect |
 
 ---
 
-## 10. Quick reference — endpoints
+## 14. Endpoint quick reference
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/.well-known/openid-configuration` | OIDC discovery |
-| GET | `/.well-known/jwks.json` | Token verification keys |
-| GET | `/oauth2/authorize` | Start login / consent (PKCE) |
-| POST | `/oauth2/token` | Code exchange / refresh |
-| GET | `/oauth2/userinfo` | Current user claims |
-| GET/POST | `/login`, `/login/json` | Interactive / API login |
-| GET/POST | `/signup`, `/signup/json` | Interactive / API signup |
-| POST | `/session/logout` | Single logout |
-| GET | `/session/me` | Current session (cookie) |
-| GET/POST | `/saml/sso` | SAML sign-on |
-| GET | `/saml/metadata/{tenant}` | SAML IdP metadata |
+| `GET` | `/.well-known/openid-configuration` | OIDC discovery |
+| `GET` | `/.well-known/jwks.json` | Signing keys |
+| `GET` | `/oauth2/authorize` | Start login (PKCE) |
+| `POST` | `/oauth2/token` | Code exchange / refresh |
+| `GET` | `/oauth2/userinfo` | Identity + ABAC attributes |
+| `GET`/`POST` | `/login`, `/login/json` | Hosted / API login |
+| `GET`/`POST` | `/signup`, `/signup/json` | Hosted / API signup |
+| `POST` | `/session/logout` | Single logout |
+| `GET` | `/session/me` | Session metadata (cookie) |
+| `POST` | `/mfa/totp/enroll` | Enroll TOTP |
+| `POST` | `/mfa/totp/verify` | Verify / step-up |
+| `GET`/`POST` | `/saml/sso` | SAML sign-on |
+| `GET` | `/saml/metadata/{tenant}` | SAML IdP metadata |
+| `*` | `/v1/*` | Admin + access control APIs |
+| `*` | `/scim/v2/*` | Provisioning |
 
-Interactive API explorer: `{SSO_BASE}/docs`
+Interactive explorer: `{SSO}/docs`.
 
 ---
 
-## 11. End-to-end smoke test (demo OIDC app)
+## Smoke test (demo OIDC app)
 
 1. Start SSO on port `8000`.  
-2. Point a simple page at `http://localhost:3000` with callback `/callback`.  
-3. Use `client_id=demo-oidc-app` and redirect `http://localhost:3000/callback`.  
-4. Run PKCE authorize → login as seeded admin → receive code → token → userinfo.  
-5. Confirm `email` from userinfo matches the signed-in user.
+2. Point a client at redirect `http://localhost:3000/callback` with `client_id=demo-oidc-app`.  
+3. Run PKCE authorize → sign in → receive `code` → token → userinfo.  
+4. Confirm `email` / `attributes` from userinfo.  
+5. Optionally open the reference SPA: `cd frontend && npm run dev`.
 
-That confirms your client integration path before you wire production redirect URIs and branding.
+That validates the integration path before you wire production redirect URIs and branding.
