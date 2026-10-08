@@ -23,25 +23,46 @@ export type UserInfo = {
   email?: string
   name?: string
   groups?: string[]
-  attributes?: Record<string, string | number | boolean | null | Array<string | number | boolean | null>>
+  attributes?: Record<string, unknown>
   tenant_id?: string
+}
+
+export type SessionMe = {
+  session_id: string
+  user_id: string
+  tenant_id: string
+  expires_at: string
+  absolute_expires_at: string
+  mfa_verified_at: string | null
 }
 
 export class ApiError extends Error {
   status: number
   detail?: string
+  challenge?: string
+  body?: Record<string, unknown>
 
-  constructor(status: number, title: string, detail?: string) {
+  constructor(
+    status: number,
+    title: string,
+    detail?: string,
+    extras?: { challenge?: string; body?: Record<string, unknown> },
+  ) {
     super(detail || title)
     this.status = status
     this.detail = detail
+    this.challenge = extras?.challenge
+    this.body = extras?.body
   }
 }
 
 async function parseError(res: Response): Promise<ApiError> {
   try {
     const body = await res.json()
-    return new ApiError(res.status, body.title || res.statusText, body.detail || body.error_description)
+    return new ApiError(res.status, body.title || res.statusText, body.detail || body.error_description, {
+      challenge: body.challenge,
+      body,
+    })
   } catch {
     return new ApiError(res.status, res.statusText)
   }
@@ -67,12 +88,13 @@ export async function loginWithPassword(
   const body = await res.json().catch(() => ({}))
   if (!res.ok) {
     if (body?.mfa_required) {
-      throw new ApiError(401, 'MFA required', 'MFA code required')
+      throw new ApiError(401, 'MFA required', 'MFA code required', { body })
     }
     throw new ApiError(
       res.status,
       body.title || res.statusText,
       body.detail || body.error_description || 'Login failed',
+      { body },
     )
   }
   return body
@@ -99,7 +121,6 @@ export async function registerUser(input: {
   return res.json()
 }
 
-/** Start OIDC authorize redirect (SSO hosted login if no session). */
 export async function beginSsoLogin(): Promise<void> {
   const verifier = createCodeVerifier()
   const challenge = await createCodeChallenge(verifier)
@@ -118,10 +139,6 @@ export async function beginSsoLogin(): Promise<void> {
   window.location.assign(url.toString())
 }
 
-/**
- * After email/password (or signup) established an SSO session cookie,
- * continue into OIDC to obtain tokens for this SPA.
- */
 export async function continueOidcAfterSession(): Promise<void> {
   await beginSsoLogin()
 }
@@ -187,6 +204,60 @@ export async function logoutRemote(): Promise<void> {
       credentials: 'include',
     })
   } catch {
-    // ignore network errors on logout
+    // ignore
   }
+}
+
+export async function fetchSessionMe(): Promise<SessionMe> {
+  const res = await fetch(`${SSO_BASE_URL}/session/me`, { credentials: 'include' })
+  if (!res.ok) throw await parseError(res)
+  return res.json()
+}
+
+export async function enrollTotp(): Promise<{ factor_id: string; secret: string; otpauth_uri: string }> {
+  const res = await fetch(`${SSO_BASE_URL}/mfa/totp/enroll`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+  if (!res.ok) throw await parseError(res)
+  return res.json()
+}
+
+export async function verifyTotp(code: string): Promise<{ verified: boolean }> {
+  const res = await fetch(`${SSO_BASE_URL}/mfa/totp/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ code }),
+  })
+  if (!res.ok) throw await parseError(res)
+  return res.json()
+}
+
+export async function ssoFetch(
+  path: string,
+  accessToken: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  const headers = new Headers(init.headers)
+  headers.set('Authorization', `Bearer ${accessToken}`)
+  if (init.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+  return fetch(`${SSO_BASE_URL}${path}`, {
+    ...init,
+    headers,
+    credentials: 'include',
+  })
+}
+
+export async function ssoJson<T>(
+  path: string,
+  accessToken: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const res = await ssoFetch(path, accessToken, init)
+  if (!res.ok) throw await parseError(res)
+  if (res.status === 204) return undefined as T
+  return res.json() as Promise<T>
 }

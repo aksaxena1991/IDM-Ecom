@@ -3,7 +3,7 @@ export const OIDC_CLIENT_ID = import.meta.env.VITE_OIDC_CLIENT_ID ?? 'demo-oidc-
 export const OIDC_REDIRECT_URI =
   import.meta.env.VITE_OIDC_REDIRECT_URI ?? 'http://localhost:3000/callback'
 export const OIDC_SCOPE =
-  import.meta.env.VITE_OIDC_SCOPE ?? 'openid profile email groups'
+  import.meta.env.VITE_OIDC_SCOPE ?? 'openid profile email groups admin'
 
 export const TOKEN_STORAGE_KEY = 'sso_portal_tokens'
 export const PKCE_VERIFIER_KEY = 'sso_pkce_verifier'

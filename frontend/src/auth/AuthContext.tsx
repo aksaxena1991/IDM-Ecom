@@ -16,6 +16,7 @@ import {
   type TokenSet,
   type UserInfo,
 } from '../lib/api'
+import { decodeJwtPayload } from '../lib/jwt'
 
 type AuthContextValue = {
   user: UserInfo | null
@@ -23,6 +24,8 @@ type AuthContextValue = {
   loading: boolean
   error: string | null
   isAuthenticated: boolean
+  isAdmin: boolean
+  accessToken: string | null
   completeOidcCallback: (code: string, state: string) => Promise<void>
   setSessionFromTokens: (tokens: TokenSet) => Promise<void>
   logout: () => Promise<void>
@@ -47,6 +50,16 @@ function persistTokens(tokens: TokenSet | null) {
     return
   }
   sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens))
+}
+
+function tokenIsAdmin(tokens: TokenSet | null): boolean {
+  if (!tokens?.access_token) return false
+  const claims = decodeJwtPayload(tokens.access_token)
+  if (!claims) return false
+  if (claims.is_admin) return true
+  return String(claims.scope || '')
+    .split(/\s+/)
+    .includes('admin')
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -96,12 +109,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [tokens, hydrateUser])
 
-  const setSessionFromTokens = useCallback(async (next: TokenSet) => {
-    persistTokens(next)
-    setTokens(next)
-    setError(null)
-    await hydrateUser(next)
-  }, [hydrateUser])
+  const setSessionFromTokens = useCallback(
+    async (next: TokenSet) => {
+      persistTokens(next)
+      setTokens(next)
+      setError(null)
+      await hydrateUser(next)
+    },
+    [hydrateUser],
+  )
 
   const completeOidcCallback = useCallback(
     async (code: string, state: string) => {
@@ -131,6 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       isAuthenticated: Boolean(user && tokens),
+      isAdmin: tokenIsAdmin(tokens),
+      accessToken: tokens?.access_token ?? null,
       completeOidcCallback,
       setSessionFromTokens,
       logout,
