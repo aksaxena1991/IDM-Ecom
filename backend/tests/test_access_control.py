@@ -7,14 +7,14 @@ from app.services.access_service import APP_ACCESS, access_service
 
 
 @pytest.mark.asyncio
-async def test_no_policies_allow_app_access(db_session, seeded):
+async def test_no_policies_deny_app_access(db_session, seeded):
     decision = await access_service.decide(
         db_session,
         user=seeded["user"],
         application=seeded["app"],
         action=APP_ACCESS,
     )
-    assert decision.allowed is True
+    assert decision.allowed is False
     assert decision.reason == "no_policy_for_action"
 
 

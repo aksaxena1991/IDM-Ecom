@@ -3,7 +3,7 @@
 Combining algorithm: deny-overrides. A matching deny wins over any allow.
 If the tenant has policies for the requested action but none grant access,
 the decision is deny. If no enabled policy targets the action, access is
-allowed so existing tenants keep working until policies are configured.
+denied (configure an explicit allow such as allow-active-users).
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ def evaluate(
     ]
     if not targeted:
         return AccessDecision(
-            allowed=True,
+            allowed=False,
             reason="no_policy_for_action",
             message="No access policy is configured for this action",
         )

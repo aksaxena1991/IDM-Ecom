@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/AuthContext'
-import { adminApi, type AppItem } from '../../lib/adminApi'
+import { adminApi, type AppItem, type UserItem } from '../../lib/adminApi'
 import { ApiError } from '../../lib/api'
+
+type Assignment = { principal_type: string; principal_id: string }
 
 export function AppsPage() {
   const { accessToken } = useAuth()
   const [apps, setApps] = useState<AppItem[]>([])
+  const [users, setUsers] = useState<UserItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<AppItem | null>(null)
+  const [panel, setPanel] = useState<'attributes' | 'assignments'>('attributes')
   const [attrJson, setAttrJson] = useState('{}')
+  const [assignments, setAssignments] = useState<Assignment[]>([])
   const [name, setName] = useState('')
   const [redirectUris, setRedirectUris] = useState('http://localhost:3000/callback')
   const [busy, setBusy] = useState(false)
@@ -16,8 +21,12 @@ export function AppsPage() {
   const load = useCallback(async () => {
     if (!accessToken) return
     try {
-      const res = await adminApi.listApps(accessToken)
-      setApps(res.items)
+      const [appsRes, usersRes] = await Promise.all([
+        adminApi.listApps(accessToken),
+        adminApi.listUsers(accessToken),
+      ])
+      setApps(appsRes.items)
+      setUsers(usersRes.items)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load apps')
@@ -54,11 +63,24 @@ export function AppsPage() {
   async function loadAttrs(app: AppItem) {
     if (!accessToken) return
     setSelected(app)
+    setPanel('attributes')
     try {
       const res = await adminApi.getAppAttributes(accessToken, app.id)
       setAttrJson(JSON.stringify(res.attributes, null, 2))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load attributes')
+    }
+  }
+
+  async function loadAssignments(app: AppItem) {
+    if (!accessToken) return
+    setSelected(app)
+    setPanel('assignments')
+    try {
+      const res = await adminApi.getAssignments(accessToken, app.id)
+      setAssignments(res.assignments)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load assignments')
     }
   }
 
@@ -76,6 +98,29 @@ export function AppsPage() {
     }
   }
 
+  async function saveAssignments() {
+    if (!accessToken || !selected) return
+    setBusy(true)
+    try {
+      await adminApi.setAssignments(accessToken, selected.id, assignments)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save assignments failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function toggleUserAssignment(userId: string) {
+    setAssignments((prev) => {
+      const exists = prev.some((a) => a.principal_type === 'user' && a.principal_id === userId)
+      if (exists) {
+        return prev.filter((a) => !(a.principal_type === 'user' && a.principal_id === userId))
+      }
+      return [...prev, { principal_type: 'user', principal_id: userId }]
+    })
+  }
+
   async function toggleStatus(app: AppItem) {
     if (!accessToken) return
     const next = app.status === 'active' ? 'disabled' : 'active'
@@ -90,7 +135,9 @@ export function AppsPage() {
   return (
     <main className="dashboard">
       <h1>Applications</h1>
-      <p className="lede">Register OIDC/SAML apps, edit status, and manage resource attributes (ABAC).</p>
+      <p className="lede">
+        Register OIDC/SAML apps, manage assignments (entitlements), and resource attributes (ABAC).
+      </p>
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
@@ -109,6 +156,13 @@ export function AppsPage() {
                   <div className="btn-row">
                     <button type="button" className="btn btn-ghost" onClick={() => void loadAttrs(app)}>
                       Attributes
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => void loadAssignments(app)}
+                    >
+                      Assignments
                     </button>
                     <button type="button" className="btn btn-ghost" onClick={() => void toggleStatus(app)}>
                       {app.status === 'active' ? 'Disable' : 'Enable'}
@@ -136,7 +190,7 @@ export function AppsPage() {
             </button>
           </form>
 
-          {selected && (
+          {selected && panel === 'attributes' && (
             <>
               <h2>Attributes · {selected.name}</h2>
               <textarea
@@ -147,6 +201,42 @@ export function AppsPage() {
               />
               <button type="button" className="btn btn-secondary" onClick={() => void saveAttrs()} disabled={busy}>
                 Save attributes
+              </button>
+            </>
+          )}
+
+          {selected && panel === 'assignments' && (
+            <>
+              <h2>Assignments · {selected.name}</h2>
+              <p className="muted small">
+                When any assignment exists, only assigned users/groups may access (then PBAC applies).
+              </p>
+              <ul className="list">
+                {users.map((u) => (
+                  <li key={u.id}>
+                    <label className="list-row">
+                      <span>
+                        <strong>{u.email}</strong>
+                        <div className="muted small">{u.name || '—'}</div>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={assignments.some(
+                          (a) => a.principal_type === 'user' && a.principal_id === u.id,
+                        )}
+                        onChange={() => toggleUserAssignment(u.id)}
+                      />
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => void saveAssignments()}
+                disabled={busy}
+              >
+                Save assignments
               </button>
             </>
           )}
