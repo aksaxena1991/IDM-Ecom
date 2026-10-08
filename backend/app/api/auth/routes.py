@@ -1,0 +1,361 @@
+from __future__ import annotations
+
+import uuid
+from typing import Annotated
+from urllib.parse import urlencode
+
+from fastapi import APIRouter, Form, Header, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from pydantic import BaseModel, EmailStr
+from sqlalchemy import select
+
+from app.api.deps import DbDep, RedisDep, get_bearer_claims, get_current_session
+from app.core.config import get_settings
+from app.core.errors import ProblemDetail
+from app.core.security import generate_token, verify_password
+from app.models.entities import User, UserStatus
+from app.services.audit_service import audit_service
+from app.services.mfa_service import mfa_service
+from app.services.oidc_service import oidc_service
+from app.services.rate_limit import rate_limiter
+from app.services.session_service import session_service
+
+router = APIRouter(tags=["auth"])
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+    tenant_slug: str = "demo"
+    mfa_code: str | None = None
+
+
+class LoginResponse(BaseModel):
+    session_id: str
+    mfa_required: bool = False
+    user_id: str | None = None
+
+
+LOGIN_HTML = """
+<!DOCTYPE html>
+<html><head><title>SSO Login</title>
+<style>
+body{{font-family:system-ui,sans-serif;max-width:420px;margin:4rem auto;padding:0 1rem}}
+input,button{{display:block;width:100%;margin:.5rem 0;padding:.6rem}}
+</style></head>
+<body>
+<h1>Sign in</h1>
+<form method="post" action="/login">
+  <input type="hidden" name="redirect" value="{redirect}"/>
+  <label>Email <input name="email" type="email" required/></label>
+  <label>Password <input name="password" type="password" required/></label>
+  <label>MFA code (if enrolled) <input name="mfa_code" inputmode="numeric"/></label>
+  <button type="submit">Continue</button>
+</form>
+{error}
+</body></html>
+"""
+
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(redirect: str = "/") -> HTMLResponse:
+    return HTMLResponse(LOGIN_HTML.format(redirect=redirect, error=""))
+
+
+async def _authenticate(
+    db: DbDep,
+    redis: RedisDep,
+    *,
+    email: str,
+    password: str,
+    mfa_code: str | None,
+) -> tuple[User | None, str | None, bool]:
+    """Returns (user, error, mfa_required)."""
+    locked, _retry = await rate_limiter.is_locked(redis, email.lower())
+    if locked:
+        return None, "locked", False
+
+    result = await db.execute(
+        select(User).where(User.email == email.lower()).where(User.status == UserStatus.active)
+    )
+    user = result.scalar_one_or_none()
+    if user is None or not user.password_hash or not verify_password(user.password_hash, password):
+        await rate_limiter.login_failure(redis, email.lower())
+        return None, "invalid", False
+
+    needs_mfa = await mfa_service.has_mfa(db, user.id)
+    if needs_mfa:
+        if not mfa_code or not await mfa_service.verify_totp(db, user.id, mfa_code):
+            return user, "mfa", True
+    return user, None, False
+
+
+@router.post("/login")
+async def login_form(
+    request: Request,
+    db: DbDep,
+    redis: RedisDep,
+    email: str = Form(...),
+    password: str = Form(...),
+    mfa_code: str | None = Form(None),
+    redirect: str = Form("/"),
+):
+    settings = get_settings()
+    user, err, mfa_required = await _authenticate(
+        db, redis, email=email, password=password, mfa_code=mfa_code
+    )
+    if err == "locked":
+        raise ProblemDetail(status=429, title="Too Many Requests", detail="Account temporarily locked")
+    if err == "invalid":
+        return HTMLResponse(
+            LOGIN_HTML.format(redirect=redirect, error="<p style='color:red'>Invalid credentials</p>"),
+            status_code=401,
+        )
+    if err == "mfa":
+        return HTMLResponse(
+            LOGIN_HTML.format(redirect=redirect, error="<p>MFA code required</p>"),
+            status_code=401,
+        )
+    assert user is not None
+    await rate_limiter.clear_login_failures(redis, email.lower())
+    session = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    )
+    await audit_service.record(
+        db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
+    )
+    response = RedirectResponse(url=redirect or "/", status_code=303)
+    response.set_cookie(
+        key=settings.cookie_name,
+        value=str(session.id),
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        max_age=settings.session_absolute_hours * 3600,
+        path="/",
+    )
+    return response
+
+
+@router.post("/login/json", response_model=LoginResponse)
+async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep):
+    settings = get_settings()
+    user, err, mfa_required = await _authenticate(
+        db, redis, email=body.email, password=body.password, mfa_code=body.mfa_code
+    )
+    if err == "locked":
+        raise ProblemDetail(status=429, title="Too Many Requests", detail="Account temporarily locked")
+    if err == "invalid":
+        raise ProblemDetail(status=401, title="Unauthorized", detail="Invalid credentials")
+    if err == "mfa":
+        return JSONResponse({"session_id": "", "mfa_required": True, "user_id": str(user.id) if user else None}, status_code=401)
+    assert user is not None
+    await rate_limiter.clear_login_failures(redis, body.email.lower())
+    session = await session_service.create(
+        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=True
+    )
+    await audit_service.record(
+        db, redis, tenant_id=user.tenant_id, actor=user.email, action="login.success", target=str(user.id)
+    )
+    response = JSONResponse(
+        {"session_id": str(session.id), "mfa_required": False, "user_id": str(user.id)}
+    )
+    response.set_cookie(
+        key=settings.cookie_name,
+        value=str(session.id),
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        max_age=settings.session_absolute_hours * 3600,
+        path="/",
+    )
+    return response
+
+
+@router.get("/oauth2/authorize")
+async def authorize(
+    request: Request,
+    db: DbDep,
+    redis: RedisDep,
+    client_id: str = Query(...),
+    redirect_uri: str = Query(...),
+    response_type: str = Query(...),
+    scope: str = Query("openid"),
+    state: str | None = Query(None),
+    nonce: str | None = Query(None),
+    code_challenge: str | None = Query(None),
+    code_challenge_method: str | None = Query(None),
+):
+    if response_type != "code":
+        raise ProblemDetail(status=400, title="unsupported_response_type", detail="Only code is supported")
+    if not code_challenge or code_challenge_method != "S256":
+        raise ProblemDetail(
+            status=400,
+            title="invalid_request",
+            detail="PKCE code_challenge with S256 is required",
+        )
+
+    app = await oidc_service.get_application(db, client_id)
+    if app is None:
+        raise ProblemDetail(status=400, title="invalid_client", detail="Unknown client_id")
+    if not oidc_service.validate_redirect_uri(app, redirect_uri):
+        raise ProblemDetail(status=400, title="invalid_request", detail="redirect_uri mismatch")
+
+    session = await get_current_session(request, db, redis)
+    if session is None:
+        qs = urlencode({"redirect": str(request.url)})
+        return RedirectResponse(url=f"/login?{qs}", status_code=302)
+
+    code = generate_token(32)
+    await oidc_service.store_auth_code(
+        redis,
+        code=code,
+        client_id=client_id,
+        user_id=session.user_id,
+        session_id=session.id,
+        redirect_uri=redirect_uri,
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method,
+        scope=scope,
+        nonce=nonce,
+    )
+    params = {"code": code}
+    if state:
+        params["state"] = state
+    sep = "&" if "?" in redirect_uri else "?"
+    return RedirectResponse(url=f"{redirect_uri}{sep}{urlencode(params)}", status_code=302)
+
+
+@router.post("/oauth2/token")
+async def token(
+    db: DbDep,
+    redis: RedisDep,
+    grant_type: str = Form(...),
+    code: str | None = Form(None),
+    redirect_uri: str | None = Form(None),
+    client_id: str = Form(...),
+    code_verifier: str | None = Form(None),
+    refresh_token: str | None = Form(None),
+):
+    if grant_type == "authorization_code":
+        if not code or not redirect_uri or not code_verifier:
+            return JSONResponse(
+                {
+                    "error": "invalid_request",
+                    "error_description": "Missing code, redirect_uri, or code_verifier",
+                },
+                status_code=400,
+            )
+        stored = await oidc_service.consume_auth_code(redis, code)
+        if stored is None:
+            return JSONResponse(
+                {"error": "invalid_grant", "error_description": "Invalid or expired code"},
+                status_code=400,
+            )
+        if stored["client_id"] != client_id or stored["redirect_uri"] != redirect_uri:
+            return JSONResponse(
+                {"error": "invalid_grant", "error_description": "Code mismatch"},
+                status_code=400,
+            )
+        if not oidc_service.verify_code_challenge(
+            code_verifier, stored["code_challenge"], stored["code_challenge_method"]
+        ):
+            return JSONResponse(
+                {"error": "invalid_grant", "error_description": "PKCE verification failed"},
+                status_code=400,
+            )
+        app = await oidc_service.get_application(db, client_id)
+        if app is None:
+            return JSONResponse({"error": "invalid_client"}, status_code=400)
+        user_result = await db.execute(select(User).where(User.id == uuid.UUID(stored["user_id"])))
+        user = user_result.scalar_one()
+        tokens = await oidc_service.issue_tokens(
+            db,
+            redis,
+            user=user,
+            app=app,
+            session_id=uuid.UUID(stored["session_id"]),
+            scope=stored.get("scope") or "openid",
+            nonce=stored.get("nonce"),
+        )
+        return tokens
+
+    if grant_type == "refresh_token":
+        if not refresh_token:
+            return JSONResponse({"error": "invalid_request"}, status_code=400)
+        try:
+            return await oidc_service.rotate_refresh(
+                db, redis, refresh_token=refresh_token, client_id=client_id
+            )
+        except ValueError as exc:
+            return JSONResponse(
+                {"error": "invalid_grant", "error_description": str(exc)},
+                status_code=400,
+            )
+
+    return JSONResponse({"error": "unsupported_grant_type"}, status_code=400)
+
+
+@router.get("/oauth2/userinfo")
+async def userinfo(
+    db: DbDep,
+    redis: RedisDep,
+    authorization: Annotated[str | None, Header()] = None,
+):
+    claims = await get_bearer_claims(db, redis, authorization)
+    return {
+        "sub": claims.get("sub"),
+        "email": claims.get("email"),
+        "name": claims.get("name"),
+        "groups": claims.get("groups", []),
+        "tenant_id": claims.get("tenant_id"),
+    }
+
+
+# MFA enrollment / verify
+class MfaEnrollResponse(BaseModel):
+    factor_id: str
+    secret: str
+    otpauth_uri: str
+
+
+@router.post("/mfa/totp/enroll", response_model=MfaEnrollResponse)
+async def enroll_totp(
+    request: Request,
+    db: DbDep,
+    redis: RedisDep,
+):
+    session = await get_current_session(request, db, redis)
+    if session is None:
+        raise ProblemDetail(status=401, title="Unauthorized", detail="Authentication required")
+    factor, secret, uri = await mfa_service.enroll_totp(db, session.user_id)
+    await audit_service.record(
+        db,
+        redis,
+        tenant_id=session.tenant_id,
+        actor=str(session.user_id),
+        action="mfa.enroll",
+        target=str(factor.id),
+    )
+    return MfaEnrollResponse(factor_id=str(factor.id), secret=secret, otpauth_uri=uri)
+
+
+class MfaVerifyRequest(BaseModel):
+    code: str
+
+
+@router.post("/mfa/totp/verify")
+async def verify_totp(
+    body: MfaVerifyRequest,
+    request: Request,
+    db: DbDep,
+    redis: RedisDep,
+):
+    session = await get_current_session(request, db, redis)
+    if session is None:
+        raise ProblemDetail(status=401, title="Unauthorized", detail="Authentication required")
+    ok = await mfa_service.verify_totp(db, session.user_id, body.code)
+    if not ok:
+        raise ProblemDetail(status=401, title="Unauthorized", detail="Invalid MFA code")
+    await session_service.mark_mfa_verified(db, redis, session)
+    return {"verified": True}
