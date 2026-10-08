@@ -9,6 +9,7 @@ from app.api.admin import router as admin_router
 from app.api.admin.access import router as access_router
 from app.api.admin.groups import router as groups_router
 from app.api.admin.roles import router as roles_router
+from app.api.admin.scim_tokens import router as scim_tokens_router
 from app.api.admin.sync import router as sync_router
 from app.api.metrics import router as metrics_router
 from app.api.auth import router as auth_router

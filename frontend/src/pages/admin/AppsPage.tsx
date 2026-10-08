@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../../auth/AuthContext'
-import { adminApi, type AppItem, type UserItem } from '../../lib/adminApi'
+import { adminApi, type AppItem, type GroupItem, type UserItem } from '../../lib/adminApi'
 import { ApiError } from '../../lib/api'
 
 type Assignment = { principal_type: string; principal_id: string }
@@ -9,24 +9,32 @@ export function AppsPage() {
   const { accessToken } = useAuth()
   const [apps, setApps] = useState<AppItem[]>([])
   const [users, setUsers] = useState<UserItem[]>([])
+  const [groups, setGroups] = useState<GroupItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<AppItem | null>(null)
   const [panel, setPanel] = useState<'attributes' | 'assignments'>('attributes')
   const [attrJson, setAttrJson] = useState('{}')
+  const [attrRows, setAttrRows] = useState<{ key: string; value: string }[]>([{ key: '', value: '' }])
+  const [advancedJson, setAdvancedJson] = useState(false)
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [name, setName] = useState('')
+  const [protocol, setProtocol] = useState<'oidc' | 'saml'>('oidc')
   const [redirectUris, setRedirectUris] = useState('http://localhost:3000/callback')
+  const [acsUrl, setAcsUrl] = useState('http://localhost:9000/acs')
+  const [entityId, setEntityId] = useState('https://sp.example.com')
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
     if (!accessToken) return
     try {
-      const [appsRes, usersRes] = await Promise.all([
+      const [appsRes, usersRes, groupsRes] = await Promise.all([
         adminApi.listApps(accessToken),
         adminApi.listUsers(accessToken),
+        adminApi.listGroups(accessToken),
       ])
       setApps(appsRes.items)
       setUsers(usersRes.items)
+      setGroups(groupsRes.items)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load apps')
@@ -43,14 +51,24 @@ export function AppsPage() {
     setBusy(true)
     setError(null)
     try {
-      await adminApi.createApp(accessToken, {
-        name,
-        protocol: 'oidc',
-        redirect_uris: redirectUris
-          .split('\n')
-          .map((s) => s.trim())
-          .filter(Boolean),
-      })
+      if (protocol === 'oidc') {
+        await adminApi.createApp(accessToken, {
+          name,
+          protocol: 'oidc',
+          redirect_uris: redirectUris
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean),
+        })
+      } else {
+        await adminApi.createApp(accessToken, {
+          name,
+          protocol: 'saml',
+          acs_url: acsUrl,
+          entity_id: entityId,
+          audience: entityId,
+        })
+      }
       setName('')
       await load()
     } catch (err) {
@@ -66,7 +84,14 @@ export function AppsPage() {
     setPanel('attributes')
     try {
       const res = await adminApi.getAppAttributes(accessToken, app.id)
-      setAttrJson(JSON.stringify(res.attributes, null, 2))
+      const attrs = res.attributes || {}
+      setAttrJson(JSON.stringify(attrs, null, 2))
+      const rows = Object.entries(attrs).map(([key, value]) => ({
+        key,
+        value: typeof value === 'string' ? value : JSON.stringify(value),
+      }))
+      setAttrRows(rows.length ? rows : [{ key: '', value: '' }])
+      setAdvancedJson(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load attributes')
     }
@@ -88,7 +113,20 @@ export function AppsPage() {
     if (!accessToken || !selected) return
     setBusy(true)
     try {
-      const attributes = JSON.parse(attrJson) as Record<string, unknown>
+      let attributes: Record<string, unknown>
+      if (advancedJson) {
+        attributes = JSON.parse(attrJson) as Record<string, unknown>
+      } else {
+        attributes = {}
+        for (const row of attrRows) {
+          if (!row.key.trim()) continue
+          try {
+            attributes[row.key.trim()] = JSON.parse(row.value)
+          } catch {
+            attributes[row.key.trim()] = row.value
+          }
+        }
+      }
       await adminApi.putAppAttributes(accessToken, selected.id, attributes)
       setError(null)
     } catch (err) {
@@ -111,13 +149,17 @@ export function AppsPage() {
     }
   }
 
-  function toggleUserAssignment(userId: string) {
+  function toggleAssignment(principalType: 'user' | 'group', principalId: string) {
     setAssignments((prev) => {
-      const exists = prev.some((a) => a.principal_type === 'user' && a.principal_id === userId)
+      const exists = prev.some(
+        (a) => a.principal_type === principalType && a.principal_id === principalId,
+      )
       if (exists) {
-        return prev.filter((a) => !(a.principal_type === 'user' && a.principal_id === userId))
+        return prev.filter(
+          (a) => !(a.principal_type === principalType && a.principal_id === principalId),
+        )
       }
-      return [...prev, { principal_type: 'user', principal_id: userId }]
+      return [...prev, { principal_type: principalType, principal_id: principalId }]
     })
   }
 
@@ -175,16 +217,36 @@ export function AppsPage() {
         </div>
 
         <div>
-          <h2>Create OIDC app</h2>
+          <h2>Create app</h2>
           <form className="stack" onSubmit={onCreate}>
             <label>
               Name
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </label>
             <label>
-              Redirect URIs (one per line)
-              <textarea value={redirectUris} onChange={(e) => setRedirectUris(e.target.value)} rows={3} />
+              Protocol
+              <select value={protocol} onChange={(e) => setProtocol(e.target.value as 'oidc' | 'saml')}>
+                <option value="oidc">OIDC</option>
+                <option value="saml">SAML</option>
+              </select>
             </label>
+            {protocol === 'oidc' ? (
+              <label>
+                Redirect URIs (one per line)
+                <textarea value={redirectUris} onChange={(e) => setRedirectUris(e.target.value)} rows={3} />
+              </label>
+            ) : (
+              <>
+                <label>
+                  ACS URL
+                  <input value={acsUrl} onChange={(e) => setAcsUrl(e.target.value)} required />
+                </label>
+                <label>
+                  SP Entity ID
+                  <input value={entityId} onChange={(e) => setEntityId(e.target.value)} required />
+                </label>
+              </>
+            )}
             <button type="submit" className="btn btn-primary" disabled={busy}>
               Create
             </button>
@@ -193,12 +255,54 @@ export function AppsPage() {
           {selected && panel === 'attributes' && (
             <>
               <h2>Attributes · {selected.name}</h2>
-              <textarea
-                className="code-area"
-                value={attrJson}
-                onChange={(e) => setAttrJson(e.target.value)}
-                rows={8}
-              />
+              <label className="list-row">
+                <span className="muted small">Advanced JSON</span>
+                <input
+                  type="checkbox"
+                  checked={advancedJson}
+                  onChange={(e) => setAdvancedJson(e.target.checked)}
+                />
+              </label>
+              {advancedJson ? (
+                <textarea
+                  className="code-area"
+                  value={attrJson}
+                  onChange={(e) => setAttrJson(e.target.value)}
+                  rows={8}
+                />
+              ) : (
+                <div className="stack">
+                  {attrRows.map((row, idx) => (
+                    <div key={idx} className="btn-row">
+                      <input
+                        placeholder="key"
+                        value={row.key}
+                        onChange={(e) => {
+                          const next = [...attrRows]
+                          next[idx] = { ...row, key: e.target.value }
+                          setAttrRows(next)
+                        }}
+                      />
+                      <input
+                        placeholder="value"
+                        value={row.value}
+                        onChange={(e) => {
+                          const next = [...attrRows]
+                          next[idx] = { ...row, value: e.target.value }
+                          setAttrRows(next)
+                        }}
+                      />
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setAttrRows((r) => [...r, { key: '', value: '' }])}
+                  >
+                    Add attribute
+                  </button>
+                </div>
+              )}
               <button type="button" className="btn btn-secondary" onClick={() => void saveAttrs()} disabled={busy}>
                 Save attributes
               </button>
@@ -211,6 +315,7 @@ export function AppsPage() {
               <p className="muted small">
                 When any assignment exists, only assigned users/groups may access (then PBAC applies).
               </p>
+              <h3>Users</h3>
               <ul className="list">
                 {users.map((u) => (
                   <li key={u.id}>
@@ -224,7 +329,27 @@ export function AppsPage() {
                         checked={assignments.some(
                           (a) => a.principal_type === 'user' && a.principal_id === u.id,
                         )}
-                        onChange={() => toggleUserAssignment(u.id)}
+                        onChange={() => toggleAssignment('user', u.id)}
+                      />
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <h3>Groups</h3>
+              <ul className="list">
+                {groups.map((g) => (
+                  <li key={g.id}>
+                    <label className="list-row">
+                      <span>
+                        <strong>{g.name}</strong>
+                        <div className="muted small">{g.member_ids.length} members</div>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={assignments.some(
+                          (a) => a.principal_type === 'group' && a.principal_id === g.id,
+                        )}
+                        onChange={() => toggleAssignment('group', g.id)}
                       />
                     </label>
                   </li>
