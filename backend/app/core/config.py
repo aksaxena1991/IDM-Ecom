@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     mfa_encryption_key: str = "local-dev-mfa-encryption-key-32b!"
     signing_keys_dir: Path = Path("./keys")
 
+    # Comma-separated origins for the React (or other) SPA
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
     audit_stream_key: str = "sso:audit:events"
     audit_retention_days: int = 365
     audit_csv_max_rows: int = 1_000_000
