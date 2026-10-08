@@ -4,6 +4,8 @@ Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, audi
 
 **Client integration guide (web / mobile / Electron / Polymer):** [docs/CLIENT_INTEGRATION_GUIDE.md](docs/CLIENT_INTEGRATION_GUIDE.md)
 
+**Database schema (all tables and uses):** [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
+
 **React SPA (sibling app):** see [`../frontend/README.md`](../frontend/README.md) — login (SSO + email/password), register, dashboard.
 
 ## Stack
