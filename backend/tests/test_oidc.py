@@ -44,7 +44,7 @@ async def test_oidc_code_flow(client: AsyncClient):
     verifier, challenge = _pkce()
     login = await client.post(
         "/login/json",
-        json={"email": "admin@example.com", "password": "Admin123!", "tenant_slug": "test"},
+        json={"email": "aksaxena1991@gmail", "password": "@Admin2026", "tenant_slug": "test"},
     )
     assert login.status_code == 200
     assert client.cookies.get("sso_session")
@@ -89,7 +89,7 @@ async def test_oidc_code_flow(client: AsyncClient):
         headers={"Authorization": f"Bearer {body['access_token']}"},
     )
     assert ui.status_code == 200
-    assert ui.json()["email"] == "admin@example.com"
+    assert ui.json()["email"] == "aksaxena1991@gmail"
 
     # refresh rotation
     refresh1 = await client.post(
@@ -131,7 +131,7 @@ async def test_oidc_code_flow(client: AsyncClient):
 async def test_logout(client: AsyncClient):
     login = await client.post(
         "/login/json",
-        json={"email": "admin@example.com", "password": "Admin123!"},
+        json={"email": "aksaxena1991@gmail", "password": "@Admin2026"},
     )
     assert login.status_code == 200
     r = await client.post("/session/logout")

@@ -33,8 +33,8 @@ uvicorn app.main:app --reload --port 8000
 
 | Item | Value |
 |------|-------|
-| Admin email | `admin@example.com` |
-| Password | `Admin123!` |
+| Admin email | `aksaxena1991@gmail` |
+| Password | `@Admin2026` |
 | OIDC client_id | `demo-oidc-app` |
 | Redirect URI | `http://localhost:3000/callback` |
 | SCIM token | `scim-demo-token-change-me` |
