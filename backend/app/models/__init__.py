@@ -8,6 +8,8 @@ from app.models.entities import (
     MfaFactor,
     RefreshToken,
     ResourceAttribute,
+    Role,
+    RolePermission,
     ScimToken,
     Session,
     SigningKey,
@@ -15,6 +17,7 @@ from app.models.entities import (
     Tenant,
     User,
     UserAttribute,
+    UserRole,
 )
 
 __all__ = [
@@ -27,6 +30,9 @@ __all__ = [
     "UserAttribute",
     "ResourceAttribute",
     "AccessPolicy",
+    "Role",
+    "RolePermission",
+    "UserRole",
     "MfaFactor",
     "Session",
     "SigningKey",
