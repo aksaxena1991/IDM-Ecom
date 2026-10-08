@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { DEFAULT_TENANT_SLUG } from '../config'
 import { ApiError, continueOidcAfterSession, registerUser } from '../lib/api'
 
 export function RegisterPage() {
   const { isAuthenticated, loading } = useAuth()
+  const [tenantSlug, setTenantSlug] = useState(DEFAULT_TENANT_SLUG)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +31,12 @@ export function RegisterPage() {
     }
     setSubmitting(true)
     try {
-      await registerUser({ email, password, name, tenantSlug: 'demo' })
+      await registerUser({
+        email,
+        password,
+        name,
+        tenantSlug: tenantSlug.trim() || DEFAULT_TENANT_SLUG,
+      })
       await continueOidcAfterSession()
     } catch (err) {
       setError(err instanceof ApiError ? err.detail || err.message : 'Registration failed')
@@ -45,6 +52,16 @@ export function RegisterPage() {
         <p className="lede">Register with email, then continue into your secure session.</p>
 
         <form className="stack" onSubmit={onSubmit}>
+          <label>
+            Tenant
+            <input
+              type="text"
+              autoComplete="organization"
+              value={tenantSlug}
+              onChange={(e) => setTenantSlug(e.target.value)}
+              required
+            />
+          </label>
           <label>
             Name
             <input

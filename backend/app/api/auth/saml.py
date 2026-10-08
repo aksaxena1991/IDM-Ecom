@@ -19,9 +19,10 @@ from app.api.deps import DbDep, RedisDep, get_current_session
 from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.keystore import keystore
-from app.models.entities import Application, AppProtocol, AppStatus, Tenant, User
+from app.models.entities import Application, AppProtocol, AppStatus, SamlAssertionReplay, Tenant, User
 from app.services.access_service import APP_ACCESS, access_service
 from app.services.audit_service import audit_service
+from app.services.metrics import metrics
 
 router = APIRouter(tags=["saml"])
 
@@ -230,7 +231,13 @@ async def saml_sso(
     private_pem = keystore.load_private_pem(key)
     issuer = f"{settings.base_url}/saml/metadata/{tenant.slug}"
     assertion_id = f"_a{uuid.uuid4().hex}"
-    if await redis.exists(f"sso:saml:replay:{assertion_id}"):
+    replay_key = f"sso:saml:replay:{assertion_id}"
+    if await redis.exists(replay_key):
+        raise ProblemDetail(status=400, title="invalid_request", detail="Replay detected")
+    existing = await db.execute(
+        select(SamlAssertionReplay).where(SamlAssertionReplay.assertion_id == assertion_id)
+    )
+    if existing.scalar_one_or_none() is not None:
         raise ProblemDetail(status=400, title="invalid_request", detail="Replay detected")
 
     response_xml = build_saml_response(
@@ -244,7 +251,15 @@ async def saml_sso(
         in_response_to=in_response_to,
         assertion_id=assertion_id,
     )
-    await redis.set(f"sso:saml:replay:{assertion_id}", "1", ex=300)
+    await redis.set(replay_key, "1", ex=300)
+    db.add(
+        SamlAssertionReplay(
+            assertion_id=assertion_id,
+            expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+        )
+    )
+    await db.commit()
+    metrics.incr("token_issues")
 
     await audit_service.record(
         db,

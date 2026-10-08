@@ -74,6 +74,16 @@ export function LoginPage() {
 
         <form className="stack" onSubmit={onPasswordLogin}>
           <label>
+            Tenant
+            <input
+              type="text"
+              autoComplete="organization"
+              value={tenantSlug}
+              onChange={(e) => setTenantSlug(e.target.value)}
+              required
+            />
+          </label>
+          <label>
             Email
             <input
               type="email"

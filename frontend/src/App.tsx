@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { AdminRoute } from './components/AdminRoute'
 import { AppLayout } from './components/AppLayout'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { StepUpModalProvider } from './components/StepUpModal'
 import { AccessEvaluatePage } from './pages/admin/AccessEvaluatePage'
@@ -19,6 +20,7 @@ import { SecurityPage } from './pages/SecurityPage'
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <StepUpModalProvider>
         <BrowserRouter>
@@ -100,5 +102,6 @@ export default function App() {
         </BrowserRouter>
       </StepUpModalProvider>
     </AuthProvider>
+    </ErrorBoundary>
   )
 }

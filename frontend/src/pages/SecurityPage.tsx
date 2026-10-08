@@ -28,7 +28,9 @@ export function SecurityPage() {
     try {
       const result = await enrollTotp()
       setEnrollment({ secret: result.secret, otpauth_uri: result.otpauth_uri })
-      setMessage('Scan the otpauth URI in your authenticator, then verify a code below.')
+      setMessage(
+        'Pending enrollment: scan the otpauth URI, then verify a code. The factor stays inactive until verification succeeds.',
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Enrollment failed')
     } finally {
@@ -42,7 +44,7 @@ export function SecurityPage() {
     setError(null)
     try {
       await verifyTotp(code.trim())
-      setMessage('MFA verified. Admin step-up window refreshed.')
+      setMessage('MFA active. Factor verified and admin step-up window refreshed.')
       setCode('')
       setEnrollment(null)
       await refreshSession()
@@ -94,12 +96,16 @@ export function SecurityPage() {
 
         <div>
           <h2>TOTP MFA</h2>
+          <p className="muted small">
+            Flow: enroll (pending) → verify code → factor active / step-up unlocked.
+          </p>
           <div className="stack">
             <button type="button" className="btn btn-secondary" onClick={() => void onEnroll()} disabled={busy}>
-              Enroll authenticator
+              {enrollment ? 'Re-enroll authenticator' : 'Enroll authenticator'}
             </button>
             {enrollment && (
               <div className="note-block">
+                <p className="badge">Pending verify</p>
                 <p>
                   <strong>Secret:</strong> <span className="mono">{enrollment.secret}</span>
                 </p>
@@ -108,7 +114,7 @@ export function SecurityPage() {
             )}
             <form className="stack" onSubmit={onVerify}>
               <label>
-                Verification / step-up code
+                {enrollment ? 'Confirm enrollment code' : 'Step-up / verification code'}
                 <input
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -118,7 +124,7 @@ export function SecurityPage() {
                 />
               </label>
               <button type="submit" className="btn btn-primary" disabled={busy}>
-                Verify code
+                {enrollment ? 'Activate MFA' : 'Verify code'}
               </button>
             </form>
             {message && <p className="ok">{message}</p>}
