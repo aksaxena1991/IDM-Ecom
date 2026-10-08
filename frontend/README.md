@@ -9,13 +9,14 @@ Frontend for the custom SSO backend.
 
 - **Login** — SSO (OIDC + PKCE) or email/password (+ MFA code when enrolled)
 - **Register** — signup then OIDC token handshake
-- **Dashboard** — userinfo profile, groups, ABAC attributes, token scopes
+- **Dashboard** — userinfo profile, groups, RBAC roles/permissions, ABAC attributes, token scopes
 - **Security** — TOTP enroll/verify and session MFA status
-- **Admin** (users with `is_admin` / `admin` scope):
+- **Admin** (users with `is_admin` or permission `admin:access`):
   - Apps (create OIDC app, enable/disable, resource attributes)
-  - Users (search, subject attributes)
-  - Policies (PBAC CRUD)
-  - Access evaluate (dry-run `app:access`)
+  - Users (search, subject attributes, multi-role assignment)
+  - Roles (create/edit RBAC roles and permissions)
+  - Policies (PBAC CRUD; conditions may use `subject.roles` / attributes)
+  - Access evaluate (dry-run `app:access` across RBAC + ABAC + PBAC)
   - Audit log + CSV export
 - **MFA step-up modal** — retries admin writes after `challenge: mfa_step_up`
 

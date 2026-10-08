@@ -45,32 +45,44 @@ uvicorn app.main:app --reload --port 8000
 | Redirect URI | `http://localhost:3000/callback` |
 | SCIM token | `scim-demo-token-change-me` |
 
-## Access control (ABAC and PBAC)
+## Access control (RBAC, ABAC, and PBAC)
 
-Subject attributes live on the user (`department`, `clearance`, and any other key you set). Resource attributes live on the application (`sensitivity`, `owner_department`). Built-in subject fields (`email`, `is_admin`, `groups`, `status`) and environment fields (`hour`, `weekday`) are available in policies without being stored.
+| Layer | Storage | Runtime subject fields |
+|-------|---------|------------------------|
+| **RBAC** | `roles`, `role_permissions`, `user_roles` | `subject.roles`, `subject.permissions` |
+| **ABAC** | `user_attributes`, `resource_attributes` | custom keys + built-ins |
+| **PBAC** | `access_policies` | deny-overrides over the above |
 
-Policies are data. On `app:access` (OIDC authorize, token issue, and SAML SSO) the engine loads enabled policies for the tenant and applies **deny-overrides**:
+Admins create roles (`POST /v1/roles`) and assign many roles per user (`PUT /v1/users/{id}/roles`). Signup assigns the system `user` role when present. Permission `admin:access` (via the `admin` role) grants admin API access alongside `users.is_admin`.
 
-- No enabled policy targets the action: allow (existing tenants keep working).
-- A matching deny wins over any allow.
-- Otherwise a matching allow grants access.
-- If policies exist for the action and none match: deny (`No access policy allows this request`).
+Subject attributes live on the user (`department`, `clearance`, …). Resource attributes live on the application (`sensitivity`, `owner_department`). Built-ins: `email`, `is_admin`, `groups`, `roles`, `permissions`, `status`; environment: `hour`, `weekday`.
 
-Demo seed creates:
+On `app:access` the engine applies **deny-overrides**:
 
-1. **`allow-active-users`** (priority 1) — baseline allow for `subject.status == active`
-2. **`deny-restricted-without-clearance`** (priority 100) — deny when app `sensitivity=restricted` and `clearance < 3`
-3. **`allow-admin-or-owning-department`** (priority 10) — allow admins or matching department
+- No enabled policy for the action → allow
+- Matching deny wins; else matching allow; else deny
 
-It also sets the admin's department to `engineering` with clearance `5`, and marks demo apps `sensitivity=internal`, `owner_department=engineering`.
+Demo seed creates roles `admin`, `user`, `app_operator` and policies:
 
-If login/authorize fails with **No access policy allows this request**, either disable/remove tenant policies for `app:access`, or ensure an allow policy matches (re-run `python scripts/seed.py` to add `allow-active-users`).
+1. **`allow-active-users`** — baseline for active users
+2. **`deny-restricted-without-clearance`** — ABAC deny on restricted apps
+3. **`allow-admin-or-owning-department`** — admin flag/role/permission or department match
+4. **`allow-app-operator-role`** — RBAC role `app_operator`
+
+If authorize fails with **No access policy allows this request**, re-run `python scripts/seed.py` or add a matching allow policy.
 
 ```http
-PUT /v1/users/{user_id}/attributes
+POST /v1/roles
 Authorization: Bearer <admin access token>
 
-{ "attributes": { "department": "engineering", "clearance": 3 } }
+{ "name": "finance_ops", "permissions": ["reports:read"] }
+```
+
+```http
+PUT /v1/users/{user_id}/roles
+Authorization: Bearer <admin access token>
+
+{ "role_ids": ["<role-uuid>"] }
 ```
 
 ```http
@@ -78,13 +90,13 @@ POST /v1/policies
 Authorization: Bearer <admin access token>
 
 {
-  "name": "finance-only",
+  "name": "finance-role-only",
   "effect": "allow",
   "priority": 10,
   "actions": ["app:access"],
   "resource_match": { "client_id": "demo-oidc-app" },
   "conditions": {
-    "all": [{ "attr": "subject.department", "op": "eq", "value": "finance" }]
+    "all": [{ "attr": "subject.roles", "op": "contains", "value": "finance_ops" }]
   }
 }
 ```
