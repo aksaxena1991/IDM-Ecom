@@ -28,6 +28,10 @@ from app.services.policy_engine import (
 APP_ACCESS = "app:access"
 
 
+class AccessDenied(Exception):
+    """Raised when a token grant must stop because policy denied the user."""
+
+
 class AccessService:
     async def subject_custom_attributes(self, db: AsyncSession, user_id: uuid.UUID) -> dict[str, Any]:
         result = await db.execute(select(UserAttribute).where(UserAttribute.user_id == user_id))
@@ -146,4 +150,4 @@ class AccessService:
 
 access_service = AccessService()
 
-__all__ = ["APP_ACCESS", "AccessService", "PolicyValidationError", "access_service"]
+__all__ = ["APP_ACCESS", "AccessDenied", "AccessService", "PolicyValidationError", "access_service"]

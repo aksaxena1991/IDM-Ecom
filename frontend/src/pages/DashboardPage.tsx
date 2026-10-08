@@ -42,6 +42,16 @@ export function DashboardPage() {
                   {user?.groups && user.groups.length > 0 ? user.groups.join(', ') : 'None'}
                 </dd>
               </div>
+              <div>
+                <dt>Attributes</dt>
+                <dd>
+                  {user?.attributes && Object.keys(user.attributes).length > 0
+                    ? Object.entries(user.attributes)
+                        .map(([key, value]) => `${key}=${String(value)}`)
+                        .join(', ')
+                    : 'None'}
+                </dd>
+              </div>
             </dl>
           </div>
 

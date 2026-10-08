@@ -9,6 +9,11 @@ export function CallbackPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const oauthError = params.get('error')
+    if (oauthError) {
+      setError(params.get('error_description') || 'Access was denied by policy.')
+      return
+    }
     const code = params.get('code')
     const state = params.get('state')
     if (!code || !state) {

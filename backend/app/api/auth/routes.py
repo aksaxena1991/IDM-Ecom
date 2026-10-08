@@ -14,7 +14,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.security import generate_token, hash_password, verify_password
 from app.models.entities import Tenant, User, UserStatus
-from app.services.access_service import APP_ACCESS, access_service
+from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 from app.services.audit_service import audit_service
 from app.services.mfa_service import mfa_service
 from app.services.oidc_service import oidc_service
@@ -492,6 +492,11 @@ async def token(
         try:
             return await oidc_service.rotate_refresh(
                 db, redis, refresh_token=refresh_token, client_id=client_id
+            )
+        except AccessDenied as exc:
+            return JSONResponse(
+                {"error": "access_denied", "error_description": str(exc)},
+                status_code=403,
             )
         except ValueError as exc:
             return JSONResponse(

@@ -13,7 +13,7 @@ from app.core.config import get_settings
 from app.core.keystore import keystore
 from app.core.security import generate_token, hash_token, verify_pkce
 from app.models.entities import Application, AppStatus, RefreshToken, User
-from app.services.access_service import APP_ACCESS, access_service
+from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 
 
 class OidcService:
@@ -197,7 +197,7 @@ class OidcService:
 
         decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
         if not decision.allowed:
-            raise ValueError(decision.message)
+            raise AccessDenied(decision.message)
 
         existing.revoked_at = datetime.now(timezone.utc)
         await db.flush()

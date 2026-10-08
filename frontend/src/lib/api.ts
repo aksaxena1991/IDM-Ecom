@@ -23,6 +23,7 @@ export type UserInfo = {
   email?: string
   name?: string
   groups?: string[]
+  attributes?: Record<string, string | number | boolean | null | Array<string | number | boolean | null>>
   tenant_id?: string
 }
 

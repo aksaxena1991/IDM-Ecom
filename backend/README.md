@@ -1,6 +1,6 @@
 # SSO Backend (FastAPI)
 
-Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, and audit logging.
+Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, audit logging, and attribute/policy access control (ABAC and PBAC).
 
 **Client integration guide (web / mobile / Electron / Polymer):** [docs/CLIENT_INTEGRATION_GUIDE.md](docs/CLIENT_INTEGRATION_GUIDE.md)
 
@@ -42,6 +42,44 @@ uvicorn app.main:app --reload --port 8000
 | OIDC client_id | `demo-oidc-app` |
 | Redirect URI | `http://localhost:3000/callback` |
 | SCIM token | `scim-demo-token-change-me` |
+
+## Access control (ABAC and PBAC)
+
+Subject attributes live on the user (`department`, `clearance`, and any other key you set). Resource attributes live on the application (`sensitivity`, `owner_department`). Built-in subject fields (`email`, `is_admin`, `groups`, `status`) and environment fields (`hour`, `weekday`) are available in policies without being stored.
+
+Policies are data. On `app:access` (OIDC authorize, token issue, and SAML SSO) the engine loads enabled policies for the tenant and applies **deny-overrides**:
+
+- No enabled policy targets the action: allow (existing tenants keep working).
+- A matching deny wins over any allow.
+- Otherwise a matching allow grants access.
+- If policies exist for the action and none match: deny.
+
+Demo seed creates both sample policies, sets the admin's department to `engineering` with clearance `5`, and marks demo apps `sensitivity=internal`, `owner_department=engineering`.
+
+```http
+PUT /v1/users/{user_id}/attributes
+Authorization: Bearer <admin access token>
+
+{ "attributes": { "department": "engineering", "clearance": 3 } }
+```
+
+```http
+POST /v1/policies
+Authorization: Bearer <admin access token>
+
+{
+  "name": "finance-only",
+  "effect": "allow",
+  "priority": 10,
+  "actions": ["app:access"],
+  "resource_match": { "client_id": "demo-oidc-app" },
+  "conditions": {
+    "all": [{ "attr": "subject.department", "op": "eq", "value": "finance" }]
+  }
+}
+```
+
+Dry-run a decision with `POST /v1/access/evaluate` and `{ "user_id", "client_id", "action": "app:access" }`.
 
 ## Tests
 

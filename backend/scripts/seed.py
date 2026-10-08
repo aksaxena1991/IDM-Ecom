@@ -14,15 +14,19 @@ from app.core.db import SessionLocal
 from app.core.keystore import keystore
 from app.core.security import hash_password, hash_token
 from app.models.entities import (
+    AccessPolicy,
     Application,
     AppProtocol,
     AppStatus,
     Group,
     GroupMembership,
     GroupSource,
+    PolicyEffect,
+    ResourceAttribute,
     ScimToken,
     Tenant,
     User,
+    UserAttribute,
     UserStatus,
 )
 
@@ -113,6 +117,68 @@ async def seed() -> None:
             )
             print(f"SCIM bearer token: {plain}")
 
+        await db.flush()
+        await _ensure_attributes(
+            db,
+            UserAttribute,
+            "user_id",
+            user.id,
+            {"department": "engineering", "clearance": 5, "title": "platform-admin"},
+        )
+
+        apps = list(
+            (
+                await db.execute(select(Application).where(Application.tenant_id == tenant.id))
+            ).scalars().all()
+        )
+        for application in apps:
+            await _ensure_attributes(
+                db,
+                ResourceAttribute,
+                "application_id",
+                application.id,
+                {"sensitivity": "internal", "owner_department": "engineering"},
+            )
+
+        await _ensure_policy(
+            db,
+            tenant_id=tenant.id,
+            name="deny-restricted-without-clearance",
+            description="Deny app access when the application is restricted and clearance is below 3.",
+            effect=PolicyEffect.deny,
+            priority=100,
+            actions=["app:access"],
+            conditions={
+                "all": [
+                    {"attr": "resource.sensitivity", "op": "eq", "value": "restricted"},
+                    {"attr": "subject.clearance", "op": "lt", "value": 3},
+                ]
+            },
+        )
+        await _ensure_policy(
+            db,
+            tenant_id=tenant.id,
+            name="allow-admin-or-owning-department",
+            description="Allow app access for admins, or when the user department owns the application.",
+            effect=PolicyEffect.allow,
+            priority=10,
+            actions=["app:access"],
+            conditions={
+                "any": [
+                    {"attr": "subject.is_admin", "op": "eq", "value": True},
+                    {
+                        "all": [
+                            {
+                                "attr": "subject.department",
+                                "op": "eq",
+                                "value_from": "resource.owner_department",
+                            }
+                        ]
+                    },
+                ]
+            },
+        )
+
         await db.commit()
         await keystore.ensure_active_es256_key(db)
         await keystore.ensure_active_rs256_key(db)
@@ -120,6 +186,30 @@ async def seed() -> None:
         print("Admin: aksaxena1991@gmail / @Admin2026")
         print("OIDC client_id: demo-oidc-app")
         print("SAML client_id: demo-saml-app")
+
+
+async def _ensure_attributes(db, model, owner_field: str, owner_id, attributes: dict) -> None:
+    for key, value in attributes.items():
+        stmt = select(model).where(getattr(model, owner_field) == owner_id).where(model.attr_key == key)
+        existing = (await db.execute(stmt)).scalar_one_or_none()
+        if existing is None:
+            db.add(model(**{owner_field: owner_id, "attr_key": key, "attr_value": value}))
+
+
+async def _ensure_policy(db, **fields) -> None:
+    stmt = (
+        select(AccessPolicy)
+        .where(AccessPolicy.tenant_id == fields["tenant_id"])
+        .where(AccessPolicy.name == fields["name"])
+    )
+    if (await db.execute(stmt)).scalar_one_or_none() is None:
+        db.add(
+            AccessPolicy(
+                resource_match={},
+                enabled=True,
+                **fields,
+            )
+        )
 
 
 if __name__ == "__main__":
