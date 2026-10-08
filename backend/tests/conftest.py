@@ -65,7 +65,7 @@ async def seeded(db_session: AsyncSession):
     await db_session.flush()
     user = User(
         tenant_id=tenant.id,
-        email="aksaxena1991@gmail",
+        email="aksaxena1991@gmail.com",
         name="Admin",
         password_hash=hash_password("@Admin2026"),
         status=UserStatus.active,

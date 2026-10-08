@@ -19,7 +19,7 @@ async def _access_token(client: AsyncClient) -> str:
     verifier, challenge = _pkce()
     await client.post(
         "/login/json",
-        json={"email": "aksaxena1991@gmail", "password": "@Admin2026"},
+        json={"email": "aksaxena1991@gmail.com", "password": "@Admin2026"},
     )
     r = await client.get(
         "/oauth2/authorize",

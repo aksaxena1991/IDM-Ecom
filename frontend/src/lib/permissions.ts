@@ -15,7 +15,9 @@ export function hasAnyPermission(
   })
 }
 
-export function claimsIndicateAdmin(claims: Record<string, unknown> | null | undefined): boolean {
+export function claimsIndicateAdmin(
+  claims: { is_admin?: unknown; roles?: unknown; permissions?: unknown; scope?: unknown } | null | undefined,
+): boolean {
   if (!claims) return false
   if (claims.is_admin) return true
   const roles = Array.isArray(claims.roles) ? claims.roles.map(String) : []

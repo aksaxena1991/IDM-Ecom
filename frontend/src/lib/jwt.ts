@@ -6,6 +6,8 @@ export type AccessClaims = {
   scope?: string
   tenant_id?: string
   groups?: string[]
+  roles?: string[]
+  permissions?: string[]
   exp?: number
   sid?: string
 }

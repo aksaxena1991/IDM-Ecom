@@ -49,7 +49,7 @@ function loadStoredRefresh(): string | null {
   }
 }
 
-function persistRefresh(refreshToken: string | null) {
+function persistRefresh(refreshToken: string | null | undefined) {
   try {
     if (!refreshToken) {
       sessionStorage.removeItem(REFRESH_STORAGE_KEY)
