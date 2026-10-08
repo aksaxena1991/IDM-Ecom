@@ -17,6 +17,7 @@ import {
   type UserInfo,
 } from '../lib/api'
 import { decodeJwtPayload } from '../lib/jwt'
+import { claimsIndicateAdmin, hasAnyPermission } from '../lib/permissions'
 
 type AuthContextValue = {
   user: UserInfo | null
@@ -63,18 +64,7 @@ function persistRefresh(refreshToken: string | null) {
 
 export function tokenIsAdmin(tokens: TokenSet | null): boolean {
   if (!tokens?.access_token) return false
-  const claims = decodeJwtPayload(tokens.access_token)
-  if (!claims) return false
-  if (claims.is_admin) return true
-  const roles = Array.isArray(claims.roles) ? claims.roles.map(String) : []
-  if (roles.includes('admin')) return true
-  const permissions = Array.isArray(claims.permissions)
-    ? claims.permissions.map(String)
-    : []
-  if (permissions.includes('admin:access') || permissions.includes('admin:*')) return true
-  return String(claims.scope || '')
-    .split(/\s+/)
-    .includes('admin')
+  return claimsIndicateAdmin(decodeJwtPayload(tokens.access_token))
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -190,16 +180,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, tokens])
 
   const hasPermission = useCallback(
-    (...perms: string[]) => {
-      if (tokenIsAdmin(tokens)) return true
-      if (permissions.includes('admin:access') || permissions.includes('admin:*')) return true
-      return perms.some((p) => {
-        if (permissions.includes(p)) return true
-        const [family] = p.split(':')
-        if (p.endsWith(':read') && permissions.includes(`${family}:write`)) return true
-        return false
-      })
-    },
+    (...perms: string[]) =>
+      hasAnyPermission(permissions, perms, { isSuperAdmin: tokenIsAdmin(tokens) }),
     [tokens, permissions],
   )
 

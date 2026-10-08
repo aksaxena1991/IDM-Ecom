@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sso
+          POSTGRES_PASSWORD: sso_dev_password
+          POSTGRES_DB: sso
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U sso"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-ci-secret-not-for-prod
+          MFA_ENCRYPTION_KEY: test-ci-mfa-encryption-key-32b!!
+          DEBUG: "true"
+          ENVIRONMENT: test
+        run: pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run test
+      - run: npx tsc -b --pretty false

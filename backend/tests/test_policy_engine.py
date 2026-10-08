@@ -14,7 +14,7 @@ def _allow(**overrides) -> PolicyRule:
     return PolicyRule(**data)
 
 
-def test_no_policy_for_action_allows():
+def test_no_policy_for_action_denies():
     decision = evaluate(
         [_allow(actions=["admin:write"])],
         action="app:access",
@@ -22,7 +22,7 @@ def test_no_policy_for_action_allows():
         resource={},
         environment={"hour": 9, "weekday": 0},
     )
-    assert decision.allowed is True
+    assert decision.allowed is False
     assert decision.reason == "no_policy_for_action"
 
 
