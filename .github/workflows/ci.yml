@@ -47,6 +47,7 @@ jobs:
         env:
           PGPASSWORD: sso_dev_password
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
           psql -h localhost -p 5433 -U sso -d sso -tc "SELECT 1 FROM pg_database WHERE datname='sso_test'" | grep -q 1 \
             || psql -h localhost -p 5433 -U sso -d sso -c "CREATE DATABASE sso_test"
       - name: Pytest

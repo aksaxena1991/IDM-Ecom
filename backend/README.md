@@ -43,7 +43,7 @@ uvicorn app.main:app --reload --port 8000
 
 | Item | Value |
 |------|-------|
-| Admin email | `aksaxena1991@gmail` |
+| Admin email | `aksaxena1991@gmail.com` |
 | Password | `@Admin2026` |
 | OIDC client_id | `demo-oidc-app` |
 | Redirect URI | `http://localhost:3000/callback` |

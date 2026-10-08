@@ -126,11 +126,18 @@ def build_saml_response(
 
     key_pem, cert_pem = _self_signed_cert(private_pem, cn=issuer)
     assertion_el = etree.fromstring(assertion_xml.encode("utf-8"))
-    signer = XMLSigner(method=methods.enveloped, digest_algorithm="sha256", signature_algorithm="rsa-sha256")
+    # Exclusive C14N so embedding under samlp:Response does not invalidate the signature
+    signer = XMLSigner(
+        method=methods.enveloped,
+        digest_algorithm="sha256",
+        signature_algorithm="rsa-sha256",
+        c14n_algorithm="http://www.w3.org/2001/10/xml-exc-c14n#",
+    )
     signed_assertion = signer.sign(assertion_el, key=key_pem, cert=cert_pem)
     signed_assertion_str = etree.tostring(signed_assertion, encoding="unicode")
 
-    response = f"""<samlp:Response xmlns:samlp="{SAMLP_NS}" xmlns:saml="{SAML_NS}" ID="{response_id}" Version="2.0" IssueInstant="{now.strftime('%Y-%m-%dT%H:%M:%SZ')}" Destination="{escape(destination)}"{f' InResponseTo="{escape(in_response_to)}"' if in_response_to else ""}>
+    in_response_attr = f' InResponseTo="{escape(in_response_to)}"' if in_response_to else ""
+    response = f"""<samlp:Response xmlns:samlp="{SAMLP_NS}" xmlns:saml="{SAML_NS}" ID="{response_id}" Version="2.0" IssueInstant="{now.strftime('%Y-%m-%dT%H:%M:%SZ')}" Destination="{escape(destination)}"{in_response_attr}>
   <saml:Issuer>{escape(issuer)}</saml:Issuer>
   <samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status>
   {signed_assertion_str}

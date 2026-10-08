@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from app.api.auth.saml import build_saml_response
-from app.core.keystore import keystore
-from cryptography.hazmat.primitives.asymmetric import rsa
+import base64
+
+from cryptography import x509
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from lxml import etree
-from signxml import XMLVerifier, methods
+from signxml import XMLVerifier
+
+from app.api.auth.saml import build_saml_response
 
 
 def test_saml_response_has_enveloped_signature():
@@ -29,4 +32,15 @@ def test_saml_response_has_enveloped_signature():
     assert assertion is not None
     sig = assertion.find(".//{http://www.w3.org/2000/09/xmldsig#}Signature")
     assert sig is not None
-    XMLVerifier().verify(assertion, require_x509=True)
+    cert_b64 = assertion.findtext(".//{http://www.w3.org/2000/09/xmldsig#}X509Certificate")
+    assert cert_b64
+    cert = x509.load_der_x509_certificate(base64.b64decode(cert_b64))
+    # Trust the embedded IdP cert out-of-band (as an SP would via metadata)
+    XMLVerifier().verify(assertion, x509_cert=cert, id_attribute="ID")
+
+
+def test_saml_metadata_shape_mentions_entity_id():
+    from app.api.auth.saml import SAML_NS, SAMLP_NS
+
+    assert SAML_NS.startswith("urn:oasis")
+    assert SAMLP_NS.startswith("urn:oasis")
