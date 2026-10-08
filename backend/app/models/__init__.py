@@ -6,6 +6,7 @@ from app.models.entities import (
     GroupMembership,
     MfaFactor,
     RefreshToken,
+    ScimToken,
     Session,
     SigningKey,
     SyncCursor,
@@ -26,4 +27,5 @@ __all__ = [
     "AuditEvent",
     "SyncCursor",
     "RefreshToken",
+    "ScimToken",
 ]

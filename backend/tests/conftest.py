@@ -9,7 +9,9 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Ensure test env before app import
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso")
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://sso:sso_dev_password@localhost:5433/sso_test"
+)
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/1")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("COOKIE_SECURE", "false")

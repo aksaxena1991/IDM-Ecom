@@ -6,14 +6,15 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 
 from app.api.deps import DbDep, RedisDep, require_admin
+from app.core.config import get_settings
 from app.core.errors import ProblemDetail
-from app.core.security import decode_cursor, encode_cursor, generate_token, hash_password
+from app.core.security import decode_cursor, encode_cursor, generate_token
 from app.models.entities import (
     AppAssignment,
     Application,
@@ -26,7 +27,6 @@ from app.models.entities import (
 )
 from app.services.audit_service import audit_service
 from app.services.rate_limit import rate_limiter
-from app.core.config import get_settings
 
 router = APIRouter(prefix="/v1", tags=["admin"])
 

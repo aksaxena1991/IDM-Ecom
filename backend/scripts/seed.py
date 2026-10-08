@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from app.core.db import SessionLocal
 from app.core.keystore import keystore
-from app.core.security import generate_token, hash_password, hash_token
+from app.core.security import hash_password, hash_token
 from app.models.entities import (
     Application,
     AppProtocol,
