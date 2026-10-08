@@ -2,8 +2,12 @@
 
 Frontend for the custom SSO backend.
 
-**Full client integration guide** (web / mobile / Electron / Polymer):  
-[../backend/docs/CLIENT_INTEGRATION_GUIDE.md](../backend/docs/CLIENT_INTEGRATION_GUIDE.md)
+| Doc | Link |
+|-----|------|
+| **Frontend user manual** | [docs/USER_MANUAL.md](docs/USER_MANUAL.md) |
+| Feature catalog | [../docs/FEATURES.md](../docs/FEATURES.md) |
+| Client integration guide | [../backend/docs/CLIENT_INTEGRATION_GUIDE.md](../backend/docs/CLIENT_INTEGRATION_GUIDE.md) |
+| Docs index | [../docs/README.md](../docs/README.md) |
 
 ## Features
 

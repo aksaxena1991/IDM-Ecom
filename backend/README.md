@@ -1,12 +1,16 @@
 # SSO Backend (FastAPI)
 
-Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, audit logging, and attribute/policy access control (ABAC and PBAC).
+Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, audit logging, and RBAC / ABAC / PBAC access control.
 
-**Client integration guide (web / mobile / Electron / Polymer):** [docs/CLIENT_INTEGRATION_GUIDE.md](docs/CLIENT_INTEGRATION_GUIDE.md)
-
-**Database schema (all tables and uses):** [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
-
-**React SPA (sibling app):** see [`../frontend/README.md`](../frontend/README.md) — login (SSO + email/password), register, dashboard.
+| Doc | Link |
+|-----|------|
+| **Backend user manual** | [docs/USER_MANUAL.md](docs/USER_MANUAL.md) |
+| Feature catalog | [../docs/FEATURES.md](../docs/FEATURES.md) |
+| Client integration guide | [docs/CLIENT_INTEGRATION_GUIDE.md](docs/CLIENT_INTEGRATION_GUIDE.md) |
+| Database tables | [docs/DATABASE_TABLES.md](docs/DATABASE_TABLES.md) |
+| Database schema | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) |
+| Frontend portal | [../frontend/README.md](../frontend/README.md) · [user manual](../frontend/docs/USER_MANUAL.md) |
+| Docs index | [../docs/README.md](../docs/README.md) |
 
 ## Stack
 
