@@ -54,7 +54,9 @@ export function AccessEvaluatePage() {
   return (
     <main className="dashboard">
       <h1>Access evaluate</h1>
-      <p className="lede">Dry-run the ABAC/PBAC decision for a user against an application.</p>
+      <p className="lede">
+        Dry-run the RBAC + ABAC + PBAC decision for a user against an application.
+      </p>
       {error && <p className="form-error">{error}</p>}
 
       <form className="stack narrow-form" onSubmit={onEvaluate}>

@@ -21,7 +21,7 @@ Step-by-step guide for connecting **web**, **mobile**, **Electron**, or **Polyme
 6. [Optional first-party login / signup JSON](#6-optional-first-party-login--signup-json)
 7. [MFA (TOTP)](#7-mfa-totp)
 8. [Using tokens in your app](#8-using-tokens-in-your-app)
-9. [Access control (ABAC / PBAC)](#9-access-control-abac--pbac)
+9. [Access control (RBAC / ABAC / PBAC)](#9-access-control-rbac--abac--pbac)
 10. [Admin API (tenant operators)](#10-admin-api-tenant-operators)
 11. [SAML (enterprise apps)](#11-saml-enterprise-apps)
 12. [SCIM (provisioning)](#12-scim-provisioning)
@@ -120,7 +120,7 @@ Your app                    SSO
    |                         |
    |-- GET /oauth2/authorize (+ PKCE) -->
    |                         |  (login / MFA if needed)
-   |                         |  (ABAC/PBAC app:access check)
+   |                         |  (RBAC/ABAC/PBAC app:access check)
    |<-- 302 ?code=&state= ---|
    |                         |
    |-- POST /oauth2/token (code + verifier) -->
@@ -135,7 +135,7 @@ Your app                    SSO
 1. **PKCE required** — `code_challenge` + `code_challenge_method=S256` on authorize; `code_verifier` on token exchange.
 2. **Exact redirect URI** — must match registration character-for-character.
 3. **Refresh tokens rotate** — each refresh returns a new refresh token; reusing an old one revokes the family.
-4. **Access may be denied by policy** — even after login, authorize/token can return `access_denied` if PBAC/ABAC denies `app:access`.
+4. **Access may be denied by policy** — even after login, authorize/token can return `access_denied` if RBAC/ABAC/PBAC denies `app:access`.
 5. **Token lifetimes (defaults)** — ID ~5 min, access ~15 min (configurable).
 
 ### Step A — Discovery (optional)
@@ -253,12 +253,14 @@ Authorization: Bearer <access_token>
   "email": "user@example.com",
   "name": "User Name",
   "groups": ["Admins"],
+  "roles": ["admin", "user"],
+  "permissions": ["admin:access", "apps:write", "portal:access"],
   "attributes": { "department": "engineering", "clearance": 5 },
   "tenant_id": "tenant-uuid"
 }
 ```
 
-`attributes` are ABAC subject attributes.
+`roles` / `permissions` are RBAC. `attributes` are ABAC subject attributes.
 
 ### Step G — Refresh
 
@@ -447,22 +449,51 @@ GET {SSO}/.well-known/jwks.json
 ```
 
 3. On `401` / expiry, use refresh rotation; on refresh failure, send the user through authorize again.
-4. Claims of interest: `sub`, `email`, `name`, `groups`, `tenant_id`, `is_admin`, `scope`, `sid`.
+4. Claims of interest: `sub`, `email`, `name`, `groups`, `roles`, `permissions`, `tenant_id`, `is_admin`, `scope`, `sid`.
 
 ---
 
-## 9. Access control (ABAC / PBAC)
+## 9. Access control (RBAC / ABAC / PBAC)
 
-On `app:access` (OIDC authorize, token issue, SAML SSO), SSO evaluates enabled policies with **deny-overrides**:
+Three layers work together on every `app:access` decision (OIDC authorize, token issue, SAML SSO):
+
+| Layer | What it is | How you configure it |
+|-------|------------|----------------------|
+| **RBAC** | Roles + permissions; users may hold many roles | Admin creates roles (`/v1/roles`), assigns to users (`/v1/users/{id}/roles`) |
+| **ABAC** | Custom attributes on users and apps | `PUT /v1/users/{id}/attributes`, `PUT /v1/apps/{id}/attributes` |
+| **PBAC** | Data-driven allow/deny policies | `POST /v1/policies` with conditions over subject/resource/environment |
+
+Policy evaluation uses **deny-overrides**:
 
 - No enabled policy for the action → allow (backward compatible).
 - Matching **deny** wins.
 - Else matching **allow** grants.
 - Else deny if policies exist for the action.
 
-**Subject attributes** (user): e.g. `department`, `clearance` — returned in userinfo as `attributes`.  
-**Resource attributes** (app): e.g. `sensitivity`, `owner_department`.  
-Built-ins also available in policies: `subject.email`, `subject.is_admin`, `subject.groups`, `env.hour`, etc.
+**Subject fields available in policy conditions:**
+
+- RBAC: `subject.roles` (list), `subject.permissions` (list) — use `contains`
+- ABAC custom: e.g. `subject.department`, `subject.clearance`
+- Built-ins: `subject.email`, `subject.is_admin`, `subject.groups`, `subject.status`
+- Environment: `environment.hour`, `environment.weekday`
+- Resource: `resource.client_id`, `resource.sensitivity`, custom app attributes
+
+Example — allow only the `app_operator` role:
+
+```json
+{
+  "name": "operators-only",
+  "effect": "allow",
+  "priority": 20,
+  "actions": ["app:access"],
+  "resource_match": { "client_id": "demo-oidc-app" },
+  "conditions": {
+    "all": [{ "attr": "subject.roles", "op": "contains", "value": "app_operator" }]
+  }
+}
+```
+
+Admin console access requires `users.is_admin` **or** permission `admin:access` (typically via the system `admin` role).
 
 Dry-run (admin):
 
@@ -478,13 +509,13 @@ Content-Type: application/json
 }
 ```
 
-If your user’s authorize fails with `access_denied`, check policies and attributes — not only credentials.
+If authorize fails with `access_denied`, check roles, attributes, and policies — not only credentials.
 
 ---
 
 ## 10. Admin API (tenant operators)
 
-Requires Bearer access token for a user with `is_admin` and typically `admin` in scope. Request scope:
+Requires Bearer access token for a user with `is_admin` **or** RBAC permission `admin:access`. Request scope:
 
 ```text
 openid profile email groups admin
@@ -494,11 +525,37 @@ openid profile email groups admin
 |------|-----------|
 | Apps | `GET/POST /v1/apps`, `PATCH /v1/apps/{id}`, `PUT /v1/apps/{id}/assignments` |
 | Users | `GET /v1/users` (cursor pagination) |
+| Roles (RBAC) | `GET/POST /v1/roles`, `GET/PATCH/DELETE /v1/roles/{id}` |
+| User roles | `GET/PUT /v1/users/{id}/roles` |
 | Attributes | `GET/PUT /v1/users/{id}/attributes`, `GET/PUT /v1/apps/{id}/attributes` |
 | Policies | `GET/POST /v1/policies`, `PATCH/DELETE /v1/policies/{id}` |
 | Evaluate | `POST /v1/access/evaluate` |
 | Audit | `GET /v1/audit-events` (`format=csv` for export) |
 | Sync stubs | `GET/PUT /v1/sync-cursors` |
+
+Create a role:
+
+```http
+POST /v1/roles
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+
+{
+  "name": "finance_ops",
+  "description": "Finance operators",
+  "permissions": ["reports:read", "apps:read"]
+}
+```
+
+Assign multiple roles to a user:
+
+```http
+PUT /v1/users/{user_id}/roles
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+
+{ "role_ids": ["<role-uuid-1>", "<role-uuid-2>"] }
+```
 
 Writes require MFA step-up when the session’s `admin_step_up_at` is missing or older than 15 minutes (§7).
 
@@ -513,7 +570,7 @@ Writes require MFA step-up when the session’s `admin_step_up_at` is missing or
    - **IdP-initiated:** `GET /saml/sso?client_id=your-saml-client-id`
 4. Your ACS receives `SAMLResponse` (Base64). Validate signature, audience, recipient, and time window. Assertions are short-lived and single-use on the IdP.
 
-PBAC/ABAC `app:access` applies to SAML SSO as well.
+RBAC/PBAC/ABAC `app:access` applies to SAML SSO as well.
 
 ---
 
@@ -540,7 +597,7 @@ Deactivating a user revokes sessions. Idempotent create on `externalId`.
 3. [ ] Implement PKCE authorize → callback → token  
 4. [ ] Verify `state` (and optionally `nonce`)  
 5. [ ] Store tokens securely; handle refresh rotation  
-6. [ ] Call `/oauth2/userinfo` (includes `attributes`)  
+6. [ ] Call `/oauth2/userinfo` (includes `roles`, `permissions`, `attributes`)  
 7. [ ] Implement logout (local clear + `/session/logout`)  
 8. [ ] Handle `access_denied` from authorize/token (policies)  
 9. [ ] If admin UI: request `admin` scope + MFA step-up UX  
@@ -554,7 +611,7 @@ Deactivating a user revokes sessions. Idempotent create on `externalId`.
 | `redirect_uri mismatch` | URI not exact | Register and use identical string |
 | Token `invalid_grant` | Bad/expired code or wrong verifier | Exchange quickly; match PKCE |
 | Refresh `invalid_grant` | Reused rotated refresh | Keep only the latest refresh token |
-| `access_denied` | PBAC/ABAC denied `app:access` | Adjust policies/attributes or evaluate dry-run |
+| `access_denied` | RBAC/ABAC/PBAC denied `app:access` | Adjust roles, policies, attributes or evaluate dry-run |
 | Login page instead of code | No SSO session | User must sign in / sign up |
 | Admin write `401` + `mfa_step_up` | Stale step-up | `POST /mfa/totp/verify` then retry |
 | CORS errors from SPA | Cross-origin `fetch` | Set `CORS_ORIGINS`; prefer full-page authorize redirect |
@@ -569,7 +626,7 @@ Deactivating a user revokes sessions. Idempotent create on `externalId`.
 | `GET` | `/.well-known/jwks.json` | Signing keys |
 | `GET` | `/oauth2/authorize` | Start login (PKCE) |
 | `POST` | `/oauth2/token` | Code exchange / refresh |
-| `GET` | `/oauth2/userinfo` | Identity + ABAC attributes |
+| `GET` | `/oauth2/userinfo` | Identity + roles, permissions, ABAC attributes |
 | `GET`/`POST` | `/login`, `/login/json` | Hosted / API login |
 | `GET`/`POST` | `/signup`, `/signup/json` | Hosted / API signup |
 | `POST` | `/session/logout` | Single logout |
@@ -590,7 +647,7 @@ Interactive explorer: `{SSO}/docs`.
 1. Start SSO on port `8000`.  
 2. Point a client at redirect `http://localhost:3000/callback` with `client_id=demo-oidc-app`.  
 3. Run PKCE authorize → sign in → receive `code` → token → userinfo.  
-4. Confirm `email` / `attributes` from userinfo.  
+4. Confirm `email` / `roles` / `attributes` from userinfo.  
 5. Optionally open the reference SPA: `cd frontend && npm run dev`.
 
 That validates the integration path before you wire production redirect URIs and branding.

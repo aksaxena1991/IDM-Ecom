@@ -17,17 +17,20 @@ Most business tables are **tenant-scoped** (`tenant_id`). Queries should always 
 tenants
   ├── users
   │     ├── group_memberships ──► groups
+  │     ├── user_roles ──► roles ──► role_permissions   (RBAC)
   │     ├── mfa_factors
   │     ├── user_attributes          (ABAC subject)
   │     ├── sessions
   │     │     └── refresh_tokens ──► applications
   │     └── (referenced by app_assignments as principal)
   ├── groups
+  ├── roles
+  │     └── role_permissions
   ├── applications
   │     ├── app_assignments
   │     ├── resource_attributes      (ABAC resource)
   │     └── refresh_tokens
-  ├── access_policies                (PBAC)
+  ├── access_policies                (PBAC over RBAC + ABAC)
   ├── signing_keys
   ├── audit_events
   ├── scim_tokens
@@ -204,11 +207,58 @@ Unique on `(user_id, attr_key)`.
 
 **Used for:** Access decisions on `app:access`. If enabled policies exist for the action but none allow → deny with *No access policy allows this request*.
 
-Demo seed policies typically include `allow-active-users`, `deny-restricted-without-clearance`, `allow-admin-or-owning-department`.
+Demo seed policies typically include `allow-active-users`, `deny-restricted-without-clearance`, `allow-admin-or-owning-department`, `allow-app-operator-role`.
 
 ---
 
-### 10. `mfa_factors`
+### 10. `roles`
+
+**Purpose:** Tenant-scoped RBAC roles created by admins. Users may hold **multiple** roles.
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | UUID PK | |
+| `tenant_id` | UUID FK → tenants | |
+| `name` | string(64) | Unique per tenant; lowercase `a-z0-9_-` |
+| `description` | text? | |
+| `is_system` | bool | System roles (`admin`, `user`) cannot be deleted |
+| `created_at` / `updated_at` | timestamptz | |
+
+**Used for:** Admin console `/v1/roles`, subject claim `roles`, PBAC `subject.roles`.
+
+---
+
+### 11. `role_permissions`
+
+**Purpose:** Permission strings attached to a role (e.g. `admin:access`, `apps:write`).
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | UUID PK | |
+| `role_id` | UUID FK → roles | Cascade delete |
+| `permission` | string(64) | Unique per role |
+| `created_at` | timestamptz | |
+
+**Used for:** Flattened into `subject.permissions` / token claims. Holding `admin:access` (or `admin:*`) grants admin API access even without `users.is_admin`.
+
+---
+
+### 12. `user_roles`
+
+**Purpose:** Many-to-many assignment of roles to users.
+
+| Column | Type | Notes |
+|--------|------|--------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → users | |
+| `role_id` | UUID FK → roles | |
+| `assigned_at` | timestamptz | |
+
+**Used for:** `PUT /v1/users/{id}/roles`, signup default `user` role, OIDC `roles` / `permissions` claims.
+
+---
+
+### 13. `mfa_factors`
 
 **Purpose:** Registered MFA devices/factors for a user.
 
@@ -225,7 +275,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 11. `sessions`
+### 14. `sessions`
 
 **Purpose:** System of record for SSO browser sessions (mirrored to Redis for fast lookup).
 
@@ -246,7 +296,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 12. `refresh_tokens`
+### 15. `refresh_tokens`
 
 **Purpose:** Rotating OIDC refresh tokens (hashed at rest).
 
@@ -267,7 +317,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 13. `signing_keys`
+### 16. `signing_keys`
 
 **Purpose:** Metadata for JWT / SAML signing keys (private material referenced on disk / future KMS).
 
@@ -286,7 +336,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 14. `audit_events`
+### 17. `audit_events`
 
 **Purpose:** Append-only security/admin audit log (365-day retention target).
 
@@ -304,7 +354,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 15. `sync_cursors`
+### 18. `sync_cursors`
 
 **Purpose:** Resume tokens for directory sync jobs (Entra / Google — worker stubbed for v1).
 
@@ -319,7 +369,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 16. `scim_tokens`
+### 19. `scim_tokens`
 
 **Purpose:** Per-tenant bearer tokens for SCIM provisioning clients.
 
@@ -336,7 +386,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 17. `auth_codes`
+### 20. `auth_codes`
 
 **Purpose:** Optional durable store for OIDC authorization codes (primary store in v1 is **Redis**).
 
@@ -358,7 +408,7 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 
 ---
 
-### 18. `saml_assertion_replays`
+### 21. `saml_assertion_replays`
 
 **Purpose:** Record assertion IDs already issued/consumed to reject replays (also backed by Redis in the live path).
 
@@ -408,8 +458,9 @@ Demo seed policies typically include `allow-active-users`, `deny-restricted-with
 | SAML login for apps | `applications`, `signing_keys`, `saml_assertion_replays` |
 | Groups / claims | `groups`, `group_memberships` |
 | App entitlement registry | `app_assignments` |
+| RBAC roles | `roles`, `role_permissions`, `user_roles` |
 | ABAC attributes | `user_attributes`, `resource_attributes` |
-| PBAC policies | `access_policies` |
+| PBAC policies | `access_policies` (conditions may reference roles + attributes) |
 | Admin audit | `audit_events` |
 | SCIM provisioning | `users`, `groups`, `group_memberships`, `scim_tokens` |
 | Directory sync resume | `sync_cursors` |
@@ -424,4 +475,4 @@ source .venv/bin/activate
 alembic upgrade head
 ```
 
-Forward-only migrations live under `alembic/versions/` (initial schema + ABAC/PBAC tables).
+Forward-only migrations live under `alembic/versions/` (initial schema, ABAC/PBAC, RBAC roles).
