@@ -32,14 +32,10 @@ async def get_current_session(
 ) -> Session | None:
     settings = get_settings()
     cookie_name = settings.cookie_name
-    session_id_raw = request.cookies.get(cookie_name)
-    if not session_id_raw:
+    raw = request.cookies.get(cookie_name)
+    if not raw:
         return None
-    try:
-        session_id = uuid.UUID(session_id_raw)
-    except ValueError:
-        return None
-    session = await session_service.get(db, redis, session_id)
+    session = await session_service.get_by_token(db, redis, raw)
     if session is None:
         return None
     await session_service.touch(db, redis, session)
@@ -92,13 +88,20 @@ async def _load_active_user(db: AsyncSession, claims: dict) -> User:
     return user
 
 
-async def _enforce_admin_step_up(db: AsyncSession, redis: Redis, claims: dict, request: Request) -> None:
+async def _enforce_admin_step_up(
+    db: AsyncSession, redis: Redis, claims: dict, request: Request, user: User
+) -> None:
     if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
         return
     settings = get_settings()
-    if getattr(settings, "require_admin_mfa", True) and settings.debug is False:
-        # Non-debug: require MFA enrollment for admin writes (checked in phase 2; step-up always)
-        pass
+    from app.services.mfa_service import mfa_service
+
+    if settings.require_admin_mfa and not await mfa_service.has_mfa(db, user.id):
+        raise ProblemDetail(
+            status=403,
+            title="MFA required",
+            detail="Admin writes require an enrolled and verified MFA factor",
+        )
     sid = claims.get("sid")
     if not sid:
         raise ProblemDetail(
@@ -152,7 +155,7 @@ async def require_admin(
     user = await _load_active_user(db, claims)
     if not await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin):
         raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
-    await _enforce_admin_step_up(db, redis, claims, request)
+    await _enforce_admin_step_up(db, redis, claims, request, user)
     return user
 
 
@@ -174,7 +177,7 @@ def require_permission(
                 title="Forbidden",
                 detail=f"Permission required: {' or '.join(permissions)}",
             )
-        await _enforce_admin_step_up(db, redis, claims, request)
+        await _enforce_admin_step_up(db, redis, claims, request, user)
         return user
 
     return _dep

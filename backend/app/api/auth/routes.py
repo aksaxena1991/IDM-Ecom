@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.security import generate_token, hash_password, verify_password
 from app.models.entities import Tenant, User, UserStatus
+from app.core.redirects import safe_redirect_path
 from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 from app.services.audit_service import audit_service
 from app.services.mfa_service import mfa_service
@@ -164,35 +165,36 @@ async def _create_user(
 def _session_cookie_response(
     *,
     settings,
-    session_id: str,
+    session_token: str,
     body: dict | None = None,
     redirect: str | None = None,
     status_code: int = 200,
 ):
     if redirect is not None:
-        response = RedirectResponse(url=redirect or "/", status_code=303)
+        response = RedirectResponse(url=safe_redirect_path(redirect), status_code=303)
     else:
         response = JSONResponse(body or {}, status_code=status_code)
-    response.set_cookie(
-        key=settings.cookie_name,
-        value=session_id,
-        httponly=True,
-        secure=settings.cookie_secure,
-        samesite="lax",
-        max_age=settings.session_absolute_hours * 3600,
-        path="/",
-    )
+    cookie_kwargs = {
+        "key": settings.cookie_name,
+        "value": session_token,
+        "httponly": True,
+        "secure": settings.cookie_secure,
+        "samesite": "lax",
+        "max_age": settings.session_absolute_hours * 3600,
+        "path": "/",
+    }
+    response.set_cookie(**cookie_kwargs)
     return response
 
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(redirect: str = "/") -> HTMLResponse:
-    return HTMLResponse(_login_html(redirect=redirect))
+    return HTMLResponse(_login_html(redirect=safe_redirect_path(redirect)))
 
 
 @router.get("/signup", response_class=HTMLResponse)
 async def signup_page(redirect: str = "/") -> HTMLResponse:
-    return HTMLResponse(_signup_html(redirect=redirect))
+    return HTMLResponse(_signup_html(redirect=safe_redirect_path(redirect)))
 
 async def _authenticate(
     db: DbDep,
