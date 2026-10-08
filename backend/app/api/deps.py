@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import Cookie, Depends, Header, Request
+from fastapi import Depends, Header, Request
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +26,6 @@ async def get_current_session(
     request: Request,
     db: DbDep,
     redis: RedisDep,
-    session_cookie: str | None = Cookie(default=None, alias=None),
 ) -> Session | None:
     settings = get_settings()
     cookie_name = settings.cookie_name

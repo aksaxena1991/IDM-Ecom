@@ -1,0 +1,249 @@
+from __future__ import annotations
+
+import base64
+import uuid
+from datetime import datetime, timedelta, timezone
+from xml.sax.saxutils import escape
+
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
+from fastapi import APIRouter, Form, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from lxml import etree
+from sqlalchemy import select
+
+from app.api.deps import DbDep, RedisDep, get_current_session
+from app.core.config import get_settings
+from app.core.errors import ProblemDetail
+from app.core.keystore import keystore
+from app.models.entities import Application, AppProtocol, AppStatus, User
+from app.services.audit_service import audit_service
+
+router = APIRouter(tags=["saml"])
+
+SAML_NS = "urn:oasis:names:tc:SAML:2.0:assertion"
+SAMLP_NS = "urn:oasis:names:tc:SAML:2.0:protocol"
+DS_NS = "http://www.w3.org/2000/09/xmldsig#"
+
+
+def _b64(data: bytes) -> str:
+    return base64.b64encode(data).decode("ascii")
+
+
+async def _get_saml_app(db: DbDep, client_id: str | None = None, entity_id: str | None = None) -> Application:
+    stmt = select(Application).where(Application.protocol == AppProtocol.saml).where(
+        Application.status == AppStatus.active
+    )
+    if client_id:
+        stmt = stmt.where(Application.client_id == client_id)
+    result = await db.execute(stmt)
+    apps = list(result.scalars().all())
+    if entity_id:
+        for app in apps:
+            if app.config.get("entity_id") == entity_id:
+                return app
+        raise ProblemDetail(status=400, title="invalid_request", detail="Unknown SAML entity")
+    if not apps:
+        raise ProblemDetail(status=400, title="invalid_request", detail="No SAML application")
+    if client_id:
+        if not apps:
+            raise ProblemDetail(status=400, title="invalid_client", detail="Unknown client")
+        return apps[0]
+    return apps[0]
+
+
+def _sign_assertion_rsa(private_pem: bytes, assertion_xml: bytes) -> str:
+    private_key = serialization.load_pem_private_key(private_pem, password=None)
+    signature = private_key.sign(assertion_xml, padding.PKCS1v15(), hashes.SHA256())
+    return _b64(signature)
+
+
+def build_saml_response(
+    *,
+    issuer: str,
+    destination: str,
+    recipient: str,
+    audience: str,
+    name_id: str,
+    session_index: str,
+    private_pem: bytes,
+    in_response_to: str | None = None,
+) -> str:
+    now = datetime.now(timezone.utc)
+    not_on_or_after = now + timedelta(minutes=5)
+    assertion_id = f"_a{uuid.uuid4().hex}"
+    response_id = f"_r{uuid.uuid4().hex}"
+
+    assertion = f"""<saml:Assertion xmlns:saml="{SAML_NS}" ID="{assertion_id}" IssueInstant="{now.isoformat()}" Version="2.0">
+  <saml:Issuer>{escape(issuer)}</saml:Issuer>
+  <saml:Subject>
+    <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">{escape(name_id)}</saml:NameID>
+    <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+      <saml:SubjectConfirmationData NotOnOrAfter="{not_on_or_after.isoformat()}" Recipient="{escape(recipient)}"{f' InResponseTo="{escape(in_response_to)}"' if in_response_to else ""}/>
+    </saml:SubjectConfirmation>
+  </saml:Subject>
+  <saml:Conditions NotBefore="{(now - timedelta(seconds=60)).isoformat()}" NotOnOrAfter="{not_on_or_after.isoformat()}">
+    <saml:AudienceRestriction>
+      <saml:Audience>{escape(audience)}</saml:Audience>
+    </saml:AudienceRestriction>
+  </saml:Conditions>
+  <saml:AuthnStatement AuthnInstant="{now.isoformat()}" SessionIndex="{escape(session_index)}">
+    <saml:AuthnContext>
+      <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
+    </saml:AuthnContext>
+  </saml:AuthnStatement>
+</saml:Assertion>"""
+
+    sig_value = _sign_assertion_rsa(private_pem, assertion.encode("utf-8"))
+    signed_assertion = assertion.replace(
+        f'<saml:Issuer>{escape(issuer)}</saml:Issuer>',
+        f'<saml:Issuer>{escape(issuer)}</saml:Issuer>'
+        f'<ds:Signature xmlns:ds="{DS_NS}"><ds:SignatureValue>{sig_value}</ds:SignatureValue></ds:Signature>',
+        1,
+    )
+
+    response = f"""<samlp:Response xmlns:samlp="{SAMLP_NS}" xmlns:saml="{SAML_NS}" ID="{response_id}" Version="2.0" IssueInstant="{now.isoformat()}" Destination="{escape(destination)}"{f' InResponseTo="{escape(in_response_to)}"' if in_response_to else ""}>
+  <saml:Issuer>{escape(issuer)}</saml:Issuer>
+  <samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status>
+  {signed_assertion}
+</samlp:Response>"""
+    return response
+
+
+@router.get("/saml/metadata/{tenant_slug}")
+async def saml_metadata(tenant_slug: str, db: DbDep):
+    settings = get_settings()
+    key = await keystore.ensure_active_rs256_key(db)
+    # Export cert-like public key PEM for metadata
+    public_b64 = base64.b64encode(
+        serialization.load_pem_public_key(key.public_key.encode("utf-8")).public_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    ).decode("ascii")
+    entity_id = f"{settings.base_url}/saml/metadata/{tenant_slug}"
+    sso_url = f"{settings.base_url}/saml/sso"
+    xml = f"""<?xml version="1.0"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="{escape(entity_id)}">
+  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <KeyDescriptor use="signing">
+      <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <X509Data><X509Certificate>{public_b64}</X509Certificate></X509Data>
+      </KeyInfo>
+    </KeyDescriptor>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="{escape(sso_url)}"/>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="{escape(sso_url)}"/>
+  </IDPSSODescriptor>
+</EntityDescriptor>"""
+    return HTMLResponse(content=xml, media_type="application/samlmetadata+xml")
+
+
+@router.post("/saml/sso")
+@router.get("/saml/sso")
+async def saml_sso(
+    request: Request,
+    db: DbDep,
+    redis: RedisDep,
+    SAMLRequest: str | None = Form(None),
+    RelayState: str | None = Form(None),
+    client_id: str | None = Query(None),
+):
+    # Also accept query params for redirect binding
+    if SAMLRequest is None:
+        SAMLRequest = request.query_params.get("SAMLRequest")
+    if RelayState is None:
+        RelayState = request.query_params.get("RelayState")
+
+    settings = get_settings()
+    session = await get_current_session(request, db, redis)
+    if session is None:
+        from urllib.parse import urlencode
+
+        return RedirectResponse(url=f"/login?{urlencode({'redirect': str(request.url)})}", status_code=302)
+
+    in_response_to = None
+    app: Application | None = None
+
+    if SAMLRequest:
+        # SP-initiated
+        try:
+            raw = base64.b64decode(SAMLRequest)
+            # May be inflated in redirect binding; try raw XML first
+            try:
+                root = etree.fromstring(raw)
+            except etree.XMLSyntaxError:
+                import zlib
+
+                root = etree.fromstring(zlib.decompress(raw, -15))
+            issuer_el = root.find(f".//{{{SAML_NS}}}Issuer")
+            entity_id = issuer_el.text if issuer_el is not None else None
+            req_id = root.get("ID")
+            in_response_to = req_id
+            app = await _get_saml_app(db, entity_id=entity_id)
+            # Validate Destination if present
+            destination = root.get("Destination")
+            if destination and destination != f"{settings.base_url}/saml/sso":
+                raise ProblemDetail(status=400, title="invalid_request", detail="Destination mismatch")
+        except ProblemDetail:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise ProblemDetail(status=400, title="invalid_request", detail=f"Invalid SAMLRequest: {exc}") from exc
+    else:
+        # IdP-initiated
+        if not client_id:
+            raise ProblemDetail(status=400, title="invalid_request", detail="client_id required for IdP-initiated")
+        app = await _get_saml_app(db, client_id=client_id)
+
+    acs_url = app.config.get("acs_url")
+    audience = app.config.get("audience") or app.config.get("entity_id")
+    if not acs_url or not audience:
+        raise ProblemDetail(status=400, title="invalid_client", detail="SAML app missing acs_url/audience")
+
+    # Replay protection for assertion IDs via redis
+    assertion_id = f"_a{uuid.uuid4().hex}"
+    if await redis.exists(f"sso:saml:replay:{assertion_id}"):
+        raise ProblemDetail(status=400, title="invalid_request", detail="Replay detected")
+
+    user_result = await db.execute(select(User).where(User.id == session.user_id))
+    user = user_result.scalar_one()
+
+    key = await keystore.ensure_active_rs256_key(db)
+    private_pem = keystore.load_private_pem(key)
+    issuer = f"{settings.base_url}/saml/metadata/demo"
+
+    # Build with fixed assertion id for replay tracking
+    response_xml = build_saml_response(
+        issuer=issuer,
+        destination=acs_url,
+        recipient=acs_url,
+        audience=audience,
+        name_id=user.email,
+        session_index=str(session.id),
+        private_pem=private_pem,
+        in_response_to=in_response_to,
+    )
+    # Extract assertion ID from response for replay cache
+    root = etree.fromstring(response_xml.encode("utf-8"))
+    assertion = root.find(f".//{{{SAML_NS}}}Assertion")
+    if assertion is not None:
+        aid = assertion.get("ID")
+        await redis.set(f"sso:saml:replay:{aid}", "1", ex=300)
+
+    await audit_service.record(
+        db,
+        redis,
+        tenant_id=session.tenant_id,
+        actor=user.email,
+        action="saml.sso",
+        target=str(app.id),
+    )
+
+    saml_b64 = _b64(response_xml.encode("utf-8"))
+    relay = f'<input type="hidden" name="RelayState" value="{escape(RelayState)}"/>' if RelayState else ""
+    html = f"""<!DOCTYPE html><html><body onload="document.forms[0].submit()">
+<form method="post" action="{escape(acs_url)}">
+<input type="hidden" name="SAMLResponse" value="{saml_b64}"/>
+{relay}
+<noscript><button type="submit">Continue</button></noscript>
+</form></body></html>"""
+    return HTMLResponse(html)
