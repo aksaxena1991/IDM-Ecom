@@ -2,6 +2,8 @@
 
 Modular-monolith SSO backend implementing OIDC, SAML, SCIM, MFA, admin API, and audit logging.
 
+**Client integration guide (web / mobile / Electron / Polymer):** [docs/CLIENT_INTEGRATION_GUIDE.md](docs/CLIENT_INTEGRATION_GUIDE.md)
+
 ## Stack
 
 - Python 3.12+ / FastAPI
