@@ -63,8 +63,18 @@ export async function loginWithPassword(
       mfa_code: mfaCode || null,
     }),
   })
-  if (!res.ok) throw await parseError(res)
-  return res.json()
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    if (body?.mfa_required) {
+      throw new ApiError(401, 'MFA required', 'MFA code required')
+    }
+    throw new ApiError(
+      res.status,
+      body.title || res.statusText,
+      body.detail || body.error_description || 'Login failed',
+    )
+  }
+  return body
 }
 
 export async function registerUser(input: {
