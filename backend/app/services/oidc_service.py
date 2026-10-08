@@ -13,6 +13,7 @@ from app.core.config import get_settings
 from app.core.keystore import keystore
 from app.core.security import generate_token, hash_token, verify_pkce
 from app.models.entities import Application, AppStatus, RefreshToken, User
+from app.services.access_service import APP_ACCESS, access_service
 
 
 class OidcService:
@@ -96,6 +97,7 @@ class OidcService:
         jti_id = str(uuid.uuid4())
 
         groups = await self._user_groups(db, user.id)
+        attributes = await access_service.subject_custom_attributes(db, user.id)
 
         id_claims = {
             "iss": self.settings.base_url,
@@ -107,6 +109,7 @@ class OidcService:
             "email": user.email,
             "name": user.name or user.email,
             "groups": groups,
+            "attributes": attributes,
             "tenant_id": str(user.tenant_id),
             "jti": jti_id,
         }
@@ -124,6 +127,7 @@ class OidcService:
             "email": user.email,
             "name": user.name or user.email,
             "groups": groups,
+            "attributes": attributes,
             "jti": jti_access,
             "sid": str(session_id),
             "token_use": "access",
@@ -190,6 +194,10 @@ class OidcService:
 
         user_result = await db.execute(select(User).where(User.id == existing.user_id))
         user = user_result.scalar_one()
+
+        decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
+        if not decision.allowed:
+            raise ValueError(decision.message)
 
         existing.revoked_at = datetime.now(timezone.utc)
         await db.flush()

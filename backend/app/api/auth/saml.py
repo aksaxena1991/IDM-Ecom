@@ -17,6 +17,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.keystore import keystore
 from app.models.entities import Application, AppProtocol, AppStatus, User
+from app.services.access_service import APP_ACCESS, access_service
 from app.services.audit_service import audit_service
 
 router = APIRouter(tags=["saml"])
@@ -206,6 +207,18 @@ async def saml_sso(
 
     user_result = await db.execute(select(User).where(User.id == session.user_id))
     user = user_result.scalar_one()
+    decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
+    if not decision.allowed:
+        await audit_service.record(
+            db,
+            redis,
+            tenant_id=user.tenant_id,
+            actor=user.email,
+            action="access.denied",
+            target=str(app.id),
+            payload={"reason": decision.reason, "policies": decision.matched_policies, "via": "saml"},
+        )
+        raise ProblemDetail(status=403, title="Forbidden", detail=decision.message)
 
     key = await keystore.ensure_active_rs256_key(db)
     private_pem = keystore.load_private_pem(key)

@@ -1,4 +1,5 @@
 from app.models.entities import (
+    AccessPolicy,
     AppAssignment,
     Application,
     AuditEvent,
@@ -6,12 +7,14 @@ from app.models.entities import (
     GroupMembership,
     MfaFactor,
     RefreshToken,
+    ResourceAttribute,
     ScimToken,
     Session,
     SigningKey,
     SyncCursor,
     Tenant,
     User,
+    UserAttribute,
 )
 
 __all__ = [
@@ -21,6 +24,9 @@ __all__ = [
     "GroupMembership",
     "Application",
     "AppAssignment",
+    "UserAttribute",
+    "ResourceAttribute",
+    "AccessPolicy",
     "MfaFactor",
     "Session",
     "SigningKey",

@@ -11,6 +11,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -166,6 +167,77 @@ class AppAssignment(Base):
         Enum(PrincipalType, name="principal_type"), nullable=False
     )
     principal_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+
+
+class PolicyEffect(str, enum.Enum):
+    allow = "allow"
+    deny = "deny"
+
+
+class UserAttribute(Base):
+    """ABAC subject attributes. Built-ins such as email and is_admin are not stored here."""
+
+    __tablename__ = "user_attributes"
+    __table_args__ = (UniqueConstraint("user_id", "attr_key", name="uq_user_attribute_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    attr_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    attr_value: Mapped[Any] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class ResourceAttribute(Base):
+    """ABAC attributes of an application (the resource being accessed)."""
+
+    __tablename__ = "resource_attributes"
+    __table_args__ = (
+        UniqueConstraint("application_id", "attr_key", name="uq_resource_attribute_key"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("applications.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    attr_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    attr_value: Mapped[Any] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class AccessPolicy(Base):
+    """PBAC rule. The engine evaluates stored conditions; nothing is hardcoded per app."""
+
+    __tablename__ = "access_policies"
+    __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_policy_tenant_name"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    effect: Mapped[PolicyEffect] = mapped_column(Enum(PolicyEffect, name="policy_effect"), nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    actions: Mapped[list[Any]] = mapped_column(JSONB().with_variant(JSON(), "sqlite"), nullable=False)
+    resource_match: Mapped[dict[str, Any]] = mapped_column(
+        JSONB().with_variant(JSON(), "sqlite"), nullable=False, default=dict
+    )
+    conditions: Mapped[dict[str, Any]] = mapped_column(
+        JSONB().with_variant(JSON(), "sqlite"), nullable=False, default=dict
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 class MfaFactor(Base):

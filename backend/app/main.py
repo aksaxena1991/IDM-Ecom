@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.admin import router as admin_router
+from app.api.admin.access import router as access_router
 from app.api.admin.sync import router as sync_router
 from app.api.auth import router as auth_router
 from app.api.auth.saml import router as saml_router
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(saml_router)
     app.include_router(session_router)
     app.include_router(admin_router)
+    app.include_router(access_router)
     app.include_router(sync_router)
     app.include_router(scim_router)
 

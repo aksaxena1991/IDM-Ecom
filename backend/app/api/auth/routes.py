@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.security import generate_token, hash_password, verify_password
 from app.models.entities import Tenant, User, UserStatus
+from app.services.access_service import APP_ACCESS, access_service
 from app.services.audit_service import audit_service
 from app.services.mfa_service import mfa_service
 from app.services.oidc_service import oidc_service
@@ -386,6 +387,25 @@ async def authorize(
         qs = urlencode({"redirect": str(request.url)})
         return RedirectResponse(url=f"/login?{qs}", status_code=302)
 
+    user_result = await db.execute(select(User).where(User.id == session.user_id))
+    user = user_result.scalar_one()
+    decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
+    if not decision.allowed:
+        await audit_service.record(
+            db,
+            redis,
+            tenant_id=user.tenant_id,
+            actor=user.email,
+            action="access.denied",
+            target=str(app.id),
+            payload={"reason": decision.reason, "policies": decision.matched_policies, "via": "oidc"},
+        )
+        params = {"error": "access_denied", "error_description": decision.message}
+        if state:
+            params["state"] = state
+        sep = "&" if "?" in redirect_uri else "?"
+        return RedirectResponse(url=f"{redirect_uri}{sep}{urlencode(params)}", status_code=302)
+
     code = generate_token(32)
     await oidc_service.store_auth_code(
         redis,
@@ -449,6 +469,12 @@ async def token(
             return JSONResponse({"error": "invalid_client"}, status_code=400)
         user_result = await db.execute(select(User).where(User.id == uuid.UUID(stored["user_id"])))
         user = user_result.scalar_one()
+        decision = await access_service.decide(db, user=user, application=app, action=APP_ACCESS)
+        if not decision.allowed:
+            return JSONResponse(
+                {"error": "access_denied", "error_description": decision.message},
+                status_code=403,
+            )
         tokens = await oidc_service.issue_tokens(
             db,
             redis,
@@ -483,11 +509,16 @@ async def userinfo(
     authorization: Annotated[str | None, Header()] = None,
 ):
     claims = await get_bearer_claims(db, redis, authorization)
+    attributes: dict = {}
+    sub = claims.get("sub")
+    if sub:
+        attributes = await access_service.subject_custom_attributes(db, uuid.UUID(sub))
     return {
-        "sub": claims.get("sub"),
+        "sub": sub,
         "email": claims.get("email"),
         "name": claims.get("name"),
         "groups": claims.get("groups", []),
+        "attributes": attributes,
         "tenant_id": claims.get("tenant_id"),
     }
 
