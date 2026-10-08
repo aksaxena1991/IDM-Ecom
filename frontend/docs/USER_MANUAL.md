@@ -57,7 +57,7 @@ Use this when you already have (or will create) an SSO session on the backend ho
 
 ### B. Email and password
 
-1. Enter email and password (tenant defaults to `demo`).
+1. Enter tenant slug (default `demo`), email, and password.
 2. Click **Sign in**.
 3. If MFA is enrolled, enter the 6-digit authenticator code when prompted.
 4. The portal creates a session cookie on the SSO host, then completes OIDC to obtain tokens for the SPA.

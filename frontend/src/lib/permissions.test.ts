@@ -3,7 +3,7 @@ import { claimsIndicateAdmin, hasAnyPermission } from './permissions'
 
 describe('hasAnyPermission', () => {
   it('allows super admin', () => {
-    expect(hasAnyPermission([], ['policies:write'], { isSuperAdmin: true })).toBe(true)
+    expect(hasAnyPermission([], ['policies:write'], { isSuperAdmin: true })).toBe(true) // opts object
   })
 
   it('allows admin:access as bypass', () => {

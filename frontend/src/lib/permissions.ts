@@ -3,10 +3,9 @@
 export function hasAnyPermission(
   held: string[],
   required: string[],
-  *,
-  isSuperAdmin = false,
+  opts?: { isSuperAdmin?: boolean },
 ): boolean {
-  if (isSuperAdmin) return true
+  if (opts?.isSuperAdmin) return true
   if (held.includes('admin:access') || held.includes('admin:*')) return true
   return required.some((p) => {
     if (held.includes(p)) return true
