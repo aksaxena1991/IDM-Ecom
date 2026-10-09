@@ -22,13 +22,13 @@ npm run dev
 
 3. Open http://localhost:3000
 
-### Demo admin (from backend seed)
+### Anubhav Saxena (from backend seed)
 
 Defaults from backend `SEED_*` env (see backend `.env.example`):
 
 | Field | Default |
 |-------|---------|
-| Email | `admin@example.com` |
+| Email | `aksaxena1991@gmail.com` |
 | Password | `ChangeMe-Admin-2026!` |
 | Tenant | `demo` |
 

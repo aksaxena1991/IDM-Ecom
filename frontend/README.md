@@ -40,7 +40,7 @@ npm run dev
 
 Open http://localhost:3000
 
-Demo admin (from backend seed): see backend README.
+Anubhav Saxena (from backend seed): see backend README.
 
 ## Config
 

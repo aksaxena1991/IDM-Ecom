@@ -2,9 +2,9 @@
 
 Credentials come from environment (never hardcode production secrets):
 
-  SEED_ADMIN_EMAIL       default: admin@example.com
+  SEED_ADMIN_EMAIL       default: aksaxena1991@gmail.com
   SEED_ADMIN_PASSWORD    default: ChangeMe-Admin-2026!
-  SEED_ADMIN_NAME        default: Demo Admin
+  SEED_ADMIN_NAME        default: Anubhav Saxena
   SEED_SCIM_TOKEN        default: scim-demo-token-change-me
   SEED_PRINT_SECRETS     set to 1/true to print password + SCIM token
 """
@@ -46,9 +46,9 @@ from app.models.entities import (
 )
 from app.services.role_service import ADMIN_PERMISSION, DEFAULT_USER_ROLE, SYSTEM_ADMIN_ROLE
 
-ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com").strip().lower()
+ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "aksaxena1991@gmail.com").strip().lower()
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "ChangeMe-Admin-2026!")
-ADMIN_NAME = os.environ.get("SEED_ADMIN_NAME", "Demo Admin")
+ADMIN_NAME = os.environ.get("SEED_ADMIN_NAME", "Anubhav Saxena")
 SCIM_PLAIN = os.environ.get("SEED_SCIM_TOKEN", "scim-demo-token-change-me")
 PRINT_SECRETS = os.environ.get("SEED_PRINT_SECRETS", "").strip().lower() in {"1", "true", "yes"}
 
@@ -84,7 +84,7 @@ async def seed() -> None:
             db.add(user)
             await db.flush()
         else:
-            # Keep demo admin aligned with env when re-seeding
+            # Keep Anubhav Saxena aligned with env when re-seeding
             user.email = ADMIN_EMAIL
             user.name = ADMIN_NAME
             user.password_hash = hash_password(ADMIN_PASSWORD)

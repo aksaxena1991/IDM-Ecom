@@ -45,7 +45,7 @@ Set via env before `python scripts/seed.py` (see `.env.example`). Defaults:
 
 | Item | Env | Default |
 |------|-----|---------|
-| Admin email | `SEED_ADMIN_EMAIL` | `admin@example.com` |
+| Admin email | `SEED_ADMIN_EMAIL` | `aksaxena1991@gmail.com` |
 | Password | `SEED_ADMIN_PASSWORD` | `ChangeMe-Admin-2026!` |
 | SCIM token | `SEED_SCIM_TOKEN` | `scim-demo-token-change-me` |
 | OIDC client_id | — | `demo-oidc-app` |

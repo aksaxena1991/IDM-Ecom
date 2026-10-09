@@ -184,7 +184,7 @@ saml_assertion_replays      (SAML anti-replay durable; Redis is primary)
 
 **What it is:** Many-to-many assignment of roles to users.
 
-**Use:** `PUT /v1/users/{id}/roles`. Signup assigns the default `user` role when it exists. Seed assigns `admin` + `user` to the demo admin.
+**Use:** `PUT /v1/users/{id}/roles`. Signup assigns the default `user` role when it exists. Seed assigns `admin` + `user` to the Anubhav Saxena.
 
 | Key fields | Meaning |
 |------------|---------|
