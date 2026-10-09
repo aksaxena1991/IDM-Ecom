@@ -21,87 +21,87 @@ import { SecurityPage } from './pages/SecurityPage'
 export default function App() {
   return (
     <ErrorBoundary>
-    <AuthProvider>
-      <StepUpModalProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/callback" element={<CallbackPage />} />
+      <AuthProvider>
+        <StepUpModalProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/callback" element={<CallbackPage />} />
 
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/security" element={<SecurityPage />} />
               <Route
-                path="/admin/apps"
                 element={
-                  <AdminRoute>
-                    <AppsPage />
-                  </AdminRoute>
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
                 }
-              />
-              <Route
-                path="/admin/users"
-                element={
-                  <AdminRoute>
-                    <UsersPage />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/admin/policies"
-                element={
-                  <AdminRoute>
-                    <PoliciesPage />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/admin/roles"
-                element={
-                  <AdminRoute>
-                    <RolesPage />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/admin/groups"
-                element={
-                  <AdminRoute>
-                    <GroupsPage />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/admin/access"
-                element={
-                  <AdminRoute>
-                    <AccessEvaluatePage />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/admin/audit"
-                element={
-                  <AdminRoute>
-                    <AuditPage />
-                  </AdminRoute>
-                }
-              />
-            </Route>
+              >
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/security" element={<SecurityPage />} />
+                <Route
+                  path="/admin/apps"
+                  element={
+                    <AdminRoute anyOf={['apps:read', 'apps:write']}>
+                      <AppsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminRoute anyOf={['users:write']}>
+                      <UsersPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/policies"
+                  element={
+                    <AdminRoute anyOf={['policies:write']}>
+                      <PoliciesPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/roles"
+                  element={
+                    <AdminRoute anyOf={['roles:write']}>
+                      <RolesPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/groups"
+                  element={
+                    <AdminRoute anyOf={['groups:read', 'groups:write']}>
+                      <GroupsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/access"
+                  element={
+                    <AdminRoute anyOf={['admin:access']}>
+                      <AccessEvaluatePage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/audit"
+                  element={
+                    <AdminRoute anyOf={['audit:read']}>
+                      <AuditPage />
+                    </AdminRoute>
+                  }
+                />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </StepUpModalProvider>
-    </AuthProvider>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </StepUpModalProvider>
+      </AuthProvider>
     </ErrorBoundary>
   )
 }

@@ -393,7 +393,7 @@ After `python scripts/seed.py` you typically have:
 | Area | Example data |
 |------|----------------|
 | Tenant | slug `demo` |
-| Admin user | `aksaxena1991@gmail.com` (`is_admin=true`) |
+| Admin user | from `SEED_ADMIN_EMAIL` (`is_admin=true`, `external_id=demo-admin`) |
 | Roles | `admin`, `user`, `app_operator` |
 | Apps | `demo-oidc-app`, `demo-saml-app` |
 | Policies | `allow-active-users`, deny/allow ABAC + role examples |

@@ -107,7 +107,7 @@ Complete list of product features for the **SSO backend** and **SSO Portal** (Re
 | Audit event stream | Yes | Audit page | Sync Postgres SoR + Redis stream ACK worker |
 | Audit CSV export | Yes | Audit page | `format=csv` |
 | Health / readiness | Yes | — | `/healthz`, `/readyz` |
-| Metrics | Yes (`/metrics`) | — | login_failures, token_issues, access_denies, scim_* |
+| Metrics | Yes (`/metrics`) | — | Bearer `METRICS_TOKEN`; login_failures, token_issues, access_denies, scim_* |
 
 ---
 

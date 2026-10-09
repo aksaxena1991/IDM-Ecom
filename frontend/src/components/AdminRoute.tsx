@@ -1,8 +1,14 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
-export function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isAdmin, loading } = useAuth()
+type Props = {
+  children: React.ReactNode
+  /** Any of these permissions grants access (same rules as nav `hasPermission`). */
+  anyOf: string[]
+}
+
+export function AdminRoute({ children, anyOf }: Props) {
+  const { isAuthenticated, hasPermission, loading } = useAuth()
 
   if (loading) {
     return (
@@ -12,6 +18,6 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     )
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (!isAdmin) return <Navigate to="/dashboard" replace />
+  if (!hasPermission(...anyOf)) return <Navigate to="/dashboard" replace />
   return children
 }

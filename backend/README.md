@@ -41,13 +41,17 @@ uvicorn app.main:app --reload --port 8000
 
 ### Demo credentials
 
-| Item | Value |
-|------|-------|
-| Admin email | `aksaxena1991@gmail.com` |
-| Password | `@Admin2026` |
-| OIDC client_id | `demo-oidc-app` |
-| Redirect URI | `http://localhost:3000/callback` |
-| SCIM token | `scim-demo-token-change-me` |
+Set via env before `python scripts/seed.py` (see `.env.example`). Defaults:
+
+| Item | Env | Default |
+|------|-----|---------|
+| Admin email | `SEED_ADMIN_EMAIL` | `admin@example.com` |
+| Password | `SEED_ADMIN_PASSWORD` | `ChangeMe-Admin-2026!` |
+| SCIM token | `SEED_SCIM_TOKEN` | `scim-demo-token-change-me` |
+| OIDC client_id | — | `demo-oidc-app` |
+| Redirect URI | — | `http://localhost:3000/callback` |
+
+Secrets are not printed unless `SEED_PRINT_SECRETS=1`. Metrics scrape: `Authorization: Bearer $METRICS_TOKEN`.
 
 ## Access control (RBAC, ABAC, and PBAC)
 
@@ -63,7 +67,7 @@ Subject attributes live on the user (`department`, `clearance`, …). Resource a
 
 On `app:access` the engine applies **deny-overrides**:
 
-- No enabled policy for the action → allow
+- No enabled policy for the action → **deny**
 - Matching deny wins; else matching allow; else deny
 
 Demo seed creates roles `admin`, `user`, `app_operator` and policies:

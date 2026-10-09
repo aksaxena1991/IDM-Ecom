@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # Comma-separated origins for the React (or other) SPA
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    # Bearer token required for GET /metrics (Prometheus scrape). Empty disables the endpoint (401).
+    metrics_token: str = "local-dev-metrics-token"
+
     audit_stream_key: str = "sso:audit:events"
     audit_retention_days: int = 365
     audit_csv_max_rows: int = 1_000_000
@@ -68,6 +71,8 @@ class Settings(BaseSettings):
             raise ValueError("MFA_ENCRYPTION_KEY must be set when debug=False / production")
         if not self.cookie_secure:
             raise ValueError("COOKIE_SECURE must be true when debug=False / production")
+        if self.metrics_token in {"", "local-dev-metrics-token", "change-me"}:
+            raise ValueError("METRICS_TOKEN must be set when debug=False / production")
         self.require_admin_mfa = True
         return self
 

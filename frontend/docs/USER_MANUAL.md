@@ -24,13 +24,15 @@ npm run dev
 
 ### Demo admin (from backend seed)
 
-| Field | Value |
-|-------|--------|
-| Email | `aksaxena1991@gmail.com` |
-| Password | `@Admin2026` |
+Defaults from backend `SEED_*` env (see backend `.env.example`):
+
+| Field | Default |
+|-------|---------|
+| Email | `admin@example.com` |
+| Password | `ChangeMe-Admin-2026!` |
 | Tenant | `demo` |
 
-After first login you should see **Admin** in the header and admin nav links.
+After first login you should see admin nav links matching your permissions.
 
 ### Environment (optional)
 

@@ -1,8 +1,18 @@
-"""Seed demo tenant, admin user, OIDC + SAML apps, SCIM token."""
+"""Seed demo tenant, admin user, OIDC + SAML apps, SCIM token.
+
+Credentials come from environment (never hardcode production secrets):
+
+  SEED_ADMIN_EMAIL       default: admin@example.com
+  SEED_ADMIN_PASSWORD    default: ChangeMe-Admin-2026!
+  SEED_ADMIN_NAME        default: Demo Admin
+  SEED_SCIM_TOKEN        default: scim-demo-token-change-me
+  SEED_PRINT_SECRETS     set to 1/true to print password + SCIM token
+"""
 
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -36,6 +46,12 @@ from app.models.entities import (
 )
 from app.services.role_service import ADMIN_PERMISSION, DEFAULT_USER_ROLE, SYSTEM_ADMIN_ROLE
 
+ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com").strip().lower()
+ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "ChangeMe-Admin-2026!")
+ADMIN_NAME = os.environ.get("SEED_ADMIN_NAME", "Demo Admin")
+SCIM_PLAIN = os.environ.get("SEED_SCIM_TOKEN", "scim-demo-token-change-me")
+PRINT_SECRETS = os.environ.get("SEED_PRINT_SECRETS", "").strip().lower() in {"1", "true", "yes"}
+
 
 async def seed() -> None:
     async with SessionLocal() as db:
@@ -47,21 +63,34 @@ async def seed() -> None:
             await db.flush()
 
         user_result = await db.execute(
-            select(User).where(User.tenant_id == tenant.id).where(User.email == "aksaxena1991@gmail.com")
+            select(User).where(User.tenant_id == tenant.id).where(User.external_id == "demo-admin")
         )
         user = user_result.scalar_one_or_none()
         if user is None:
+            user_result = await db.execute(
+                select(User).where(User.tenant_id == tenant.id).where(User.email == ADMIN_EMAIL)
+            )
+            user = user_result.scalar_one_or_none()
+        if user is None:
             user = User(
                 tenant_id=tenant.id,
-                email="aksaxena1991@gmail.com",
-                name="Anubhav Saxena",
-                password_hash=hash_password("@Admin2026"),
+                email=ADMIN_EMAIL,
+                name=ADMIN_NAME,
+                password_hash=hash_password(ADMIN_PASSWORD),
                 status=UserStatus.active,
                 is_admin=True,
                 external_id="demo-admin",
             )
             db.add(user)
             await db.flush()
+        else:
+            # Keep demo admin aligned with env when re-seeding
+            user.email = ADMIN_EMAIL
+            user.name = ADMIN_NAME
+            user.password_hash = hash_password(ADMIN_PASSWORD)
+            user.is_admin = True
+            user.external_id = "demo-admin"
+            user.status = UserStatus.active
 
         group_result = await db.execute(
             select(Group).where(Group.tenant_id == tenant.id).where(Group.name == "Admins")
@@ -111,17 +140,20 @@ async def seed() -> None:
                 )
             )
 
-        scim_result = await db.execute(select(ScimToken).where(ScimToken.tenant_id == tenant.id))
-        if scim_result.scalar_one_or_none() is None:
-            plain = "scim-demo-token-change-me"
+        scim_result = await db.execute(
+            select(ScimToken).where(ScimToken.tenant_id == tenant.id).where(ScimToken.revoked_at.is_(None))
+        )
+        scim_row = scim_result.scalar_one_or_none()
+        if scim_row is None:
             db.add(
                 ScimToken(
                     tenant_id=tenant.id,
-                    token_hash=hash_token(plain),
+                    token_hash=hash_token(SCIM_PLAIN),
                     label="demo",
                 )
             )
-            print(f"SCIM bearer token: {plain}")
+        else:
+            scim_row.token_hash = hash_token(SCIM_PLAIN)
 
         await db.flush()
         await _ensure_attributes(
@@ -264,7 +296,12 @@ async def seed() -> None:
         await keystore.ensure_active_es256_key(db)
         await keystore.ensure_active_rs256_key(db)
         print("Seed complete.")
-        print("Admin: aksaxena1991@gmail.com / @Admin2026")
+        print(f"Admin email: {ADMIN_EMAIL}")
+        if PRINT_SECRETS:
+            print(f"Admin password: {ADMIN_PASSWORD}")
+            print(f"SCIM bearer token: {SCIM_PLAIN}")
+        else:
+            print("Admin password / SCIM token: set via SEED_* env (use SEED_PRINT_SECRETS=1 to print)")
         print("OIDC client_id: demo-oidc-app")
         print("SAML client_id: demo-saml-app")
         print(f"RBAC roles: {SYSTEM_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")

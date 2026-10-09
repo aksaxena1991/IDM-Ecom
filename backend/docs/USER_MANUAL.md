@@ -47,16 +47,20 @@ uvicorn app.main:app --reload --port 8000
 
 ### Demo seed credentials
 
-| Item | Value |
-|------|--------|
-| Admin email | `aksaxena1991@gmail.com` |
-| Password | `@Admin2026` |
-| Tenant slug | `demo` |
-| OIDC client_id | `demo-oidc-app` |
-| Redirect URI | `http://localhost:3000/callback` |
-| SAML client_id | `demo-saml-app` |
-| SCIM bearer | `scim-demo-token-change-me` |
-| Seeded roles | `admin`, `user`, `app_operator` |
+Configured via env when running `python scripts/seed.py` (see `.env.example`):
+
+| Item | Env | Default |
+|------|-----|---------|
+| Admin email | `SEED_ADMIN_EMAIL` | `admin@example.com` |
+| Password | `SEED_ADMIN_PASSWORD` | `ChangeMe-Admin-2026!` |
+| SCIM bearer | `SEED_SCIM_TOKEN` | `scim-demo-token-change-me` |
+| Tenant slug | — | `demo` |
+| OIDC client_id | — | `demo-oidc-app` |
+| Redirect URI | — | `http://localhost:3000/callback` |
+| SAML client_id | — | `demo-saml-app` |
+| Seeded roles | — | `admin`, `user`, `app_operator` |
+
+Password and SCIM token are printed only when `SEED_PRINT_SECRETS=1`. Metrics: `GET /metrics` with `Authorization: Bearer $METRICS_TOKEN`.
 
 ---
 
@@ -297,7 +301,7 @@ All admin writes are audited (e.g. `role.create`, `user.roles.set`, `user.attrib
 ### 3.11 SCIM provisioning
 
 Base path: `/scim/v2`  
-Auth: `Authorization: Bearer <scim_token>` (seed: `scim-demo-token-change-me`)
+Auth: `Authorization: Bearer <scim_token>` (from `SEED_SCIM_TOKEN` / `POST /v1/scim-tokens`)
 
 | Resource | Operations |
 |----------|------------|
