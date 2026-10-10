@@ -55,7 +55,7 @@ export function LoginPage() {
   return (
     <div className="auth-shell">
       <div className="auth-panel">
-        <p className="brand">SSO Portal</p>
+        <p className="brand">Nector Nest IDM</p>
         <h1>Sign in</h1>
         <p className="lede">Access your workspace with SSO or email and password.</p>
 

@@ -1,6 +1,6 @@
-# SSO Portal — Frontend User Manual
+# Nector Nest IDM — Frontend User Manual
 
-How to use the **React SSO Portal** at http://localhost:3000.
+How to use the **React Nector Nest IDM** at http://localhost:3000.
 
 For the full feature list see [docs/FEATURES.md](../../docs/FEATURES.md).  
 For API / integration details see [CLIENT_INTEGRATION_GUIDE.md](../../backend/docs/CLIENT_INTEGRATION_GUIDE.md).

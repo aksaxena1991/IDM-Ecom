@@ -14,7 +14,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.security import generate_token, hash_password, verify_password
 from app.models.entities import Tenant, User, UserStatus
-from app.api.auth.hosted_pages import legal_page_html, login_html, signup_html
+from app.api.auth.hosted_pages import legal_page_html, login_html
 from app.core.redirects import safe_redirect_path
 from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 from app.services.audit_service import audit_service
@@ -59,11 +59,6 @@ class SignupResponse(BaseModel):
 def _login_html(redirect: str = "/", error: str = "") -> str:
     settings = get_settings()
     return login_html(redirect=redirect, error=error, brand=settings.app_name.replace(" Backend", " Portal"))
-
-
-def _signup_html(redirect: str = "/", error: str = "") -> str:
-    settings = get_settings()
-    return signup_html(redirect=redirect, error=error, brand=settings.app_name.replace(" Backend", " Portal"))
 
 
 def _validate_password(password: str) -> str | None:
@@ -146,9 +141,11 @@ async def login_page(redirect: str = "/") -> HTMLResponse:
     return HTMLResponse(_login_html(redirect=safe_redirect_path(redirect)))
 
 
-@router.get("/signup", response_class=HTMLResponse)
-async def signup_page(redirect: str = "/") -> HTMLResponse:
-    return HTMLResponse(_signup_html(redirect=safe_redirect_path(redirect)))
+@router.get("/signup")
+async def signup_page(redirect: str = "/") -> RedirectResponse:
+    """Hosted self-signup UI is disabled; keep route for bookmarks → login."""
+    qs = urlencode({"redirect": safe_redirect_path(redirect)})
+    return RedirectResponse(url=f"/login?{qs}", status_code=302)
 
 
 @router.get("/legal/terms", response_class=HTMLResponse)
@@ -156,7 +153,7 @@ async def legal_terms() -> HTMLResponse:
     return HTMLResponse(
         legal_page_html(
             title="Terms of Service",
-            body="Placeholder terms for the SSO Portal demo. Replace with your organization’s legal terms before production.",
+            body="Placeholder terms for the Nector Nest IDM demo. Replace with your organization’s legal terms before production.",
         )
     )
 
@@ -166,7 +163,7 @@ async def legal_privacy() -> HTMLResponse:
     return HTMLResponse(
         legal_page_html(
             title="Privacy Policy",
-            body="Placeholder privacy policy for the SSO Portal demo. Replace with your organization’s privacy policy before production.",
+            body="Placeholder privacy policy for the Nector Nest IDM demo. Replace with your organization’s privacy policy before production.",
         )
     )
 
@@ -278,41 +275,10 @@ async def login_json(body: LoginRequest, db: DbDep, redis: RedisDep, request: Re
 
 
 @router.post("/signup")
-async def signup_form(
-    db: DbDep,
-    redis: RedisDep,
-    email: str = Form(...),
-    password: str = Form(...),
-    confirm_password: str | None = Form(None),
-    name: str | None = Form(None),
-    tenant_slug: str = Form("demo"),
-    redirect: str = Form("/"),
-):
-    settings = get_settings()
-    confirm = confirm_password if confirm_password is not None else password
-    if password != confirm:
-        return HTMLResponse(
-            _signup_html(redirect=redirect, error="<p class='error'>Passwords do not match</p>"),
-            status_code=400,
-        )
-    user, err = await _create_user(
-        db, email=email, password=password, name=name, tenant_slug=tenant_slug
-    )
-    if err:
-        return HTMLResponse(
-            _signup_html(redirect=redirect, error=f"<p class='error'>{err}</p>"),
-            status_code=400,
-        )
-    assert user is not None
-    session, token = await session_service.create(
-        db, redis, user_id=user.id, tenant_id=user.tenant_id, mfa_verified=False
-    )
-    await audit_service.record(
-        db, redis, tenant_id=user.tenant_id, actor=user.email, action="signup.success", target=str(user.id)
-    )
-    return _session_cookie_response(
-        settings=settings, session_token=token, redirect=safe_redirect_path(redirect)
-    )
+async def signup_form(redirect: str = Form("/")):
+    """Hosted HTML signup form is disabled."""
+    qs = urlencode({"redirect": safe_redirect_path(redirect)})
+    return RedirectResponse(url=f"/login?{qs}", status_code=302)
 
 
 @router.post("/signup/json", response_model=SignupResponse, status_code=201)

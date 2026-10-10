@@ -56,7 +56,7 @@ async def test_signup_rejects_duplicate_and_short_password(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_signup_page_renders(client: AsyncClient):
-    r = await client.get("/signup")
-    assert r.status_code == 200
-    assert "Create account" in r.text
+async def test_signup_page_redirects_to_login(client: AsyncClient):
+    r = await client.get("/signup", follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"].startswith("/login")

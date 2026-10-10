@@ -40,7 +40,7 @@ export function CallbackPage() {
     return (
       <div className="page-center">
         <div className="auth-panel narrow">
-          <p className="brand">SSO Portal</p>
+          <p className="brand">Nector Nest IDM</p>
           <h1>Sign-in problem</h1>
           <p className="form-error">{error}</p>
           <Link className="btn btn-primary" to="/login">

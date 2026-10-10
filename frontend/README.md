@@ -1,4 +1,4 @@
-# SSO Portal (React + TypeScript)
+# Nector Nest IDM (React + TypeScript)
 
 Frontend for the custom SSO backend.
 

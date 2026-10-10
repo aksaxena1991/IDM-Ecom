@@ -1,6 +1,6 @@
 # IDM-Ecom SSO — Feature Catalog
 
-Complete list of product features for the **SSO backend** and **SSO Portal** (React frontend).
+Complete list of product features for the **SSO backend** and **Nector Nest IDM** (React frontend).
 
 | App | Default URL | Docs |
 |-----|-------------|------|

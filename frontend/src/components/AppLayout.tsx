@@ -8,7 +8,7 @@ export function AppLayout() {
     <div className="app-shell">
       <header className="app-header">
         <div className="header-left">
-          <p className="brand compact">SSO Portal</p>
+          <p className="brand compact">Nector Nest IDM</p>
           <nav className="nav">
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/security">Security</NavLink>

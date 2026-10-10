@@ -47,7 +47,7 @@ export function RegisterPage() {
   return (
     <div className="auth-shell">
       <div className="auth-panel">
-        <p className="brand">SSO Portal</p>
+        <p className="brand">Nector Nest IDM</p>
         <h1>Create account</h1>
         <p className="lede">Register with email, then continue into your secure session.</p>
 
