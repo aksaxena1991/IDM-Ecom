@@ -100,20 +100,51 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     return isValid;
   };
 
-  const handleLogin = (event: React.FormEvent) => {
+  const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!handleValidate()) return;
 
     setIsLoading(true);
-    window.setTimeout(() => {
-      setIsLoading(false);
-      toast.success('Signed in', `Welcome back, ${email}`);
-      onLoginSuccess?.({
-        email,
-        rememberMe: false,
-        tenantId: 'org_nectornest_prod',
+    try {
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        credentials: 'include',
+        body: new URLSearchParams({
+          email: email.trim(),
+          password,
+          redirect: '/',
+        }),
       });
-    }, 900);
+
+      if (response.ok) {
+        toast.success('Signed in', `Welcome back, ${email.trim()}`);
+        onLoginSuccess?.({
+          email: email.trim(),
+          rememberMe: false,
+          tenantId: 'org_nectornest_prod',
+        });
+        return;
+      }
+
+      const text = await response.text();
+      const errorMatch = text.match(/class=['"]error['"]>(.*?)<\/p>/i);
+      const message = (errorMatch?.[1] || '').replace(/<[^>]+>/g, '').trim();
+      if (response.status === 429 || /locked/i.test(message || text)) {
+        toast.error('Sign in failed', 'Account temporarily locked');
+        return;
+      }
+      if (/mfa/i.test(message)) {
+        toast.error('Sign in failed', 'MFA code required');
+        return;
+      }
+      setPasswordError(message || 'Invalid credentials');
+      toast.error('Sign in failed', message || 'Invalid credentials');
+    } catch {
+      toast.error('Sign in failed', 'Could not reach the login service');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -206,11 +237,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </Button>
              <span>or</span>
             <Button
-              type="submit"
+              type="button"
               variant="secondary"
               size="large"
               fullWidth
-              isLoading={isLoading}
             >
               Login with SSO
             </Button>

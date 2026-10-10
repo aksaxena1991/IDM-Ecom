@@ -75,7 +75,14 @@ class Settings(BaseSettings):
 
     # SPA origins allowed by CORS / cookie CSRF Origin checks
     cors_origins: CorsOrigins = Field(
-        default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"]
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
+            "http://localhost:3002",
+            "http://127.0.0.1:3002",
+        ]
     )
 
     # Bearer token required for GET /metrics (Prometheus scrape). Empty disables the endpoint (401).
