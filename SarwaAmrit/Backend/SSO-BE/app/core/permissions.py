@@ -5,7 +5,7 @@ Custom permissions may still be attached to roles; these constants are enforced 
 
 from __future__ import annotations
 
-ADMIN_ACCESS = "admin:access"
+ADMIN_ACCESS = "platform-super-admin:access"
 APPS_READ = "apps:read"
 APPS_WRITE = "apps:write"
 USERS_WRITE = "users:write"

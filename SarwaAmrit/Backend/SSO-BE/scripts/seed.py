@@ -44,7 +44,7 @@ from app.models.entities import (
     UserRole,
     UserStatus,
 )
-from app.services.role_service import ADMIN_PERMISSION, DEFAULT_USER_ROLE, SYSTEM_ADMIN_ROLE
+from app.services.role_service import SUPER_ADMIN_PERMISSION, DEFAULT_USER_ROLE, PLATFORM_SUPER_ADMIN_ROLE, PLATFORM_ADMIN_ROLE
 
 ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "aksaxena1991@gmail.com").strip().lower()
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "@Admin2026")
@@ -58,12 +58,12 @@ async def seed() -> None:
         result = await db.execute(select(Tenant).where(Tenant.slug == "demo"))
         tenant = result.scalar_one_or_none()
         if tenant is None:
-            tenant = Tenant(name="Demo Tenant", slug="demo")
+            tenant = Tenant(name="sarwa amrit tenant", slug="sarwa-amrit-tenant")
             db.add(tenant)
             await db.flush()
 
         user_result = await db.execute(
-            select(User).where(User.tenant_id == tenant.id).where(User.external_id == "demo-admin")
+            select(User).where(User.tenant_id == tenant.id).where(User.external_id == "")
         )
         user = user_result.scalar_one_or_none()
         if user is None:
@@ -79,7 +79,7 @@ async def seed() -> None:
                 password_hash=hash_password(ADMIN_PASSWORD),
                 status=UserStatus.active,
                 is_admin=True,
-                external_id="demo-admin",
+                external_id="",
             )
             db.add(user)
             await db.flush()
@@ -89,7 +89,7 @@ async def seed() -> None:
             user.name = ADMIN_NAME
             user.password_hash = hash_password(ADMIN_PASSWORD)
             user.is_admin = True
-            user.external_id = "demo-admin"
+            user.external_id = ""
             user.status = UserStatus.active
 
         group_result = await db.execute(
@@ -218,8 +218,8 @@ async def seed() -> None:
             conditions={
                 "any": [
                     {"attr": "subject.is_admin", "op": "eq", "value": True},
-                    {"attr": "subject.roles", "op": "contains", "value": SYSTEM_ADMIN_ROLE},
-                    {"attr": "subject.permissions", "op": "contains", "value": ADMIN_PERMISSION},
+                    {"attr": "subject.roles", "op": "contains", "value": PLATFORM_SUPER_ADMIN_ROLE},
+                    {"attr": "subject.permissions", "op": "contains", "value": SUPER_ADMIN_PERMISSION},
                     {
                         "all": [
                             {
@@ -247,13 +247,13 @@ async def seed() -> None:
             },
         )
 
-        admin_role = await _ensure_role(
+        super_admin_role = await _ensure_role(
             db,
             tenant_id=tenant.id,
-            name=SYSTEM_ADMIN_ROLE,
-            description="Tenant administrator with full console access",
+            name=PLATFORM_SUPER_ADMIN_ROLE,
+            description="Full platform access for super admins",
             permissions=[
-                ADMIN_PERMISSION,
+                SUPER_ADMIN_PERMISSION,
                 "apps:read",
                 "apps:write",
                 "users:write",
@@ -282,7 +282,7 @@ async def seed() -> None:
             is_system=False,
         )
 
-        await _ensure_user_role(db, user.id, admin_role.id)
+        await _ensure_user_role(db, user.id, super_admin_role.id)
         await _ensure_user_role(db, user.id, user_role.id)
 
         # Entitlements: assign admin user + Admins group to demo apps
@@ -303,7 +303,7 @@ async def seed() -> None:
         print("OIDC client_id: idm-oidc-app")
         print("OIDC client_id: ims-oidc-app")
         print("SAML client_id: idm-saml-app")
-        print(f"RBAC roles: {SYSTEM_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
+        print(f"RBAC roles: {PLATFORM_SUPER_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
 
 
 async def _ensure_oidc_app(

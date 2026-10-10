@@ -264,7 +264,7 @@ class Role(Base):
 
 
 class RolePermission(Base):
-    """Permission string attached to a role (e.g. admin:access, apps:write)."""
+    """Permission string attached to a role (e.g. platform-super-admin:access, apps:write)."""
 
     __tablename__ = "role_permissions"
     __table_args__ = (UniqueConstraint("role_id", "permission", name="uq_role_permission"),)

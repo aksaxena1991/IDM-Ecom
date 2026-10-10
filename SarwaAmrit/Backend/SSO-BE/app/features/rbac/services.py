@@ -14,9 +14,10 @@ from app.models.entities import Role, RolePermission, UserRole
 
 ROLE_NAME = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 PERMISSION_NAME = re.compile(r"^[a-z*][a-z0-9_:*]{0,63}$")
-ADMIN_PERMISSION = "admin:access"
+PLATFORM_SUPER_ADMIN_PERMISSION = "platform-platform-super-admin:access"
 DEFAULT_USER_ROLE = "user"
-SYSTEM_ADMIN_ROLE = "admin"
+PLATFORM_SUPER_ADMIN_ROLE = "platform-super-admin"
+PLATFORM_ADMIN_ROLE = "platform-admin"
 
 
 class RoleValidationError(ValueError):
@@ -147,14 +148,14 @@ class RoleService:
         perms = await self.user_permissions(db, user_id)
         if permission in perms:
             return True
-        # Wildcard support: admin:* grants admin:access
+        # Wildcard support: admin:* grants platform-super-admin:access
         prefix = permission.split(":")[0] + ":*"
         return prefix in perms or "*" in perms
 
     async def is_admin_principal(self, db: AsyncSession, user_id: uuid.UUID, *, is_admin_flag: bool) -> bool:
         if is_admin_flag:
             return True
-        return await self.user_has_permission(db, user_id, ADMIN_PERMISSION)
+        return await self.user_has_permission(db, user_id, SUPER_ADMIN_PERMISSION)
 
     async def list_user_roles(self, db: AsyncSession, user_id: uuid.UUID) -> list[Role]:
         result = await db.execute(
@@ -215,9 +216,10 @@ class RoleService:
 role_service = RoleService()
 
 __all__ = [
-    "ADMIN_PERMISSION",
+    "SUPER_ADMIN_PERMISSION",
     "DEFAULT_USER_ROLE",
-    "SYSTEM_ADMIN_ROLE",
+    "PLATFORM_SUPER_ADMIN_ROLE",
+    "PLATFORM_ADMIN_ROLE",
     "RoleService",
     "RoleValidationError",
     "role_service",

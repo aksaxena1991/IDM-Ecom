@@ -100,7 +100,7 @@ AuditReadDep = Annotated[User, Depends(_rate_limited(require_permission(AUDIT_RE
 PoliciesWriteDep = Annotated[User, Depends(_rate_limited(require_permission(POLICIES_WRITE)))]
 RolesWriteDep = Annotated[User, Depends(_rate_limited(require_permission(ROLES_WRITE)))]
 RolesReadDep = Annotated[User, Depends(_rate_limited(require_permission(ROLES_WRITE, USERS_WRITE)))]
-# Superuser / any admin:access principal (evaluate + shared helpers)
+# Superuser / any platform-super-admin:access principal (evaluate + shared helpers)
 AdminDep = Annotated[User, Depends(_rate_limited(require_admin))]
 
 

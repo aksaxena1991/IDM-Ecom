@@ -162,7 +162,7 @@ async def require_admin(
     claims: Annotated[dict, Depends(get_bearer_claims)],
     request: Request,
 ) -> User:
-    """Any admin-console principal (is_admin or admin:access)."""
+    """Any admin-console principal (is_admin or platform-super-admin:access)."""
     user = await _load_active_user(db, claims)
     if not await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin):
         raise ProblemDetail(status=403, title="Forbidden", detail="Admin required")
@@ -173,7 +173,7 @@ async def require_admin(
 def require_permission(
     *permissions: str,
 ) -> Callable[..., Coroutine[Any, Any, User]]:
-    """Allow if superuser (is_admin / admin:access) or user holds any listed permission."""
+    """Allow if superuser (is_admin / platform-super-admin:access) or user holds any listed permission."""
 
     async def _dep(
         db: DbDep,
