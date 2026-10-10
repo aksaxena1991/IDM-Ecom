@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Button, Card, Chip, Input, Select } from '@thoughtstream/ui'
+import { Button, Card, Chip, Input, Multiselect, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../../auth/context/AuthContext'
-import { adminApi, type PolicyItem } from '../../../../core/adminApi'
+import { adminApi, type AppItem, type PolicyItem } from '../../../../core/adminApi'
 
 const DEFAULT_CONDITIONS = `{
   "any": [
@@ -17,15 +17,20 @@ export function PoliciesPage() {
   const [name, setName] = useState('')
   const [effect, setEffect] = useState<'allow' | 'deny'>('allow')
   const [priority, setPriority] = useState(10)
-  const [clientId, setClientId] = useState('idm-oidc-app')
+  const [clientIds, setClientIds] = useState<string[]>([])
+  const [apps, setApps] = useState<AppItem[]>([])
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS)
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
     if (!accessToken) return
     try {
-      const res = await adminApi.listPolicies(accessToken)
-      setPolicies(res.items)
+      const [policyRes, appRes] = await Promise.all([
+        adminApi.listPolicies(accessToken),
+        adminApi.listApps(accessToken),
+      ])
+      setPolicies(policyRes.items)
+      setApps(appRes.items)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load policies')
@@ -47,7 +52,7 @@ export function PoliciesPage() {
         priority,
         enabled: true,
         actions: ['app:access'],
-        resource_match: clientId ? { client_id: clientId } : {},
+        resource_match: clientIds.length ? { client_id: clientIds } : {},
         conditions: JSON.parse(conditions) as Record<string, unknown>,
       })
       setName('')
@@ -154,11 +159,18 @@ export function PoliciesPage() {
               onChange={(e) => setPriority(Number(e.target.value))}
               min={0}
             />
-            <Input
-              label="Resource target client ID (optional)"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              placeholder="idm-oidc-app"
+            <Multiselect
+              label="Resource target client IDs (optional)"
+              placeholder="Select applications"
+              value={clientIds}
+              onChange={setClientIds}
+              searchable
+              clearable
+              options={apps.map((app) => ({
+                value: app.client_id,
+                label: `${app.name} — ${app.client_id}`,
+              }))}
+              helperText="Leave empty to apply to every application. Multiple IDs match if the request client is in the list."
             />
             <label>
               Conditions Rule Specification (JSON)

@@ -137,7 +137,11 @@ def _action_matches(actions: list[str], action: str) -> bool:
 
 def _resource_matches(match: dict[str, Any], resource: dict[str, Any]) -> bool:
     for key, expected in match.items():
-        if resource.get(key) != expected:
+        actual = resource.get(key)
+        if isinstance(expected, list):
+            if actual not in expected:
+                return False
+        elif actual != expected:
             return False
     return True
 

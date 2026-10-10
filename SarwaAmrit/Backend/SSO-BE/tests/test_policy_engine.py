@@ -127,6 +127,29 @@ def test_group_contains_and_resource_match():
     assert miss.reason == "default_deny"
 
 
+def test_resource_match_client_id_list():
+    rule = _allow(
+        resource_match={"client_id": ["idm-oidc-app", "ims-oidc-app"]},
+        conditions={},
+    )
+    idm = evaluate(
+        [rule],
+        action="app:access",
+        subject={},
+        resource={"client_id": "idm-oidc-app"},
+        environment={},
+    )
+    other = evaluate(
+        [rule],
+        action="app:access",
+        subject={},
+        resource={"client_id": "other-app"},
+        environment={},
+    )
+    assert idm.allowed is True
+    assert other.reason == "default_deny"
+
+
 def test_environment_hour_window():
     rule = _allow(
         conditions={
