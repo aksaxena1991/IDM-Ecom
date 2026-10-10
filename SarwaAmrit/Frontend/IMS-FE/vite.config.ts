@@ -3,10 +3,7 @@ import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 import path from 'path';
 
-const DS_ROOT = path.resolve(
-  __dirname,
-  '../../../nectorNest-IMS/Thought-Stream-Design-System'
-);
+const DS_ROOT = path.resolve(__dirname, '../DesignSystem/thoughtstream-ui');
 
 export default defineConfig({
   plugins: [

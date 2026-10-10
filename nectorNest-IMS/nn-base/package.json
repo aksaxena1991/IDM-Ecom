@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@thoughtstream/ui": "file:../Thought-Stream-Design-System",
+    "@thoughtstream/ui": "file:../../SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui",
     "lucide-react": "^0.475.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

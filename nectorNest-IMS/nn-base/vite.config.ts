@@ -22,8 +22,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@thoughtstream/ui/styles.css': path.resolve(__dirname, '../Thought-Stream-Design-System/src/styles.css'),
-      '@thoughtstream/ui': path.resolve(__dirname, '../Thought-Stream-Design-System/src/index.ts'),
+      '@thoughtstream/ui/styles.css': path.resolve(
+        __dirname,
+        '../../SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui/src/styles.css'
+      ),
+      '@thoughtstream/ui': path.resolve(
+        __dirname,
+        '../../SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui/src/index.ts'
+      ),
     },
   },
   server: {

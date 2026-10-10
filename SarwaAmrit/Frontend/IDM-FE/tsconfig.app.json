@@ -8,12 +8,8 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "paths": {
-      "@thoughtstream/ui": [
-        "../../../nectorNest-IMS/Thought-Stream-Design-System/src/index.ts"
-      ],
-      "@thoughtstream/ui/*": [
-        "../../../nectorNest-IMS/Thought-Stream-Design-System/src/*"
-      ]
+      "@thoughtstream/ui": ["../DesignSystem/thoughtstream-ui/src/index.ts"],
+      "@thoughtstream/ui/*": ["../DesignSystem/thoughtstream-ui/src/*"]
     },
 
     /* Bundler mode */

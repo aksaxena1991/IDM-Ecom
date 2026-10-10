@@ -23,8 +23,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@thoughtstream/ui": ["../Thought-Stream-Design-System/src/index.ts"],
-      "@thoughtstream/ui/*": ["../Thought-Stream-Design-System/src/*"]
+      "@thoughtstream/ui": [
+        "../../SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui/src/index.ts"
+      ],
+      "@thoughtstream/ui/*": [
+        "../../SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui/src/*"
+      ]
     }
   },
   "include": ["src"],

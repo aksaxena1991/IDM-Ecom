@@ -6,7 +6,7 @@ import { defineConfig } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REMOTE_ORIGIN = 'http://localhost:3000'
-const DS_ROOT = path.resolve(__dirname, '../../../nectorNest-IMS/Thought-Stream-Design-System')
+const DS_ROOT = path.resolve(__dirname, '../DesignSystem/thoughtstream-ui')
 const REPO_ROOT = path.resolve(__dirname, '../../..')
 
 export default defineConfig({

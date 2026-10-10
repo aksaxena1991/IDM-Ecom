@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@thoughtstream/ui": "file:../../../nectorNest-IMS/Thought-Stream-Design-System",
+    "@thoughtstream/ui": "file:../DesignSystem/thoughtstream-ui",
     "lucide-react": "^1.55.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

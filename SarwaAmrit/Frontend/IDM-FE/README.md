@@ -53,4 +53,4 @@ cd shell && npm run dev
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:3000/callback` |
 | `VITE_OIDC_SCOPE` | `openid profile email groups admin` |
 
-Design system: `@thoughtstream/ui` → `nectorNest-IMS/Thought-Stream-Design-System`.
+Design system: `@thoughtstream/ui` → `SarwaAmrit/Frontend/DesignSystem/thoughtstream-ui`.
