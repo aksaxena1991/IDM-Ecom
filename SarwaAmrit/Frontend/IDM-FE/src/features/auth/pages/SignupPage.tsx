@@ -147,7 +147,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin, onSig
         name: fullName.trim(),
         tenantSlug: organization.trim() || DEFAULT_TENANT_SLUG,
       })
-      toast.success('Workspace provisioned', `Welcome to Nector Nest IDM, ${fullName}.`)
+      toast.success('Workspace provisioned', `Welcome to Sarwa Amrit IDM, ${fullName}.`)
       onSignupSuccess?.({
         fullName,
         email,

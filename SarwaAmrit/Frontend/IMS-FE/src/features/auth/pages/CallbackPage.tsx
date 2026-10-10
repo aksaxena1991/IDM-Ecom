@@ -60,7 +60,7 @@ export const CallbackPage: React.FC = () => {
         <div className="nn-gate-modal" role="status" aria-live="polite">
           <form className="nn-gate-auth" onSubmit={(event) => event.preventDefault()}>
             <Typography variant="headline" as="h1" className="nn-gate-title">
-              Nector Nest - IMS
+              Sarwa Amrit - IMS
             </Typography>
             {error ? (
               <>

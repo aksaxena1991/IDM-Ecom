@@ -149,7 +149,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <NestMark />
 
             <Typography id="nn-gate-title" variant="headline" as="h1" className="nn-gate-title">
-              Nector Nest - IMS
+              Sarwa Amrit - IMS
             </Typography>
             <Typography variant="bodySmall" color="secondary" className="nn-gate-subtitle">
               Your inventory sidekick for nodes, ledgers, and fulfillment — ready whenever you are.

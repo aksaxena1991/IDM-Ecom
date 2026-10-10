@@ -148,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup, onLogi
             <NestMark />
 
             <Typography id="nn-gate-title" variant="headline" as="h1" className="nn-gate-title">
-              Nector Nest - IDM
+              Sarwa Amrit - IDM
             </Typography>
             <Typography variant="bodySmall" color="secondary" className="nn-gate-subtitle">
               Cryptographic access to your enterprise identity workspace.

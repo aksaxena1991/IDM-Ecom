@@ -155,7 +155,7 @@ async def legal_terms() -> HTMLResponse:
     return HTMLResponse(
         legal_page_html(
             title="Terms of Service",
-            body="Placeholder terms for the Nector Nest IDM demo. Replace with your organization’s legal terms before production.",
+            body="Placeholder terms for the Sarwa Amrit IDM demo. Replace with your organization’s legal terms before production.",
         )
     )
 
@@ -165,7 +165,7 @@ async def legal_privacy() -> HTMLResponse:
     return HTMLResponse(
         legal_page_html(
             title="Privacy Policy",
-            body="Placeholder privacy policy for the Nector Nest IDM demo. Replace with your organization’s privacy policy before production.",
+            body="Placeholder privacy policy for the Sarwa Amrit IDM demo. Replace with your organization’s privacy policy before production.",
         )
     )
 

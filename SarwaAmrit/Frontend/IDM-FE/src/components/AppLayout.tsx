@@ -152,13 +152,13 @@ export function AppLayout() {
                 <Sparkles size={14} />
               </div>
               <div className="nn-sidebar-brand-copy">
-                <span className="nn-sidebar-brand-title">Nector Nest</span>
+                <span className="nn-sidebar-brand-title">Sarwa Amrit</span>
                 <span className="nn-sidebar-brand-meta">IDM Core</span>
               </div>
             </div>
           }
           collapsedHeader={
-            <div className="nn-sidebar-mark" title="Nector Nest IDM">
+            <div className="nn-sidebar-mark" title="Sarwa Amrit IDM">
               <Sparkles size={14} />
             </div>
           }
@@ -231,11 +231,11 @@ export function AppLayout() {
           brand={
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Sparkles size={13} />
-              <span>Nector Nest IDM</span>
+              <span>Sarwa Amrit IDM</span>
             </div>
           }
           status={{ label: 'SYSTEM OPERATIONAL', state: 'operational' }}
-          copyright={`© ${new Date().getFullYear()} Nector Nest. Cryptographic identity governance.`}
+          copyright={`© ${new Date().getFullYear()} Sarwa Amrit. Cryptographic identity governance.`}
           legalLinks={[
             { label: 'Security Policy', href: '#security' },
             { label: 'Audit Compliance', href: '#compliance' },

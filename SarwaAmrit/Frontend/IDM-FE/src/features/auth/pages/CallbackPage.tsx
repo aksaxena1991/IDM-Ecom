@@ -60,7 +60,7 @@ export function CallbackPage() {
   }
 
   return (
-    <AuthGate title="Nector Nest IDM" subtitle="Exchanging authorization tokens and establishing a secure session.">
+    <AuthGate title="Sarwa Amrit IDM" subtitle="Exchanging authorization tokens and establishing a secure session.">
       <Typography variant="caption" color="secondary" className="mono" style={{ textAlign: 'center' }}>
         Completing OIDC handshake…
       </Typography>

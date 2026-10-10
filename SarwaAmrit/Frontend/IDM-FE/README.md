@@ -1,4 +1,4 @@
-# Nector Nest IDM (React + TypeScript)
+# Sarwa Amrit IDM (React + TypeScript)
 
 Frontend for the custom SSO backend.
 
