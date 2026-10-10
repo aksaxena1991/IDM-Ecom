@@ -192,21 +192,7 @@ async def seed() -> None:
                 ]
             },
         )
-        await _ensure_policy(
-            db,
-            tenant_id=tenant.id,
-            name="deny-restricted-without-clearance",
-            description="Deny app access when the application is restricted and clearance is below 3.",
-            effect=PolicyEffect.deny,
-            priority=100,
-            actions=["app:access"],
-            conditions={
-                "all": [
-                    {"attr": "resource.sensitivity", "op": "eq", "value": "restricted"},
-                    {"attr": "subject.clearance", "op": "lt", "value": 3},
-                ]
-            },
-        )
+        
         
         
 
