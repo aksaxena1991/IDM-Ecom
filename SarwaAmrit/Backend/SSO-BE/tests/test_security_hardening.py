@@ -7,6 +7,7 @@ import pytest
 
 from app.core.redirects import safe_redirect_path
 from app.core.security import decrypt_secret, encrypt_secret
+from app.features.mfa.services import otpauth_qr_data_url
 from app.services.mfa_service import mfa_service
 from app.services.policy_engine import evaluate
 
@@ -57,6 +58,13 @@ def test_app_access_default_deny_without_policies():
     )
     assert decision.allowed is False
     assert decision.reason == "no_policy_for_action"
+
+
+def test_otpauth_qr_data_url_is_png():
+    uri = "otpauth://totp/SSO:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=SSO"
+    data_url = otpauth_qr_data_url(uri)
+    assert data_url.startswith("data:image/png;base64,")
+    assert len(data_url) > 200
 
 
 @pytest.mark.asyncio

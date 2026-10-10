@@ -187,7 +187,12 @@ export async function fetchSessionMe(): Promise<SessionMe> {
   return res.json()
 }
 
-export async function enrollTotp(): Promise<{ factor_id: string; secret: string; otpauth_uri: string }> {
+export async function enrollTotp(): Promise<{
+  factor_id: string
+  secret: string
+  otpauth_uri: string
+  qr_code_data_url: string
+}> {
   const res = await fetch(`${SSO_BASE_URL}/mfa/totp/enroll`, {
     method: 'POST',
     credentials: 'include',

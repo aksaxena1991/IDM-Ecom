@@ -20,7 +20,7 @@ from app.features.auth.services import safe_redirect_path
 from app.features.access.services import APP_ACCESS, AccessDenied, access_service
 from app.features.audit.services import audit_service
 from app.core.metrics import metrics
-from app.features.mfa.services import mfa_service
+from app.features.mfa.services import mfa_service, otpauth_qr_data_url
 from app.features.oidc.services import oidc_service
 from app.features.auth.services import rate_limiter
 from app.features.rbac.services import role_service
@@ -531,6 +531,7 @@ class MfaEnrollResponse(BaseModel):
     factor_id: str
     secret: str
     otpauth_uri: str
+    qr_code_data_url: str
 
 
 @router.post("/mfa/totp/enroll", response_model=MfaEnrollResponse)
@@ -542,7 +543,11 @@ async def enroll_totp(
     session = await get_current_session(request, db, redis)
     if session is None:
         raise ProblemDetail(status=401, title="Unauthorized", detail="Authentication required")
-    factor, secret, uri = await mfa_service.enroll_totp(db, session.user_id)
+    user_result = await db.execute(select(User).where(User.id == session.user_id))
+    user = user_result.scalar_one_or_none()
+    factor, secret, uri = await mfa_service.enroll_totp(
+        db, session.user_id, label=(user.email if user else None)
+    )
     await audit_service.record(
         db,
         redis,
@@ -551,7 +556,12 @@ async def enroll_totp(
         action="mfa.enroll",
         target=str(factor.id),
     )
-    return MfaEnrollResponse(factor_id=str(factor.id), secret=secret, otpauth_uri=uri)
+    return MfaEnrollResponse(
+        factor_id=str(factor.id),
+        secret=secret,
+        otpauth_uri=uri,
+        qr_code_data_url=otpauth_qr_data_url(uri),
+    )
 
 
 class MfaVerifyRequest(BaseModel):

@@ -1,14 +1,35 @@
 from __future__ import annotations
 
+import base64
+import io
 import uuid
 from datetime import datetime, timezone
 
 import pyotp
+import qrcode
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.security import decrypt_secret, encrypt_secret
 from app.models.entities import MfaFactor, MfaType
+
+
+def otpauth_qr_data_url(otpauth_uri: str) -> str:
+    """PNG QR as a data URL so authenticator apps can scan the otpauth URI."""
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=8,
+        border=2,
+    )
+    qr.add_data(otpauth_uri)
+    qr.make(fit=True)
+    image = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
 
 
 class MfaService:
@@ -28,7 +49,8 @@ class MfaService:
         await db.commit()
         await db.refresh(factor)
         totp = pyotp.TOTP(secret)
-        uri = totp.provisioning_uri(name=label or str(user_id), issuer_name="SSO")
+        issuer = get_settings().app_name.replace(" Backend", "").strip() or "SSO"
+        uri = totp.provisioning_uri(name=label or str(user_id), issuer_name=issuer)
         return factor, secret, uri
 
     async def get_totp_factors(

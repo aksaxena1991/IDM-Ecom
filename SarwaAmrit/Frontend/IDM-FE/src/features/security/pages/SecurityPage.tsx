@@ -4,7 +4,11 @@ import { enrollTotp, fetchSessionMe, verifyTotp, type SessionMe } from '../../..
 
 export function SecurityPage() {
   const [session, setSession] = useState<SessionMe | null>(null)
-  const [enrollment, setEnrollment] = useState<{ secret: string; otpauth_uri: string } | null>(null)
+  const [enrollment, setEnrollment] = useState<{
+    secret: string
+    otpauth_uri: string
+    qr_code_data_url: string
+  } | null>(null)
   const [code, setCode] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -28,9 +32,13 @@ export function SecurityPage() {
     setMessage(null)
     try {
       const result = await enrollTotp()
-      setEnrollment({ secret: result.secret, otpauth_uri: result.otpauth_uri })
+      setEnrollment({
+        secret: result.secret,
+        otpauth_uri: result.otpauth_uri,
+        qr_code_data_url: result.qr_code_data_url,
+      })
       setMessage(
-        'Pending enrollment: scan the otpauth URI, then verify a code. The factor stays inactive until verification succeeds.',
+        'Pending enrollment: scan the QR code with Google Authenticator, Authy, or 1Password, then verify a code. The factor stays inactive until verification succeeds.',
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Enrollment failed')
@@ -130,10 +138,30 @@ export function SecurityPage() {
             {enrollment && (
               <div className="note-block">
                 <Chip variant="status" tone="warning">PENDING VERIFICATION</Chip>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    margin: '1rem 0',
+                    padding: '0.75rem',
+                    background: '#fff',
+                    borderRadius: 8,
+                  }}
+                >
+                  <img
+                    src={enrollment.qr_code_data_url}
+                    alt="Scan this QR code with Google Authenticator, Authy, or 1Password"
+                    width={192}
+                    height={192}
+                  />
+                </div>
+                <p className="muted small">
+                  Scan the QR code, then enter the 6-digit code from the app. If scanning fails, enter
+                  this secret manually:
+                </p>
                 <p style={{ marginTop: '0.5rem' }}>
                   <strong>Base32 Secret:</strong> <span className="mono">{enrollment.secret}</span>
                 </p>
-                <p className="mono wrap muted small">{enrollment.otpauth_uri}</p>
               </div>
             )}
 
