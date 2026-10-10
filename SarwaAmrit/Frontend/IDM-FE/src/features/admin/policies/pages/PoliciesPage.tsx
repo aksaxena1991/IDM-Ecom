@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Button, Card, Chip, Input, Multiselect, Select } from '@thoughtstream/ui'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { Button, Card, Chip, Input, Multiselect, Panel, PanelGroup, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type AppItem, type PolicyItem } from '../../../../core/adminApi'
 
@@ -21,6 +21,8 @@ export function PoliciesPage() {
   const [apps, setApps] = useState<AppItem[]>([])
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS)
   const [busy, setBusy] = useState(false)
+  const [openPolicyIds, setOpenPolicyIds] = useState<string[]>([])
+  const seenPolicyIds = useRef(new Set<string>())
 
   const load = useCallback(async () => {
     if (!accessToken) return
@@ -40,6 +42,15 @@ export function PoliciesPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    const ids = policies.map((policy) => policy.id)
+    setOpenPolicyIds((current) => {
+      const fresh = ids.filter((id) => !seenPolicyIds.current.has(id))
+      seenPolicyIds.current = new Set(ids)
+      return [...current.filter((id) => ids.includes(id)), ...fresh]
+    })
+  }, [policies])
 
   async function onCreate(e: FormEvent) {
     e.preventDefault()
@@ -95,42 +106,41 @@ export function PoliciesPage() {
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
-        <Card variant="default" padding="medium">
+        <section>
           <h2>Active Policies ({policies.length})</h2>
-          <ul className="list">
-            {policies.map((p) => (
-              <li key={p.id}>
-                <div className="list-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <strong>{p.name}</strong>
-                      <Chip
-                        variant="status"
-                        tone={p.effect === 'deny' ? 'error' : 'success'}
-                      >
+          {policies.length === 0 ? (
+            <p className="muted">No policies yet.</p>
+          ) : (
+            <PanelGroup allowMultiple value={openPolicyIds} onValueChange={setOpenPolicyIds}>
+              {policies.map((p) => (
+                <Panel
+                  key={p.id}
+                  id={p.id}
+                  className="policy-panel"
+                  title={p.name}
+                  subtitle={`Priority: ${p.priority} · Status: ${p.enabled ? 'Active / Evaluating' : 'Disabled'}`}
+                  trailing={
+                    <div className="policy-panel-trailing">
+                      <Chip variant="status" tone={p.effect === 'deny' ? 'error' : 'success'}>
                         {p.effect.toUpperCase()}
                       </Chip>
+                      <span className="policy-panel-actions">
+                        <Button variant="ghost" size="small" onClick={() => void toggleEnabled(p)}>
+                          {p.enabled ? 'Disable' : 'Enable'}
+                        </Button>
+                        <Button variant="ghost" size="small" onClick={() => void onDelete(p)}>
+                          Delete
+                        </Button>
+                      </span>
                     </div>
-                    <div className="btn-row">
-                      <Button variant="ghost" size="small" onClick={() => void toggleEnabled(p)}>
-                        {p.enabled ? 'Disable' : 'Enable'}
-                      </Button>
-                      <Button variant="ghost" size="small" onClick={() => void onDelete(p)}>
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="muted small mono" style={{ marginTop: '0.4rem' }}>
-                    Priority: {p.priority} · Status: {p.enabled ? 'Active / Evaluating' : 'Disabled'}
-                  </div>
-
+                  }
+                >
                   <pre className="tiny-pre">{JSON.stringify(p.conditions, null, 2)}</pre>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
+                </Panel>
+              ))}
+            </PanelGroup>
+          )}
+        </section>
 
         <Card variant="default" padding="medium">
           <h2>Author New Policy</h2>

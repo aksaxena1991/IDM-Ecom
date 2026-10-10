@@ -121,39 +121,45 @@ export const Panel: React.FC<PanelProps> = ({
       className={`ts-panel ${isExpanded ? 'ts-panel--expanded' : ''} ${className}`.trim()}
       {...props}
     >
-      <button
-        type="button"
-        id={headerId}
-        aria-expanded={isExpanded}
-        aria-controls={contentId}
-        className="ts-panel-header"
-        onClick={handleToggle}
-      >
-        <div className="ts-panel-header-left">
-          {step !== undefined && (
-            <span
-              className={`ts-panel-index ${isExpanded ? 'ts-panel-index--active' : ''}`}
-              aria-hidden="true"
-            >
-              {step}
-            </span>
-          )}
-          <div className="ts-panel-title-group">
-            <h4 className="ts-panel-title">{title}</h4>
-            {subtitle && <p className="ts-panel-subtitle">{subtitle}</p>}
+      <div className="ts-panel-header">
+        <button
+          type="button"
+          id={headerId}
+          aria-expanded={isExpanded}
+          aria-controls={contentId}
+          className="ts-panel-toggle"
+          onClick={handleToggle}
+        >
+          <div className="ts-panel-header-left">
+            {step !== undefined && (
+              <span
+                className={`ts-panel-index ${isExpanded ? 'ts-panel-index--active' : ''}`}
+                aria-hidden="true"
+              >
+                {step}
+              </span>
+            )}
+            <div className="ts-panel-title-group">
+              <h4 className="ts-panel-title">{title}</h4>
+              {subtitle && <p className="ts-panel-subtitle">{subtitle}</p>}
+            </div>
           </div>
-        </div>
+        </button>
 
-        <div className="ts-panel-header-right">
-          {trailing}
-          <span
-            className={`ts-panel-chevron ${isExpanded ? 'ts-panel-chevron--open' : ''}`}
-            aria-hidden="true"
-          >
+        {trailing != null && <div className="ts-panel-header-actions">{trailing}</div>}
+
+        <button
+          type="button"
+          className="ts-panel-chevron-btn"
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={handleToggle}
+        >
+          <span className={`ts-panel-chevron ${isExpanded ? 'ts-panel-chevron--open' : ''}`}>
             <ChevronDown size={18} />
           </span>
-        </div>
-      </button>
+        </button>
+      </div>
 
       {isExpanded && (
         <div

@@ -434,6 +434,29 @@ select:focus,
   line-height: 1.5;
 }
 
+.policy-panel .ts-panel-toggle {
+  flex: 0 1 auto;
+}
+
+.policy-panel .ts-panel-header-actions {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.policy-panel-trailing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.policy-panel-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .tiny-pre {
   margin: 0.5rem 0 0;
   padding: 0.75rem;
