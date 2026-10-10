@@ -34,6 +34,7 @@ export * from './components/RadioButton';
 export * from './components/Tooltip';
 export * from './components/Typography';
 export * from './components/Avatar';
+export * from './components/Icon';
 export * from './components/Divider';
 export * from './components/Blockquote';
 

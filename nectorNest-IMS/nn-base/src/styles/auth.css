@@ -1021,6 +1021,439 @@ body:has(.nn-gate) {
   color: var(--ts-color-text-secondary);
 }
 
+/* ==========================================================================
+   Dashboard Screens Common Elements
+   ========================================================================== */
+.nn-screen-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+.nn-dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nn-section-heading {
+  margin: 0;
+  font-family: var(--ts-font-heading);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-mono-caption {
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.nn-mono-bold {
+  font-family: var(--ts-font-mono);
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-mono-text {
+  font-family: var(--ts-font-mono);
+  color: var(--ts-color-text-primary);
+}
+
+.nn-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Telemetry Stream */
+.nn-telemetry-panel {
+  border: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-bg);
+}
+
+.nn-telemetry-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.nn-telemetry-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  font-size: 0.8125rem;
+  transition: background-color 100ms ease;
+}
+
+.nn-telemetry-item:hover {
+  background: var(--ts-color-surface);
+}
+
+.nn-telemetry-item:last-child {
+  border-bottom: none;
+}
+
+.nn-telemetry-icon {
+  color: var(--ts-color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.nn-telemetry-time {
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.nn-telemetry-badge {
+  font-family: var(--ts-font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  background: var(--ts-color-surface-raised);
+  border: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-text-secondary);
+  flex-shrink: 0;
+}
+
+.nn-telemetry-desc {
+  flex: 1;
+  color: var(--ts-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nn-telemetry-tag {
+  flex-shrink: 0;
+}
+
+/* Filter Bar & Search */
+.nn-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nn-search-wrap {
+  width: min(380px, 100%);
+}
+
+.nn-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Warehouses Screen Styles */
+.nn-banner-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-surface);
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.nn-banner-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nn-banner-label {
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nn-banner-value {
+  font-family: var(--ts-font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-banner-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--ts-border-subtle);
+}
+
+.nn-facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.nn-facility-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nn-facility-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nn-facility-name {
+  margin: 0;
+  font-family: var(--ts-font-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-facility-region {
+  font-size: 0.75rem;
+  color: var(--ts-color-text-secondary);
+  margin-top: 2px;
+}
+
+.nn-facility-capacity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nn-capacity-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nn-facility-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.nn-facility-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nn-facility-meta-label {
+  font-family: var(--ts-font-mono);
+  font-size: 0.625rem;
+  color: var(--ts-color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.nn-facility-meta-val {
+  font-size: 0.75rem;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-facility-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nn-zone-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nn-zone-pill {
+  padding: 3px 8px;
+  background: var(--ts-color-surface-raised);
+  border: 1px solid var(--ts-border-subtle);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-secondary);
+}
+
+.nn-facility-lanes {
+  margin-top: auto;
+}
+
+.nn-facility-lane-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nn-lane-tag {
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-secondary);
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  padding: 2px 6px;
+}
+
+/* Fleet & Transit Lanes */
+.nn-lanes-section {
+  border: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-bg);
+}
+
+.nn-lanes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.nn-lane-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nn-lane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nn-lane-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ts-font-heading);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-lane-stop {
+  color: var(--ts-color-text-primary);
+}
+
+.nn-lane-arrow {
+  color: var(--ts-color-text-tertiary);
+}
+
+.nn-lane-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nn-lane-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.nn-lane-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.nn-lane-meta-val {
+  color: var(--ts-color-text-primary);
+  font-weight: 500;
+}
+
+/* System Settings Screen */
+.nn-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.nn-settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.nn-settings-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-settings-card-title {
+  margin: 0;
+  font-family: var(--ts-font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.nn-settings-card-subtitle {
+  margin: 3px 0 0;
+  font-size: 0.75rem;
+  color: var(--ts-color-text-secondary);
+  line-height: 1.4;
+}
+
+.nn-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nn-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.nn-sso-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.nn-api-key-input {
+  flex: 1;
+}
+
+/* Signup Gate Layout Adjustments */
+.nn-gate-modal--signup {
+  max-width: 540px;
+  grid-template-columns: 1fr;
+}
+
+.nn-gate-auth--signup {
+  padding: 24px 36px;
+  align-items: stretch;
+}
+
+.nn-gate-fields--signup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
 @media (max-width: 800px) {
   .nn-gate-modal {
     grid-template-columns: 1fr;
@@ -1037,4 +1470,27 @@ body:has(.nn-gate) {
   .nn-gate-stage {
     display: none;
   }
+
+  .nn-dashboard-topbar {
+    padding: 0 16px;
+  }
+
+  .nn-dashboard-main {
+    padding: 20px 16px;
+  }
+
+  .nn-banner-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nn-banner-divider {
+    display: none;
+  }
+
+  .nn-facilities-grid,
+  .nn-settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
+

@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   ThemeProvider,
   useTheme,
   Sidebar,
   type SidebarNavGroup,
   Footer,
-  Card,
   Chip,
-  Button,
 } from '@thoughtstream/ui';
 import {
   LayoutDashboard,
@@ -22,18 +20,64 @@ import {
   Sun,
   Moon,
   Sparkles,
-  ArrowUpRight,
-  Activity,
-  CheckCircle2,
 } from 'lucide-react';
 
+import { OverviewScreen } from './dashboard/OverviewScreen';
+import { InventoryScreen } from './dashboard/InventoryScreen';
+import { WarehousesScreen } from './dashboard/WarehousesScreen';
+import { FleetScreen } from './dashboard/FleetScreen';
+import { OrdersScreen } from './dashboard/OrdersScreen';
+import { AnalyticsScreen } from './dashboard/AnalyticsScreen';
+import { SettingsScreen } from './dashboard/SettingsScreen';
+
 export const SESSION_KEY = 'nn-base-session';
+
+const VALID_TABS = [
+  'overview',
+  'inventory',
+  'warehouses',
+  'fleet',
+  'orders',
+  'analytics',
+  'settings',
+] as const;
+
+type DashboardTab = typeof VALID_TABS[number];
+
+const TAB_METADATA: Record<DashboardTab, { group: string; label: string }> = {
+  overview: { group: 'Operations', label: 'Overview' },
+  inventory: { group: 'Operations', label: 'Inventory' },
+  warehouses: { group: 'Operations', label: 'Warehouses' },
+  fleet: { group: 'Operations', label: 'Fleet & Dispatch' },
+  orders: { group: 'Operations', label: 'Orders & Transfers' },
+  analytics: { group: 'Intelligence', label: 'Ledgers & Analytics' },
+  settings: { group: 'Intelligence', label: 'System Settings' },
+};
 
 const DashboardView: React.FC = () => {
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { tab } = useParams<{ tab?: string }>();
+
+  const currentTab: DashboardTab = (
+    tab && (VALID_TABS as readonly string[]).includes(tab) ? tab : 'overview'
+  ) as DashboardTab;
+
+  const [activeTab, setActiveTab] = useState<DashboardTab>(currentTab);
   const [collapsed, setCollapsed] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    if (tab && (VALID_TABS as readonly string[]).includes(tab)) {
+      setActiveTab(tab as DashboardTab);
+    }
+  }, [tab]);
+
+  const handleSelectTab = (selectedId: string) => {
+    if ((VALID_TABS as readonly string[]).includes(selectedId)) {
+      setActiveTab(selectedId as DashboardTab);
+      navigate(`/dashboard/${selectedId}`, { replace: true });
+    }
+  };
 
   const handleLogout = () => {
     sessionStorage.removeItem(SESSION_KEY);
@@ -50,7 +94,7 @@ const DashboardView: React.FC = () => {
           icon: <LayoutDashboard size={16} />,
           active: activeTab === 'overview',
           badge: 'Live',
-          onClick: () => setActiveTab('overview'),
+          onClick: () => handleSelectTab('overview'),
         },
         {
           id: 'inventory',
@@ -58,21 +102,21 @@ const DashboardView: React.FC = () => {
           icon: <Package size={16} />,
           active: activeTab === 'inventory',
           badge: '1.2k',
-          onClick: () => setActiveTab('inventory'),
+          onClick: () => handleSelectTab('inventory'),
         },
         {
           id: 'warehouses',
           label: 'Warehouses',
           icon: <Warehouse size={16} />,
           active: activeTab === 'warehouses',
-          onClick: () => setActiveTab('warehouses'),
+          onClick: () => handleSelectTab('warehouses'),
         },
         {
           id: 'fleet',
           label: 'Fleet & Dispatch',
           icon: <Truck size={16} />,
           active: activeTab === 'fleet',
-          onClick: () => setActiveTab('fleet'),
+          onClick: () => handleSelectTab('fleet'),
         },
         {
           id: 'orders',
@@ -80,7 +124,7 @@ const DashboardView: React.FC = () => {
           icon: <ClipboardCheck size={16} />,
           active: activeTab === 'orders',
           badge: '9',
-          onClick: () => setActiveTab('orders'),
+          onClick: () => handleSelectTab('orders'),
         },
       ],
     },
@@ -92,14 +136,14 @@ const DashboardView: React.FC = () => {
           label: 'Ledgers & Analytics',
           icon: <BarChart3 size={16} />,
           active: activeTab === 'analytics',
-          onClick: () => setActiveTab('analytics'),
+          onClick: () => handleSelectTab('analytics'),
         },
         {
           id: 'settings',
           label: 'System Settings',
           icon: <Settings size={16} />,
           active: activeTab === 'settings',
-          onClick: () => setActiveTab('settings'),
+          onClick: () => handleSelectTab('settings'),
         },
       ],
     },
@@ -230,6 +274,8 @@ const DashboardView: React.FC = () => {
     </button>
   );
 
+  const meta = TAB_METADATA[activeTab] || TAB_METADATA.overview;
+
   return (
     <div
       className={`nn-dashboard-layout thoughtstream-theme-${resolvedTheme}`}
@@ -259,11 +305,9 @@ const DashboardView: React.FC = () => {
         <header className="nn-dashboard-topbar">
           <div className="nn-dashboard-topbar-left">
             <nav className="nn-dashboard-breadcrumb" aria-label="Breadcrumb">
-              <span>Operations</span>
+              <span>{meta.group}</span>
               <span className="nn-dashboard-breadcrumb-sep">/</span>
-              <span className="nn-dashboard-breadcrumb-current">
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-              </span>
+              <span className="nn-dashboard-breadcrumb-current">{meta.label}</span>
             </nav>
           </div>
 
@@ -283,158 +327,15 @@ const DashboardView: React.FC = () => {
           </div>
         </header>
 
-        {/* Dashboard Main Workspace */}
+        {/* Dashboard Main Workspace - Renders the active screen */}
         <main className="nn-dashboard-main" aria-label="Dashboard content">
-          {/* Header Section */}
-          <div className="nn-dashboard-header">
-            <div>
-              <h1 className="nn-dashboard-title">Operations Sanctuary</h1>
-              <p className="nn-dashboard-subtitle">
-                Distraction-free inventory velocity, node synchronization, and fulfillment ledger.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Button variant="secondary" size="small">
-                Download Ledger
-              </Button>
-              <Button variant="primary" size="small">
-                Dispatch Order
-              </Button>
-            </div>
-          </div>
-
-          {/* Metric Cards Grid */}
-          <section className="nn-dashboard-metrics-grid" aria-label="Key Performance Indicators">
-            <Card variant="default" padding="medium" className="nn-metric-card">
-              <span className="nn-metric-label">Catalog SKUs</span>
-              <span className="nn-metric-value">24,580</span>
-              <div className="nn-metric-trend nn-metric-trend--positive">
-                <ArrowUpRight size={14} />
-                <span>+12.4% vs last cycle</span>
-              </div>
-            </Card>
-
-            <Card variant="default" padding="medium" className="nn-metric-card">
-              <span className="nn-metric-label">In-Transit Shipments</span>
-              <span className="nn-metric-value">342</span>
-              <div className="nn-metric-trend">
-                <span>8 active fleet lanes</span>
-              </div>
-            </Card>
-
-            <Card variant="default" padding="medium" className="nn-metric-card">
-              <span className="nn-metric-label">Warehouse Capacity</span>
-              <span className="nn-metric-value">78.2%</span>
-              <div className="nn-metric-trend">
-                <span>Optimal distribution</span>
-              </div>
-            </Card>
-
-            <Card variant="default" padding="medium" className="nn-metric-card">
-              <span className="nn-metric-label">Node Sync Latency</span>
-              <span className="nn-metric-value">12ms</span>
-              <div className="nn-metric-trend nn-metric-trend--positive">
-                <Activity size={14} />
-                <span>Zero backpressure</span>
-              </div>
-            </Card>
-          </section>
-
-          {/* Fulfillment Nodes Ledger Section */}
-          <section className="nn-nodes-table-wrap" aria-label="Fulfillment Nodes Ledger">
-            <div className="nn-nodes-table-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <CheckCircle2 size={16} style={{ color: 'var(--ts-color-success)' }} />
-                <h3
-                  style={{
-                    margin: 0,
-                    fontFamily: 'var(--ts-font-heading)',
-                    fontSize: '0.9375rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  Active Fulfillment Cells
-                </h3>
-              </div>
-              <span
-                style={{
-                  fontFamily: 'var(--ts-font-mono)',
-                  fontSize: '0.6875rem',
-                  color: 'var(--ts-color-text-tertiary)',
-                }}
-              >
-                4 Nodes Synchronized
-              </span>
-            </div>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table className="nn-nodes-table">
-                <thead>
-                  <tr>
-                    <th>Cell Identifier</th>
-                    <th>Facility Region</th>
-                    <th>Active Inventory</th>
-                    <th>Fleet Lanes</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)', fontWeight: 600 }}>
-                      CELL-NORTH-01
-                    </td>
-                    <td>Seattle Hub Facility</td>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)' }}>8,920 SKUs</td>
-                    <td>3 Dedicated</td>
-                    <td>
-                      <Chip variant="status" tone="success">
-                        Synchronized
-                      </Chip>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)', fontWeight: 600 }}>
-                      CELL-CENTRAL-02
-                    </td>
-                    <td>Chicago Logistics Base</td>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)' }}>4,210 SKUs</td>
-                    <td>2 Dedicated</td>
-                    <td>
-                      <Chip variant="status" tone="success">
-                        Synchronized
-                      </Chip>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)', fontWeight: 600 }}>
-                      CELL-PACIFIC-03
-                    </td>
-                    <td>Los Angeles Depot</td>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)' }}>7,150 SKUs</td>
-                    <td>2 Dedicated</td>
-                    <td>
-                      <Chip variant="status" tone="success">
-                        Synchronized
-                      </Chip>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)', fontWeight: 600 }}>
-                      CELL-EAST-04
-                    </td>
-                    <td>Newark Distribution Cell</td>
-                    <td style={{ fontFamily: 'var(--ts-font-mono)' }}>4,300 SKUs</td>
-                    <td>1 Dedicated</td>
-                    <td>
-                      <Chip variant="status" tone="success">
-                        Synchronized
-                      </Chip>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+          {activeTab === 'overview' && <OverviewScreen onNavigateToTab={handleSelectTab} />}
+          {activeTab === 'inventory' && <InventoryScreen />}
+          {activeTab === 'warehouses' && <WarehousesScreen />}
+          {activeTab === 'fleet' && <FleetScreen />}
+          {activeTab === 'orders' && <OrdersScreen />}
+          {activeTab === 'analytics' && <AnalyticsScreen />}
+          {activeTab === 'settings' && <SettingsScreen />}
         </main>
 
         {/* Minimal Footer from @thoughtstream/ui */}

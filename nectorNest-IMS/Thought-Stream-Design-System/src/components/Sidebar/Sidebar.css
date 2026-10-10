@@ -48,6 +48,7 @@
 }
 
 .ts-sidebar--collapsed .ts-sidebar__header {
+  height: 48px;
   padding: 0 8px;
   justify-content: space-between;
   gap: 4px;
@@ -117,8 +118,8 @@
 }
 
 .ts-sidebar--collapsed .ts-sidebar__body {
-  padding: 16px 6px;
-  gap: 12px;
+  padding: 8px 4px;
+  gap: 8px;
 }
 
 .ts-sidebar__group {
@@ -178,7 +179,7 @@
 
 .ts-sidebar--collapsed .ts-sidebar__item {
   justify-content: center;
-  padding: 10px 0;
+  padding: 8px 0;
   border-left: none;
 }
 
