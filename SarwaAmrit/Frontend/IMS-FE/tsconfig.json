@@ -14,9 +14,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@thoughtstream/ui": ["../DesignSystem/thoughtstream-ui/src/index.ts"],
       "@thoughtstream/ui/*": ["../DesignSystem/thoughtstream-ui/src/*"]
     }
