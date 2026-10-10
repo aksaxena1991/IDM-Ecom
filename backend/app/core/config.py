@@ -1,10 +1,36 @@
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated, Any
 
-from pydantic import model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BeforeValidator, Field, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+
+def _parse_cors_origins(value: Any) -> list[str]:
+    """Accept list, JSON array string, or comma-separated string from env."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        if text.startswith("["):
+            parsed = json.loads(text)
+            if not isinstance(parsed, list):
+                raise ValueError("CORS_ORIGINS JSON must be an array of strings")
+            return [str(item).strip() for item in parsed if str(item).strip()]
+        return [part.strip() for part in text.split(",") if part.strip()]
+    raise TypeError("cors_origins must be a list[str]")
+
+
+# NoDecode: pydantic-settings would JSON-decode list fields before validators;
+# we parse JSON arrays and legacy comma-separated env values ourselves.
+CorsOrigins = Annotated[list[str], NoDecode, BeforeValidator(_parse_cors_origins)]
 
 
 class Settings(BaseSettings):
@@ -47,8 +73,10 @@ class Settings(BaseSettings):
     require_admin_mfa: bool = False
     signing_keys_dir: Path = Path("./keys")
 
-    # Comma-separated origins for the React (or other) SPA
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # SPA origins allowed by CORS / cookie CSRF Origin checks
+    cors_origins: CorsOrigins = Field(
+        default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"]
+    )
 
     # Bearer token required for GET /metrics (Prometheus scrape). Empty disables the endpoint (401).
     metrics_token: str = "local-dev-metrics-token"

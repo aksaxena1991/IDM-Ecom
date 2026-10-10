@@ -45,7 +45,7 @@ class CookieCsrfMiddleware(BaseHTTPMiddleware):
 
 def _origin_allowed(request: Request) -> bool:
     settings = get_settings()
-    allowed = {o.strip().rstrip("/") for o in settings.cors_origins.split(",") if o.strip()}
+    allowed = {o.rstrip("/") for o in settings.cors_origins}
     allowed.add(settings.base_url.rstrip("/"))
     origin = request.headers.get("origin")
     if origin:
