@@ -20,5 +20,5 @@ SarwaAmrit/
 | `Backend/SSO-BE` | SSO / identity API |
 | `Backend/IMS-BE` | Inventory management API |
 | `Frontend/Shell-Base-FE` | Host shell (Module Federation) |
-| `Frontend/IDM-FE` | Identity portal remote |
+| `Frontend/IDM-FE` | Identity portal remote (feature-sliced React app) |
 | `Frontend/IMS-FE` | Inventory remote |

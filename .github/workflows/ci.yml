@@ -64,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: SarwaAmrit/Frontend/IDM-FE
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: SarwaAmrit/Frontend/IDM-FE/package-lock.json
       - run: npm ci
       - run: npm run test
       - run: npx tsc -b --pretty false
