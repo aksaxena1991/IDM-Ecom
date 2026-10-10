@@ -1,0 +1,91 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Overview" />
+
+<div style={{ maxWidth: '680px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
+
+# ThoughtStream
+
+<p style={{ fontSize: '20px', lineHeight: '1.75', color: '#57534E', marginTop: '12px', marginBottom: '32px' }}>
+  Minimal, zen, distraction-free design system for contemplative writing, personal letters, and calm web applications.
+</p>
+
+---
+
+## Design Philosophy
+
+**ThoughtStream** embraces generous white space as a foundational design element, letting words breathe and ideas settle. The warm, neutral palette recedes behind content, creating a reading experience that feels like a well-set page in a quiet room. Every decision prioritizes reading flow and typographic clarity over ornament.
+
+### Core Principles
+
+1. **Zero Rounded Corners (Except Avatars & Radios):** All interactive and container elements use sharp, geometric edges (0px radius) to maintain a modern editorial discipline.
+2. **Flat Aesthetic (No Drop Shadows):** Separation is achieved strictly through delicate hairline borders (`#E7E5E4`) and generous whitespace.
+3. **Harmonic Typography:** Literary serif headings (*Libre Baskerville*) paired with clean body copy (*Inter*) and monospace code (*Source Code Pro*).
+4. **Optimal Reading Measure:** Maximum reading container width constrained to **680px** for sustained reader focus.
+5. **Calm Palette:** Warm whites (`#FAFAF9`), stone grays (`#78716C`, `#A8A29E`), and warm black (`#1C1917`).
+
+---
+
+## Injecting into External Applications
+
+You can easily install and consume ThoughtStream in any React application (Next.js, Vite, Remix, Create React App):
+
+```bash
+npm install @thoughtstream/ui
+# or yarn add / pnpm add
+```
+
+### Import Styles
+
+Import the complete stylesheet once in your application entry file (e.g. `main.tsx`, `_app.tsx`, or `layout.tsx`):
+
+```tsx
+import '@thoughtstream/ui/styles.css';
+```
+
+### Consume Components
+
+```tsx
+import React from 'react';
+import {
+  Button,
+  Input,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardBody,
+  Typography,
+} from '@thoughtstream/ui';
+
+export function NewsletterSignup() {
+  return (
+    <Card variant="default">
+      <CardHeader>
+        <CardTitle>Subscribe to the Monograph</CardTitle>
+      </CardHeader>
+      <CardBody>
+        <Typography variant="body" measure>
+          Receive our contemplative essays every Sunday morning. No noise, no promotions.
+        </Typography>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          <Input placeholder="reader@thoughtstream.org" />
+          <Button variant="primary">Subscribe</Button>
+        </div>
+      </CardBody>
+    </Card>
+  );
+}
+```
+
+### Accessing Design Tokens Directly
+
+You can also import raw TypeScript constants or CSS variables:
+
+```tsx
+import { tokens, colors, typography, spacing } from '@thoughtstream/ui';
+
+console.log(tokens.colors.brand.primary); // #78716C
+console.log(tokens.spacing.content.maxReadingWidth); // 680px
+```
+
+</div>

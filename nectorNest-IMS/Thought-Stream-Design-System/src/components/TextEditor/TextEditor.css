@@ -1,0 +1,295 @@
+/* ThoughtStream TextEditor Styles */
+
+.ts-text-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  font-family: var(--ts-font-body);
+  position: relative;
+  transition: border-color var(--ts-transition-fast);
+}
+
+.ts-text-editor--focused {
+  border-color: var(--ts-color-primary);
+}
+
+.ts-text-editor--zen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  border: none;
+  background-color: var(--ts-color-bg);
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Toolbar */
+.ts-text-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--ts-color-surface);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  gap: 12px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.ts-text-editor-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ts-text-editor-toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background-color: var(--ts-border-medium);
+  margin: 0 4px;
+}
+
+.ts-text-editor-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--ts-radius-none);
+  color: var(--ts-color-text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: var(--ts-transition-standard);
+  font-family: var(--ts-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ts-text-editor-btn:hover:not(:disabled) {
+  background-color: var(--ts-color-bg);
+  border-color: var(--ts-border-subtle);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-text-editor-btn:focus-visible {
+  box-shadow: var(--ts-focus-ring);
+}
+
+.ts-text-editor-btn--active {
+  background-color: var(--ts-color-bg);
+  border-color: var(--ts-border-medium);
+  color: var(--ts-color-primary);
+}
+
+.ts-text-editor-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Mode Switch Tabs */
+.ts-text-editor-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  padding: 2px;
+}
+
+.ts-text-editor-tab-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--ts-radius-none);
+  font-family: var(--ts-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ts-color-text-secondary);
+  padding: 4px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: var(--ts-transition-standard);
+}
+
+.ts-text-editor-tab-btn:hover {
+  color: var(--ts-color-text-primary);
+}
+
+.ts-text-editor-tab-btn--active {
+  background-color: var(--ts-color-primary);
+  color: var(--ts-color-bg);
+  font-weight: 600;
+}
+
+/* Content Area */
+.ts-text-editor-content {
+  display: flex;
+  flex: 1;
+  min-height: 280px;
+  max-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ts-text-editor--zen .ts-text-editor-content {
+  max-height: calc(100vh - 90px);
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Textarea Pane */
+.ts-text-editor-textarea {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--ts-font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ts-color-text-primary);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.ts-text-editor-textarea::placeholder {
+  color: var(--ts-color-text-tertiary);
+  font-style: italic;
+}
+
+/* Split Border */
+.ts-text-editor-split-divider {
+  width: 1px;
+  background-color: var(--ts-border-subtle);
+}
+
+/* Preview Pane */
+.ts-text-editor-preview {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 20px 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-family: var(--ts-font-body);
+  color: var(--ts-color-text-primary);
+  line-height: 1.7;
+  background-color: var(--ts-color-bg);
+  scrollbar-width: thin;
+}
+
+.ts-text-editor-preview h1 {
+  font-family: var(--ts-font-heading);
+  font-size: 24px;
+  margin: 0 0 16px 0;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  padding-bottom: 8px;
+}
+
+.ts-text-editor-preview h2 {
+  font-family: var(--ts-font-heading);
+  font-size: 20px;
+  margin: 24px 0 12px 0;
+}
+
+.ts-text-editor-preview h3 {
+  font-family: var(--ts-font-heading);
+  font-size: 17px;
+  margin: 20px 0 8px 0;
+}
+
+.ts-text-editor-preview p {
+  margin: 0 0 16px 0;
+}
+
+.ts-text-editor-preview blockquote {
+  margin: 16px 0;
+  padding: 8px 16px;
+  border-left: 2px solid var(--ts-color-primary);
+  font-style: italic;
+  color: var(--ts-color-text-secondary);
+  background-color: var(--ts-color-surface);
+}
+
+.ts-text-editor-preview pre {
+  margin: 16px 0;
+  padding: 14px;
+  background-color: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  font-family: var(--ts-font-mono);
+  font-size: 13px;
+  overflow-x: auto;
+}
+
+.ts-text-editor-preview code {
+  font-family: var(--ts-font-mono);
+  font-size: 13px;
+  background-color: var(--ts-color-surface);
+  padding: 2px 4px;
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.ts-text-editor-preview hr {
+  border: none;
+  border-top: 1px solid var(--ts-border-subtle);
+  margin: 24px 0;
+}
+
+.ts-text-editor-preview ul,
+.ts-text-editor-preview ol {
+  margin: 0 0 16px 0;
+  padding-left: 24px;
+}
+
+.ts-text-editor-preview li {
+  margin-bottom: 6px;
+}
+
+/* Status Footer Bar */
+.ts-text-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-surface);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+  box-sizing: border-box;
+}
+
+.ts-text-editor-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ts-text-editor-save-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-text-editor-save-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--ts-color-success);
+  border-radius: var(--ts-radius-none);
+}

@@ -1,0 +1,250 @@
+/* ThoughtStream NotificationBar Component Styles */
+
+.ts-notification-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 16px;
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: var(--ts-radius-none);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-bg-subtle);
+  color: var(--ts-color-text-primary);
+  transition: all var(--ts-transition-normal);
+  z-index: 100;
+}
+
+/* Placement variants */
+.ts-notification-bar--static {
+  position: static;
+}
+
+.ts-notification-bar--sticky {
+  position: sticky;
+  top: 0;
+}
+
+.ts-notification-bar--fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.ts-notification-bar--fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom: none;
+  border-top: 1px solid var(--ts-border-subtle);
+}
+
+/* Layout variants */
+.ts-notification-bar--contained {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-left: 1px solid var(--ts-border-subtle);
+  border-right: 1px solid var(--ts-border-subtle);
+}
+
+.ts-notification-bar--floating {
+  margin: 12px auto;
+  max-width: 960px;
+  border: 1px solid var(--ts-border-subtle);
+}
+
+/* Visual Variants */
+.ts-notification-bar--neutral {
+  background-color: var(--ts-color-surface);
+  border-color: var(--ts-border-subtle);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-notification-bar--info {
+  background-color: var(--ts-color-bg);
+  border-color: var(--ts-border-medium);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-notification-bar--announcement {
+  background-color: var(--ts-color-text-primary);
+  border-color: var(--ts-color-text-primary);
+  color: var(--ts-color-bg);
+}
+
+.ts-notification-bar--announcement .ts-notification-bar-badge {
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  border-color: var(--ts-color-bg);
+}
+
+.ts-notification-bar--announcement .ts-notification-bar-action {
+  color: var(--ts-color-bg);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ts-notification-bar--announcement .ts-notification-bar-action:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.ts-notification-bar--announcement .ts-notification-bar-dismiss {
+  color: var(--ts-color-bg);
+}
+
+.ts-notification-bar--announcement .ts-notification-bar-dismiss:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.ts-notification-bar--warning {
+  background-color: var(--ts-status-warning-bg);
+  border-color: var(--ts-status-warning-border);
+  color: #854D0E;
+}
+
+[data-theme="dark"] .ts-notification-bar--warning {
+  background-color: #2E2305;
+  border-color: #713F12;
+  color: #FEF08A;
+}
+
+.ts-notification-bar--error {
+  background-color: var(--ts-status-error-bg);
+  border-color: var(--ts-status-error-border);
+  color: #991B1B;
+}
+
+[data-theme="dark"] .ts-notification-bar--error {
+  background-color: #2B0E0E;
+  border-color: #7F1D1D;
+  color: #FECACA;
+}
+
+.ts-notification-bar--success {
+  background-color: var(--ts-status-success-bg);
+  border-color: var(--ts-status-success-border);
+  color: #166534;
+}
+
+[data-theme="dark"] .ts-notification-bar--success {
+  background-color: #0E2413;
+  border-color: #14532D;
+  color: #BBF7D0;
+}
+
+/* Inner content */
+.ts-notification-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ts-notification-bar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ts-notification-bar-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  border-radius: var(--ts-radius-none);
+  flex-shrink: 0;
+}
+
+.ts-notification-bar-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-notification-bar-title {
+  font-weight: 600;
+}
+
+.ts-notification-bar-description {
+  opacity: 0.9;
+}
+
+/* Right side actions and dismiss */
+.ts-notification-bar-aside {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+.ts-notification-bar-action {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  color: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all var(--ts-transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ts-notification-bar-action:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: currentColor;
+}
+
+[data-theme="dark"] .ts-notification-bar-action:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.ts-notification-bar-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--ts-radius-none);
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all var(--ts-transition-fast);
+}
+
+.ts-notification-bar-dismiss:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: var(--ts-border-subtle);
+}
+
+[data-theme="dark"] .ts-notification-bar-dismiss:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ts-notification-bar-dismiss:focus-visible {
+  outline: 2px solid var(--ts-color-primary);
+  outline-offset: 1px;
+}

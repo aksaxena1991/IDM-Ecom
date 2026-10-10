@@ -1,0 +1,1034 @@
+/**
+ * ThoughtStream Design System - Liquid Glass Optics
+ *
+ * Implements a high-refraction liquid glass aesthetic across all components:
+ * - Multi-layered frosted translucency with optical backdrop blur
+ * - Specular refraction hairline borders and light-catch highlights
+ * - Inner specular bevels and ambient volumetric depth
+ * - Strict adherence to the 0px sharp geometry architectural philosophy
+ */
+
+/* ==========================================================================
+   Global Liquid Glass Utility Classes
+   ========================================================================== */
+
+.ts-liquid-glass {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-liquid-glass-raised {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-liquid-glass-sunken {
+  background: var(--ts-glass-gradient-sunken) !important;
+  backdrop-filter: var(--ts-glass-blur-sm) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+}
+
+/* ==========================================================================
+   1. Card Component
+   ========================================================================== */
+
+.ts-card {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur);
+  -webkit-backdrop-filter: var(--ts-glass-blur);
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.ts-card--default:hover {
+  background: var(--ts-glass-gradient-hover) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg);
+}
+
+.ts-card--elevated {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep);
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep);
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg);
+}
+
+.ts-card--elevated:hover {
+  background: var(--ts-glass-gradient-hover) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
+}
+
+.ts-card-footer {
+  border-top: 1px solid var(--ts-glass-border-subtle);
+  background: var(--ts-glass-bg-subtle);
+}
+
+/* ==========================================================================
+   2. Button Component
+   ========================================================================== */
+
+.ts-button {
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ts-button--primary {
+  background: linear-gradient(135deg, rgba(120, 113, 108, 0.92) 0%, rgba(87, 83, 78, 0.88) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.45) !important;
+  color: #FAFAF9 !important;
+}
+
+.ts-button--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(87, 83, 78, 0.96) 0%, rgba(68, 64, 60, 0.94) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.48) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18), inset 0 1px 1.5px rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-1px);
+}
+
+.ts-button--primary:active:not(:disabled) {
+  background: linear-gradient(135deg, rgba(68, 64, 60, 0.98) 0%, rgba(41, 37, 36, 0.96) 100%) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(0);
+}
+
+[data-theme="dark"] .ts-button--primary,
+.thoughtstream-theme-dark .ts-button--primary {
+  background: linear-gradient(135deg, rgba(250, 250, 249, 0.95) 0%, rgba(214, 211, 209, 0.88) 100%) !important;
+  color: #1C1917 !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1.5px rgba(255, 255, 255, 1) !important;
+}
+
+[data-theme="dark"] .ts-button--primary:hover:not(:disabled),
+.thoughtstream-theme-dark .ts-button--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E7E5E4 100%) !important;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+}
+
+.ts-button--secondary {
+  background: var(--ts-glass-bg-subtle) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+  color: var(--ts-color-text-primary) !important;
+}
+
+.ts-button--secondary:hover:not(:disabled) {
+  background: var(--ts-glass-bg-hover) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+  transform: translateY(-1px);
+}
+
+.ts-button--secondary:active:not(:disabled) {
+  background: var(--ts-glass-bg-active) !important;
+  transform: translateY(0);
+}
+
+.ts-button--ghost:hover:not(:disabled) {
+  background: var(--ts-glass-bg-subtle) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+/* ==========================================================================
+   3. Inputs & Form Fields (Text, Number, Search, Textarea)
+   ========================================================================== */
+
+.ts-input,
+.ts-textarea {
+  background: var(--ts-glass-bg-sunken) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+  transition: all 0.2s ease;
+}
+
+.ts-input:hover:not(:disabled):not(.ts-input--error),
+.ts-textarea:hover:not(:disabled) {
+  border-color: var(--ts-glass-border-strong) !important;
+  background: var(--ts-glass-bg-subtle) !important;
+}
+
+.ts-input:focus,
+.ts-textarea:focus {
+  background: var(--ts-glass-bg) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45), var(--ts-glass-shadow-sm) !important;
+}
+
+[data-theme="dark"] .ts-input:focus,
+[data-theme="dark"] .ts-textarea:focus,
+.thoughtstream-theme-dark .ts-input:focus,
+.thoughtstream-theme-dark .ts-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12), var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-input--filled {
+  background: var(--ts-glass-bg-sunken) !important;
+}
+
+/* ==========================================================================
+   4. Select & Multiselect
+   ========================================================================== */
+
+.ts-select-trigger,
+.ts-multiselect-trigger {
+  background: var(--ts-glass-bg-sunken) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+  transition: all 0.2s ease;
+}
+
+.ts-select-trigger:hover:not(:disabled),
+.ts-multiselect-trigger:hover:not(:disabled) {
+  background: var(--ts-glass-bg-subtle) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+}
+
+.ts-select-trigger:focus-visible,
+.ts-select-trigger--open,
+.ts-multiselect-trigger:focus-visible,
+.ts-multiselect-trigger--open {
+  background: var(--ts-glass-bg) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45), var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-select-dropdown,
+.ts-multiselect-dropdown {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-select-option:hover,
+.ts-select-option--focused,
+.ts-multiselect-option:hover,
+.ts-multiselect-option--focused {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-select-option--selected,
+.ts-multiselect-option--selected {
+  background: var(--ts-glass-bg-raised) !important;
+  border-left: 2px solid var(--ts-color-primary) !important;
+}
+
+.ts-multiselect-tag {
+  background: var(--ts-glass-bg-raised) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+/* ==========================================================================
+   5. Dropdowns & Popovers
+   ========================================================================== */
+
+.ts-dropdown-menu,
+.ts-popover-content {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-dropdown-item:hover,
+.ts-dropdown-item--focused {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-dropdown-separator {
+  background: var(--ts-glass-border-subtle) !important;
+}
+
+/* ==========================================================================
+   6. Modal & Drawer
+   ========================================================================== */
+
+.ts-modal-overlay,
+.ts-drawer-overlay {
+  background: rgba(28, 25, 23, 0.42) !important;
+  backdrop-filter: blur(14px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(175%) !important;
+}
+
+[data-theme="dark"] .ts-modal-overlay,
+[data-theme="dark"] .ts-drawer-overlay,
+.thoughtstream-theme-dark .ts-modal-overlay,
+.thoughtstream-theme-dark .ts-drawer-overlay {
+  background: rgba(10, 8, 7, 0.65) !important;
+}
+
+.ts-modal {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-modal-header {
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-modal-footer {
+  border-top: 1px solid var(--ts-glass-border-subtle) !important;
+  background: var(--ts-glass-bg-subtle) !important;
+}
+
+.ts-drawer {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border-color: var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-drawer-header {
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-drawer-footer {
+  border-top: 1px solid var(--ts-glass-border-subtle) !important;
+  background: var(--ts-glass-bg-subtle) !important;
+}
+
+/* ==========================================================================
+   7. Panel & Accordion
+   ========================================================================== */
+
+.ts-panel-group {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-panel {
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-panel--expanded {
+  background: var(--ts-glass-bg-subtle) !important;
+}
+
+.ts-panel-header:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+/* ==========================================================================
+   8. NotificationBar & Toast
+   ========================================================================== */
+
+.ts-notification-bar {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border-color: var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-notification-bar--neutral {
+  border-left: 3px solid var(--ts-color-primary) !important;
+}
+
+.ts-notification-bar--info {
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.75) 0%, rgba(224, 242, 254, 0.45) 100%) !important;
+  border-color: rgba(186, 230, 253, 0.8) !important;
+  border-left: 3px solid #0284C7 !important;
+}
+
+.ts-notification-bar--announcement {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.75) 0%, rgba(253, 230, 138, 0.45) 100%) !important;
+  border-color: rgba(252, 211, 77, 0.8) !important;
+  border-left: 3px solid #D97706 !important;
+}
+
+.ts-notification-bar--warning {
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.75) 0%, rgba(254, 226, 226, 0.45) 100%) !important;
+  border-color: rgba(254, 202, 202, 0.8) !important;
+  border-left: 3px solid #DC2626 !important;
+}
+
+.ts-notification-bar--success {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.75) 0%, rgba(220, 252, 231, 0.45) 100%) !important;
+  border-color: rgba(187, 247, 208, 0.8) !important;
+  border-left: 3px solid #16A34A !important;
+}
+
+[data-theme="dark"] .ts-notification-bar--info,
+.thoughtstream-theme-dark .ts-notification-bar--info {
+  background: linear-gradient(135deg, rgba(12, 74, 110, 0.55) 0%, rgba(8, 47, 73, 0.4) 100%) !important;
+  border-color: rgba(3, 105, 161, 0.6) !important;
+}
+
+[data-theme="dark"] .ts-notification-bar--announcement,
+.thoughtstream-theme-dark .ts-notification-bar--announcement {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.55) 0%, rgba(69, 26, 3, 0.4) 100%) !important;
+  border-color: rgba(180, 83, 9, 0.6) !important;
+}
+
+[data-theme="dark"] .ts-notification-bar--warning,
+.thoughtstream-theme-dark .ts-notification-bar--warning {
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.55) 0%, rgba(69, 10, 10, 0.4) 100%) !important;
+  border-color: rgba(185, 28, 28, 0.6) !important;
+}
+
+[data-theme="dark"] .ts-notification-bar--success,
+.thoughtstream-theme-dark .ts-notification-bar--success {
+  background: linear-gradient(135deg, rgba(20, 83, 45, 0.55) 0%, rgba(5, 46, 22, 0.4) 100%) !important;
+  border-color: rgba(22, 101, 52, 0.6) !important;
+}
+
+.ts-toast {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+/* ==========================================================================
+   9. Navigation: Sidebar & MenuBar
+   ========================================================================== */
+
+.ts-sidebar {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border-color: var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-sidebar__header {
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-sidebar__footer {
+  border-top: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-sidebar__item:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-sidebar__item--active {
+  background: var(--ts-glass-bg-raised) !important;
+  border-left: 2px solid var(--ts-color-primary) !important;
+}
+
+.ts-sidebar__item-tooltip {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-menubar {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border-bottom: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-menubar--sticky {
+  background: var(--ts-glass-gradient-raised) !important;
+}
+
+.ts-menubar__tray {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border-bottom: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-menubar__item:hover,
+.ts-menubar__action-btn:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+/* ==========================================================================
+   10. Footer Component
+   ========================================================================== */
+
+.ts-footer {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border-top: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-footer__newsletter-input {
+  background: var(--ts-glass-bg-sunken) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-footer__bottom {
+  border-top: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+/* ==========================================================================
+   11. Tabs & Stepper
+   ========================================================================== */
+
+.ts-tab-list {
+  background: var(--ts-glass-bg-subtle);
+  border-bottom: 1px solid var(--ts-glass-border-subtle);
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+}
+
+.ts-tab:hover:not(:disabled) {
+  background: var(--ts-glass-bg-hover);
+}
+
+.ts-tabs--enclosed .ts-tab--active {
+  background: var(--ts-glass-bg-raised) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-sm);
+}
+
+.ts-tabs--pills .ts-tab--active {
+  background: var(--ts-glass-bg-raised) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-sm);
+}
+
+.ts-stepper__indicator {
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+  transition: all 0.2s ease;
+}
+
+.ts-stepper__indicator--upcoming {
+  background: var(--ts-glass-gradient-sunken) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  color: var(--ts-color-text-tertiary) !important;
+}
+
+.ts-stepper__indicator--current {
+  background: linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(68, 64, 60, 0.90) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  color: #FAFAF9 !important;
+  box-shadow: 0 0 0 3px rgba(120, 113, 108, 0.25), var(--ts-glass-shadow-md) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .ts-stepper__indicator--current,
+.thoughtstream-theme-dark .ts-stepper__indicator--current {
+  background: linear-gradient(135deg, rgba(250, 250, 249, 0.96) 0%, rgba(214, 211, 209, 0.90) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  color: #1C1917 !important;
+  box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.35), var(--ts-glass-shadow-md) !important;
+}
+
+.ts-stepper__indicator--completed {
+  background: var(--ts-glass-gradient-raised) !important;
+  border: 1px solid var(--ts-color-primary) !important;
+  color: var(--ts-color-primary) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-stepper__indicator--error {
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.85) 0%, rgba(254, 202, 202, 0.6) 100%) !important;
+  border: 1px solid var(--ts-color-error) !important;
+  color: var(--ts-color-error) !important;
+}
+
+.ts-stepper__connector-before,
+.ts-stepper__connector-after {
+  background-color: var(--ts-glass-border-subtle) !important;
+}
+
+.ts-stepper__item--completed .ts-stepper__connector-before,
+.ts-stepper__item--completed .ts-stepper__connector-after,
+.ts-stepper__item--current .ts-stepper__connector-before {
+  background-color: var(--ts-color-primary) !important;
+  box-shadow: 0 0 6px rgba(120, 113, 108, 0.35) !important;
+}
+
+.ts-stepper__content-body {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+/* ==========================================================================
+   12. Progress Bar & Stepper
+   ========================================================================== */
+
+.ts-progress-track {
+  background: var(--ts-glass-bg-sunken) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+}
+
+.ts-progress-fill {
+  box-shadow: 0 0 12px rgba(120, 113, 108, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ==========================================================================
+   13. Charts Suite
+   ========================================================================== */
+
+.ts-chart-container {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-chart-tooltip {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-table-chart-header-cell {
+  background: var(--ts-glass-bg-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+}
+
+.ts-table-chart-row:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+/* ==========================================================================
+   Map Suite (Liquid Glass HUD & Cartography)
+   ========================================================================== */
+
+.ts-map-container {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-map-header {
+  background: var(--ts-glass-bg-subtle) !important;
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+}
+
+.ts-map-layer-toggles {
+  background: var(--ts-glass-bg-sunken) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-map-layer-btn {
+  border-right: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-map-layer-btn:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-map-btn-group,
+.ts-map-compass,
+.ts-map-presets-select,
+.ts-map-legend {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-map-btn {
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-map-btn:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-map-telemetry {
+  background: var(--ts-glass-bg-subtle) !important;
+  border-top: 1px solid var(--ts-glass-border-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+}
+
+.ts-map-tooltip {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+
+/* ==========================================================================
+   14. TextEditor & Calculator
+   ========================================================================== */
+
+.ts-text-editor {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-text-editor-toolbar {
+  background: var(--ts-glass-bg-subtle) !important;
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-text-editor-btn:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-calculator {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-calculator-display {
+  background: var(--ts-glass-bg-sunken) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+  border-bottom: 1px solid var(--ts-glass-border-subtle) !important;
+}
+
+.ts-calculator-btn {
+  background: var(--ts-glass-bg-subtle) !important;
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  transition: all 0.15s ease;
+}
+
+.ts-calculator-btn:hover {
+  background: var(--ts-glass-bg-hover) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+}
+
+/* ==========================================================================
+   15. Date & Time Pickers
+   ========================================================================== */
+
+.ts-datepicker-trigger,
+.ts-timepicker-trigger,
+.ts-daterangepicker-trigger,
+.ts-timerangepicker-trigger {
+  background: var(--ts-glass-bg-sunken) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle) !important;
+  box-shadow: var(--ts-glass-shadow-inner) !important;
+}
+
+.ts-datepicker-popover,
+.ts-timepicker-popover,
+.ts-calendar-card {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-calendar-day:hover:not(:disabled) {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-calendar-day--selected {
+  background: var(--ts-glass-bg-raised) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+/* ==========================================================================
+   16. Tree, Drag & Drop, SplitScreen
+   ========================================================================== */
+
+.ts-tree {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-tree-node:hover {
+  background: var(--ts-glass-bg-hover) !important;
+}
+
+.ts-sortable-item {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur-sm) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm) !important;
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm) !important;
+}
+
+.ts-sortable-item:hover {
+  background: var(--ts-glass-gradient-hover) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+  box-shadow: var(--ts-glass-shadow-md) !important;
+}
+
+.ts-split-pane {
+  background: var(--ts-glass-gradient) !important;
+  backdrop-filter: var(--ts-glass-blur) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur) !important;
+}
+
+/* ==========================================================================
+   17. Loader, Skeleton & SplashScreen
+   ========================================================================== */
+
+.ts-loader-card {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: var(--ts-glass-blur-deep) !important;
+  -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
+  border: 1px solid var(--ts-glass-border-specular) !important;
+  box-shadow: var(--ts-glass-shadow-lg) !important;
+}
+
+.ts-skeleton {
+  background: var(--ts-glass-bg-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle);
+}
+
+.ts-skeleton--shimmer::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%) !important;
+}
+
+.ts-splash-screen {
+  background: var(--ts-glass-gradient-raised) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+}
+
+/* ==========================================================================
+   18. Chips, Badges & Tooltips
+   ========================================================================== */
+
+.ts-chip {
+  background: var(--ts-glass-bg-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border) !important;
+  box-shadow: var(--ts-glass-shadow-sm);
+}
+
+.ts-chip:hover:not(:disabled) {
+  background: var(--ts-glass-bg-hover) !important;
+  border-color: var(--ts-glass-border-strong) !important;
+}
+
+.ts-tooltip {
+  background: rgba(28, 25, 23, 0.88) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+}
+
+.ts-blockquote {
+  background: var(--ts-glass-bg-subtle) !important;
+  backdrop-filter: var(--ts-glass-blur-sm);
+  -webkit-backdrop-filter: var(--ts-glass-blur-sm);
+  border: 1px solid var(--ts-glass-border-subtle);
+  border-left: 3px solid var(--ts-color-primary) !important;
+  box-shadow: var(--ts-glass-shadow-sm);
+}
+
+/* ==========================================================================
+   19. Storybook Liquid Ambient Stage & Canvas Caustics
+   ========================================================================== */
+
+.thoughtstream-root {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Light Mode Liquid Canvas */
+[data-theme="light"].thoughtstream-root,
+.thoughtstream-theme-light.thoughtstream-root {
+  background-color: #F5F4F0;
+  background-image:
+    radial-gradient(at 10% 12%, rgba(215, 208, 198, 0.75) 0px, transparent 55%),
+    radial-gradient(at 90% 15%, rgba(198, 222, 248, 0.7) 0px, transparent 48%),
+    radial-gradient(at 52% 88%, rgba(252, 235, 218, 0.8) 0px, transparent 55%),
+    radial-gradient(at 88% 85%, rgba(228, 216, 244, 0.65) 0px, transparent 50%),
+    radial-gradient(at 18% 75%, rgba(210, 236, 226, 0.6) 0px, transparent 48%);
+  background-attachment: fixed;
+}
+
+/* Dark Mode Liquid Canvas */
+[data-theme="dark"].thoughtstream-root,
+.thoughtstream-theme-dark.thoughtstream-root {
+  background-color: #12100E;
+  background-image:
+    radial-gradient(at 12% 15%, rgba(72, 65, 58, 0.65) 0px, transparent 60%),
+    radial-gradient(at 88% 18%, rgba(32, 60, 92, 0.55) 0px, transparent 52%),
+    radial-gradient(at 48% 82%, rgba(72, 46, 32, 0.5) 0px, transparent 55%),
+    radial-gradient(at 85% 85%, rgba(58, 38, 78, 0.45) 0px, transparent 50%),
+    radial-gradient(at 18% 75%, rgba(26, 58, 50, 0.45) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Ambient Floating Liquid Orbs */
+.ts-liquid-ambient-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Backdrop Variants */
+[data-theme="light"].thoughtstream-backdrop-prismatic,
+.thoughtstream-theme-light.thoughtstream-backdrop-prismatic {
+  background-color: #F0F4F8;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(199, 210, 254, 0.8) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(254, 215, 226, 0.8) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(187, 247, 208, 0.7) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(254, 240, 138, 0.7) 0px, transparent 50%);
+}
+
+[data-theme="dark"].thoughtstream-backdrop-prismatic,
+.thoughtstream-theme-dark.thoughtstream-backdrop-prismatic {
+  background-color: #0F172A;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(67, 56, 202, 0.55) 0px, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(159, 18, 57, 0.5) 0px, transparent 55%),
+    radial-gradient(at 100% 100%, rgba(20, 83, 45, 0.5) 0px, transparent 55%),
+    radial-gradient(at 0% 100%, rgba(133, 77, 14, 0.5) 0px, transparent 55%);
+}
+
+[data-theme="light"].thoughtstream-backdrop-zen,
+.thoughtstream-theme-light.thoughtstream-backdrop-zen {
+  background-color: #FAFAF9;
+  background-image:
+    radial-gradient(at 20% 20%, rgba(231, 229, 228, 0.9) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(214, 211, 209, 0.8) 0px, transparent 50%);
+}
+
+[data-theme="dark"].thoughtstream-backdrop-zen,
+.thoughtstream-theme-dark.thoughtstream-backdrop-zen {
+  background-color: #1C1917;
+  background-image:
+    radial-gradient(at 20% 20%, rgba(41, 37, 36, 0.8) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(68, 64, 60, 0.6) 0px, transparent 50%);
+}
+
+[data-theme="light"].thoughtstream-backdrop-flat,
+.thoughtstream-theme-light.thoughtstream-backdrop-flat {
+  background: #FAFAF9 !important;
+}
+
+[data-theme="dark"].thoughtstream-backdrop-flat,
+.thoughtstream-theme-dark.thoughtstream-backdrop-flat {
+  background: #1C1917 !important;
+}
+
+.ts-liquid-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: ts-orb-float 20s infinite ease-in-out alternate;
+}
+
+.ts-liquid-orb--1 {
+  width: 480px;
+  height: 480px;
+  top: -80px;
+  left: 10%;
+  background: radial-gradient(circle, rgba(200, 225, 255, 0.65) 0%, rgba(200, 225, 255, 0) 70%);
+}
+
+.ts-liquid-orb--2 {
+  width: 540px;
+  height: 540px;
+  bottom: -100px;
+  right: 5%;
+  background: radial-gradient(circle, rgba(255, 228, 210, 0.65) 0%, rgba(255, 228, 210, 0) 70%);
+  animation-delay: -7s;
+  animation-duration: 25s;
+}
+
+.ts-liquid-orb--3 {
+  width: 420px;
+  height: 420px;
+  top: 40%;
+  left: 65%;
+  background: radial-gradient(circle, rgba(225, 215, 245, 0.55) 0%, rgba(225, 215, 245, 0) 70%);
+  animation-delay: -14s;
+  animation-duration: 22s;
+}
+
+[data-theme="dark"] .ts-liquid-orb--1,
+.thoughtstream-theme-dark .ts-liquid-orb--1 {
+  background: radial-gradient(circle, rgba(40, 85, 140, 0.45) 0%, rgba(40, 85, 140, 0) 70%);
+}
+
+[data-theme="dark"] .ts-liquid-orb--2,
+.thoughtstream-theme-dark .ts-liquid-orb--2 {
+  background: radial-gradient(circle, rgba(120, 70, 40, 0.4) 0%, rgba(120, 70, 40, 0) 70%);
+}
+
+[data-theme="dark"] .ts-liquid-orb--3,
+.thoughtstream-theme-dark .ts-liquid-orb--3 {
+  background: radial-gradient(circle, rgba(80, 50, 115, 0.35) 0%, rgba(80, 50, 115, 0) 70%);
+}
+
+@keyframes ts-orb-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, 30px) scale(1.08);
+  }
+  100% {
+    transform: translate(-30px, 50px) scale(0.95);
+  }
+}

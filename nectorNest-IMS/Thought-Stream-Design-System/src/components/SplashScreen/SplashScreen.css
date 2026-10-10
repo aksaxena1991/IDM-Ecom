@@ -1,0 +1,192 @@
+/* ThoughtStream SplashScreen Component Styles */
+
+.ts-splash-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  font-family: var(--ts-font-body);
+  user-select: none;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+}
+
+/* Fullscreen mode */
+.ts-splash-screen--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Embedded mode */
+.ts-splash-screen--embedded {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  padding: 48px 24px;
+}
+
+.ts-splash-screen--exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Center Content Stack */
+.ts-splash-screen-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 440px;
+  padding: 0 24px;
+}
+
+/* Geometric Monogram Emblem */
+.ts-splash-screen-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.ts-splash-screen-emblem {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border: 1.5px solid var(--ts-color-text-primary);
+  border-radius: var(--ts-radius-none);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-splash-screen-emblem-inner {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ts-color-text-secondary);
+  border-radius: var(--ts-radius-none);
+  animation: ts-splash-emblem-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ts-splash-emblem-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+}
+
+/* Typography */
+.ts-splash-screen-title {
+  font-family: var(--ts-font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px 0;
+  color: var(--ts-color-text-primary);
+}
+
+.ts-splash-screen-subtitle {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ts-color-text-tertiary);
+  margin: 0 0 40px 0;
+  max-width: 360px;
+}
+
+.ts-splash-screen-quote {
+  font-family: var(--ts-font-heading);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ts-color-text-secondary);
+  margin: 0 0 36px 0;
+  max-width: 380px;
+}
+
+/* Progress & Status area */
+.ts-splash-screen-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 260px;
+  gap: 14px;
+}
+
+.ts-splash-screen-status {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ts-color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.ts-splash-screen-progress-wrap {
+  width: 100%;
+}
+
+/* Actions / Enter button */
+.ts-splash-screen-actions {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ts-splash-screen-btn {
+  font-family: var(--ts-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 10px 24px;
+  background-color: var(--ts-color-text-primary);
+  color: var(--ts-color-bg);
+  border: 1px solid var(--ts-color-text-primary);
+  border-radius: var(--ts-radius-none);
+  cursor: pointer;
+  transition: all var(--ts-transition-fast);
+}
+
+.ts-splash-screen-btn:hover {
+  background-color: var(--ts-color-text-secondary);
+  border-color: var(--ts-color-text-secondary);
+}
+
+.ts-splash-screen-skip-btn {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  color: var(--ts-color-text-tertiary);
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color var(--ts-transition-fast);
+}
+
+.ts-splash-screen-skip-btn:hover {
+  color: var(--ts-color-text-primary);
+}
+
+/* Footer mark */
+.ts-splash-screen-footer {
+  position: absolute;
+  bottom: 24px;
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ts-color-text-tertiary);
+  opacity: 0.6;
+}

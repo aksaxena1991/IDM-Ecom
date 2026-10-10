@@ -1,0 +1,33 @@
+/* ThoughtStream Baseline Theme Styles */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.thoughtstream-theme,
+.thoughtstream-root {
+  margin: 0;
+  padding: 0;
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-size);
+  line-height: var(--ts-text-body-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible hidden utility */
+.ts-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -1,0 +1,255 @@
+/* ThoughtStream SplitScreen (Multi Split Screen) Styles */
+
+.ts-split-screen {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  user-select: auto;
+}
+
+.ts-split-screen--horizontal {
+  flex-direction: row;
+}
+
+.ts-split-screen--vertical {
+  flex-direction: column;
+}
+
+/* Individual Pane */
+.ts-split-pane {
+  box-sizing: border-box;
+  overflow: auto;
+  position: relative;
+  background-color: var(--ts-color-bg);
+  min-width: 0;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ts-border-medium) transparent;
+}
+
+.ts-split-pane::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.ts-split-pane::-webkit-scrollbar-thumb {
+  background-color: var(--ts-border-medium);
+}
+
+.ts-split-pane--collapsed {
+  display: none !important;
+}
+
+/* Resizer Gutter Divider */
+.ts-split-resizer {
+  position: relative;
+  background-color: var(--ts-border-subtle);
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: background-color var(--ts-transition-fast);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: none;
+}
+
+.ts-split-screen--horizontal > .ts-split-resizer {
+  width: 5px;
+  cursor: col-resize;
+  height: 100%;
+}
+
+.ts-split-screen--vertical > .ts-split-resizer {
+  height: 5px;
+  cursor: row-resize;
+  width: 100%;
+}
+
+.ts-split-resizer:hover,
+.ts-split-resizer--dragging {
+  background-color: var(--ts-color-primary);
+}
+
+/* Resizer Handle Icon / Dots */
+.ts-split-resizer-handle {
+  position: absolute;
+  background-color: var(--ts-border-strong);
+  border-radius: var(--ts-radius-none);
+  pointer-events: none;
+  transition: background-color var(--ts-transition-fast);
+}
+
+.ts-split-screen--horizontal > .ts-split-resizer > .ts-split-resizer-handle {
+  width: 1px;
+  height: 24px;
+}
+
+.ts-split-screen--vertical > .ts-split-resizer > .ts-split-resizer-handle {
+  width: 24px;
+  height: 1px;
+}
+
+.ts-split-resizer:hover > .ts-split-resizer-handle,
+.ts-split-resizer--dragging > .ts-split-resizer-handle {
+  background-color: var(--ts-color-bg);
+}
+
+/* Resizer Collapse Button */
+.ts-split-resizer-collapse-btn {
+  position: absolute;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity var(--ts-transition-standard), background-color var(--ts-transition-fast);
+  z-index: 20;
+}
+
+.ts-split-resizer:hover .ts-split-resizer-collapse-btn,
+.ts-split-resizer-collapse-btn:focus-visible {
+  opacity: 1;
+}
+
+.ts-split-resizer-collapse-btn:hover {
+  background-color: var(--ts-color-surface);
+  color: var(--ts-color-text-primary);
+  border-color: var(--ts-color-primary);
+}
+
+.ts-split-resizer-collapse-btn:focus-visible {
+  box-shadow: var(--ts-focus-ring);
+}
+
+/* ========================================================================== */
+/*                   SPLIT SCREEN GRID SYSTEM (SplitGrid)                     */
+/* ========================================================================== */
+
+.ts-split-grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  user-select: auto;
+}
+
+.ts-split-grid-cell {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: auto;
+  background-color: var(--ts-color-bg);
+  min-width: 0;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ts-border-medium) transparent;
+}
+
+.ts-split-grid-cell::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.ts-split-grid-cell::-webkit-scrollbar-thumb {
+  background-color: var(--ts-border-medium);
+}
+
+/* Column Gutters */
+.ts-split-grid-gutter-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  margin-left: -2.5px;
+  cursor: col-resize;
+  background-color: var(--ts-border-subtle);
+  z-index: 10;
+  transition: background-color var(--ts-transition-fast);
+  user-select: none;
+  touch-action: none;
+}
+
+.ts-split-grid-gutter-col:hover,
+.ts-split-grid-gutter-col--dragging {
+  background-color: var(--ts-color-primary);
+}
+
+/* Row Gutters */
+.ts-split-grid-gutter-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 5px;
+  margin-top: -2.5px;
+  cursor: row-resize;
+  background-color: var(--ts-border-subtle);
+  z-index: 10;
+  transition: background-color var(--ts-transition-fast);
+  user-select: none;
+  touch-action: none;
+}
+
+.ts-split-grid-gutter-row:hover,
+.ts-split-grid-gutter-row--dragging {
+  background-color: var(--ts-color-primary);
+}
+
+/* Intersection Junction Resizer */
+.ts-split-grid-intersection {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  z-index: 20;
+  cursor: move;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--ts-transition-fast), background-color var(--ts-transition-fast);
+  user-select: none;
+  touch-action: none;
+}
+
+.ts-split-grid-intersection:hover,
+.ts-split-grid-intersection--dragging {
+  background-color: var(--ts-color-primary);
+  border-color: var(--ts-color-primary);
+}
+
+.ts-split-grid-intersection::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background-color: var(--ts-color-primary);
+  border-radius: var(--ts-radius-none);
+  pointer-events: none;
+}
+
+.ts-split-grid-intersection:hover::after,
+.ts-split-grid-intersection--dragging::after {
+  background-color: var(--ts-color-bg);
+}
+

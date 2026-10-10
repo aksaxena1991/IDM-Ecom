@@ -1,0 +1,131 @@
+.ts-dropdown-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.ts-dropdown-menu {
+  position: absolute;
+  z-index: 1500;
+  min-width: 200px;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  box-shadow: var(--ts-shadow-none);
+  padding: 4px 0;
+  box-sizing: border-box;
+  animation: ts-dropdown-pop 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.ts-dropdown--bottom-start {
+  top: calc(100% + 4px);
+  left: 0;
+}
+
+.ts-dropdown--bottom-end {
+  top: calc(100% + 4px);
+  right: 0;
+}
+
+.ts-dropdown--top-start {
+  bottom: calc(100% + 4px);
+  left: 0;
+}
+
+.ts-dropdown--top-end {
+  bottom: calc(100% + 4px);
+  right: 0;
+}
+
+.ts-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  font-family: var(--ts-font-body);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ts-color-text-primary);
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--ts-radius-none);
+  transition: var(--ts-transition-standard);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ts-dropdown-item:hover,
+.ts-dropdown-item:focus {
+  background-color: var(--ts-color-surface);
+}
+
+.ts-dropdown-item--destructive {
+  color: var(--ts-color-error);
+}
+
+.ts-dropdown-item--destructive:hover,
+.ts-dropdown-item--destructive:focus {
+  background-color: var(--ts-status-error-bg);
+}
+
+.ts-dropdown-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ts-dropdown-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ts-dropdown-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-color-primary);
+}
+
+.ts-dropdown-item--destructive .ts-dropdown-item-icon {
+  color: var(--ts-color-error);
+}
+
+.ts-dropdown-item-shortcut {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+.ts-dropdown-separator {
+  height: 1px;
+  background-color: var(--ts-border-subtle);
+  margin: 4px 0;
+  border: none;
+}
+
+.ts-dropdown-label {
+  padding: 6px 16px 4px 16px;
+  font-family: var(--ts-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ts-color-text-tertiary);
+}
+
+@keyframes ts-dropdown-pop {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

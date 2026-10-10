@@ -1,0 +1,398 @@
+/* ThoughtStream Charts Suite Styles */
+
+.ts-chart-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  padding: 20px 24px;
+  position: relative;
+  font-family: var(--ts-font-body);
+}
+
+.ts-chart-container--borderless {
+  border: none;
+  padding: 0;
+}
+
+/* Header & Title */
+.ts-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.ts-chart-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-chart-title {
+  font-family: var(--ts-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin: 0;
+}
+
+.ts-chart-subtitle {
+  font-family: var(--ts-font-body);
+  font-size: 12px;
+  color: var(--ts-color-text-tertiary);
+  margin: 0;
+}
+
+/* Legend */
+.ts-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity var(--ts-transition-fast);
+}
+
+.ts-chart-legend-item:hover {
+  color: var(--ts-color-text-primary);
+}
+
+.ts-chart-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--ts-radius-none);
+  flex-shrink: 0;
+}
+
+/* Chart SVG Canvas wrapper */
+.ts-chart-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.ts-chart-svg {
+  display: block;
+  overflow: visible;
+  width: 100%;
+}
+
+/* Gridlines & Axes */
+.ts-chart-gridline {
+  stroke: var(--ts-border-subtle);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.ts-chart-axis-line {
+  stroke: var(--ts-border-medium);
+  stroke-width: 1;
+}
+
+.ts-chart-axis-tick {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  fill: var(--ts-color-text-tertiary);
+  user-select: none;
+}
+
+/* Tracking Crosshair Line */
+.ts-chart-crosshair {
+  stroke: var(--ts-color-primary);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+/* Point nodes */
+.ts-chart-point {
+  fill: var(--ts-color-bg);
+  stroke-width: 2;
+  transition: r var(--ts-transition-fast);
+}
+
+.ts-chart-point--active {
+  r: 5;
+  stroke-width: 2.5;
+}
+
+/* Bar Elements */
+.ts-chart-bar {
+  transition: opacity var(--ts-transition-fast);
+  cursor: pointer;
+}
+
+.ts-chart-bar:hover {
+  opacity: 0.85;
+}
+
+/* Floating Chart Tooltip */
+.ts-chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  padding: 10px 14px;
+  font-family: var(--ts-font-body);
+  font-size: 12px;
+  color: var(--ts-color-text-primary);
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  white-space: nowrap;
+  animation: ts-chart-tooltip-fade 0.1s ease-out;
+}
+
+[data-theme="dark"] .ts-chart-tooltip {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  border-color: var(--ts-border-medium);
+}
+
+@keyframes ts-chart-tooltip-fade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -95%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+.ts-chart-tooltip-title {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ts-color-text-secondary);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.ts-chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0;
+}
+
+.ts-chart-tooltip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-chart-tooltip-color {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--ts-radius-none);
+}
+
+.ts-chart-tooltip-value {
+  font-family: var(--ts-font-mono);
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+}
+
+/* Pie & Donut Charts */
+.ts-chart-slice {
+  cursor: pointer;
+  transition: opacity var(--ts-transition-fast), transform var(--ts-transition-fast);
+}
+
+.ts-chart-slice:hover {
+  opacity: 0.88;
+}
+
+/* Gantt Chart */
+.ts-chart-gantt-row {
+  transition: background-color var(--ts-transition-fast);
+}
+
+.ts-chart-gantt-bar {
+  cursor: pointer;
+  transition: opacity var(--ts-transition-fast);
+}
+
+.ts-chart-gantt-bar:hover {
+  opacity: 0.85;
+}
+
+.ts-chart-gantt-today {
+  stroke: var(--ts-color-primary);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+/* Funnel Chart */
+.ts-chart-funnel-step {
+  cursor: pointer;
+  transition: opacity var(--ts-transition-fast);
+}
+
+.ts-chart-funnel-step:hover {
+  opacity: 0.85;
+}
+
+/* Gauge Chart */
+.ts-chart-gauge-needle {
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Heatmap Chart */
+.ts-chart-heatmap-cell {
+  cursor: pointer;
+  transition: opacity var(--ts-transition-fast), stroke var(--ts-transition-fast);
+}
+
+.ts-chart-heatmap-cell:hover {
+  stroke: var(--ts-color-text-primary);
+  stroke-width: 1.5;
+}
+
+/* Candlestick Chart */
+.ts-chart-candle-wick {
+  stroke-width: 1;
+}
+
+.ts-chart-candle-body {
+  cursor: pointer;
+  transition: opacity var(--ts-transition-fast);
+}
+
+.ts-chart-candle-body:hover {
+  opacity: 0.85;
+}
+
+/* Scatter & Histogram */
+.ts-chart-scatter-point {
+  cursor: pointer;
+  transition: r var(--ts-transition-fast), opacity var(--ts-transition-fast);
+}
+
+.ts-chart-scatter-point:hover {
+  opacity: 0.85;
+}
+
+.ts-chart-trendline {
+  stroke: var(--ts-color-text-secondary);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+/* Venn Diagram */
+.ts-chart-venn-circle {
+  cursor: pointer;
+  transition: fill-opacity var(--ts-transition-fast);
+}
+
+.ts-chart-venn-circle:hover {
+  fill-opacity: 0.45;
+}
+
+/* Map Charts: Route, Pin, Connection, Density */
+.ts-chart-map-frame {
+  background-color: var(--ts-color-bg-subtle);
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.ts-chart-map-gridline {
+  stroke: var(--ts-border-subtle);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 4;
+}
+
+.ts-chart-map-pin {
+  cursor: pointer;
+  transition: transform var(--ts-transition-fast);
+}
+
+.ts-chart-map-pin:hover {
+  transform: translateY(-2px);
+}
+
+.ts-chart-map-arc {
+  fill: none;
+  stroke-linecap: square;
+  transition: stroke-width var(--ts-transition-fast);
+}
+
+.ts-chart-map-arc:hover {
+  stroke-width: 2.5;
+}
+
+/* Table Chart */
+.ts-chart-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ts-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: var(--ts-font-body);
+  text-align: left;
+}
+
+.ts-chart-table th {
+  padding: 10px 14px;
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ts-color-text-tertiary);
+  border-bottom: 1px solid var(--ts-border-medium);
+  background-color: var(--ts-color-bg-subtle);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ts-chart-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-text-primary);
+  white-space: nowrap;
+}
+
+.ts-chart-table tr:hover td {
+  background-color: var(--ts-color-bg-subtle);
+}
+
+.ts-chart-table-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: var(--ts-border-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+.ts-chart-table-bar-fill {
+  height: 100%;
+  background-color: var(--ts-color-text-primary);
+  transition: width 0.3s ease;
+}
+

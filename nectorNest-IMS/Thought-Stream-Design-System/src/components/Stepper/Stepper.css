@@ -1,0 +1,363 @@
+/**
+ * ThoughtStream Stepper Styles
+ *
+ * Contemplative, 0px border radius, hairline track dividers,
+ * crisp monospace numerals and flat surfaces.
+ */
+
+.ts-stepper {
+  box-sizing: border-box;
+  width: 100%;
+  font-family: var(--ts-font-body, system-ui, -apple-system, sans-serif);
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-stepper *,
+.ts-stepper *::before,
+.ts-stepper *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+.ts-stepper__list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* ==========================================================================
+   Horizontal Stepper
+   ========================================================================== */
+.ts-stepper--horizontal .ts-stepper__list {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.ts-stepper--horizontal .ts-stepper__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+  text-align: center;
+}
+
+.ts-stepper--horizontal .ts-stepper__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+  outline: none;
+  z-index: 2;
+  padding: 4px;
+}
+
+.ts-stepper--horizontal .ts-stepper__label-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 180px;
+}
+
+/* Hairline Connector lines in horizontal orientation */
+.ts-stepper--horizontal .ts-stepper__connector-before,
+.ts-stepper--horizontal .ts-stepper__connector-after {
+  position: absolute;
+  top: 18px;
+  height: 1px;
+  background-color: var(--ts-border-subtle, #e7e5e4);
+  z-index: 1;
+  transition: background-color 200ms ease;
+}
+
+.ts-stepper--horizontal.ts-stepper--sm .ts-stepper__connector-before,
+.ts-stepper--horizontal.ts-stepper--sm .ts-stepper__connector-after {
+  top: 15px;
+}
+
+.ts-stepper--horizontal.ts-stepper--lg .ts-stepper__connector-before,
+.ts-stepper--horizontal.ts-stepper--lg .ts-stepper__connector-after {
+  top: 22px;
+}
+
+.ts-stepper--horizontal .ts-stepper__connector-before {
+  left: 0;
+  right: 50%;
+}
+
+.ts-stepper--horizontal .ts-stepper__connector-after {
+  left: 50%;
+  right: 0;
+}
+
+.ts-stepper--horizontal .ts-stepper__item--completed .ts-stepper__connector-after,
+.ts-stepper--horizontal .ts-stepper__item--completed .ts-stepper__connector-before {
+  background-color: var(--ts-color-primary, #78716c);
+}
+
+.ts-stepper--horizontal .ts-stepper__item--current .ts-stepper__connector-before {
+  background-color: var(--ts-color-primary, #78716c);
+}
+
+/* ==========================================================================
+   Vertical Stepper
+   ========================================================================== */
+.ts-stepper--vertical .ts-stepper__list {
+  flex-direction: column;
+  width: 100%;
+}
+
+.ts-stepper--vertical .ts-stepper__item {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.ts-stepper--vertical .ts-stepper__item:last-child {
+  padding-bottom: 0;
+}
+
+.ts-stepper--vertical .ts-stepper__header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: default;
+  outline: none;
+  z-index: 2;
+  padding: 4px 0;
+}
+
+.ts-stepper--vertical .ts-stepper__label-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+/* Vertical Connector Track */
+.ts-stepper--vertical .ts-stepper__connector-after {
+  position: absolute;
+  left: 14px;
+  top: 32px;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--ts-border-subtle, #e7e5e4);
+  z-index: 1;
+  transition: background-color 200ms ease;
+}
+
+.ts-stepper--vertical.ts-stepper--sm .ts-stepper__connector-after {
+  left: 11px;
+  top: 26px;
+}
+
+.ts-stepper--vertical.ts-stepper--lg .ts-stepper__connector-after {
+  left: 17px;
+  top: 38px;
+}
+
+.ts-stepper--vertical .ts-stepper__item--completed .ts-stepper__connector-after {
+  background-color: var(--ts-color-primary, #78716c);
+}
+
+.ts-stepper--vertical .ts-stepper__connector-before {
+  display: none;
+}
+
+/* Vertical Content Gutter & Body */
+.ts-stepper__content-pane {
+  display: flex;
+  margin-top: 8px;
+  padding-left: 42px;
+}
+
+.ts-stepper--sm .ts-stepper__content-pane {
+  padding-left: 36px;
+}
+
+.ts-stepper--lg .ts-stepper__content-pane {
+  padding-left: 48px;
+}
+
+.ts-stepper__content-body {
+  width: 100%;
+  padding: 16px;
+  background: var(--ts-color-surface, #f5f5f4);
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ts-color-text-secondary, #57534e);
+}
+
+/* ==========================================================================
+   Step Indicator Box (0px Sharp Square)
+   ========================================================================== */
+.ts-stepper__indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--ts-color-bg, #fafaf9);
+  border: 1px solid var(--ts-border-medium, #d6d3d1);
+  color: var(--ts-color-text-secondary, #57534e);
+  font-family: var(--ts-font-mono, 'Source Code Pro', monospace);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transition: all 180ms ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.ts-stepper--sm .ts-stepper__indicator {
+  width: 22px;
+  height: 22px;
+  font-size: 0.6875rem;
+}
+
+.ts-stepper--lg .ts-stepper__indicator {
+  width: 36px;
+  height: 36px;
+  font-size: 0.875rem;
+}
+
+/* Status: Upcoming */
+.ts-stepper__indicator--upcoming {
+  border-color: var(--ts-border-subtle, #e7e5e4);
+  color: var(--ts-color-text-tertiary, #a8a29e);
+  background-color: var(--ts-color-bg, #fafaf9);
+}
+
+/* Status: Current */
+.ts-stepper__indicator--current {
+  border-color: var(--ts-color-text-primary, #1c1917);
+  background-color: var(--ts-color-text-primary, #1c1917);
+  color: var(--ts-color-bg, #fafaf9);
+  font-weight: 600;
+}
+
+/* Status: Completed */
+.ts-stepper__indicator--completed {
+  border-color: var(--ts-color-primary, #78716c);
+  background-color: var(--ts-color-surface-raised, #efedeb);
+  color: var(--ts-color-primary, #78716c);
+}
+
+/* Status: Error */
+.ts-stepper__indicator--error {
+  border-color: var(--ts-color-error, #dc2626);
+  background-color: var(--ts-status-error-bg, #fef2f2);
+  color: var(--ts-color-error, #dc2626);
+}
+
+/* Dots Variant */
+.ts-stepper--dots .ts-stepper__indicator {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  padding: 0;
+  border-width: 1px;
+}
+
+.ts-stepper--dots .ts-stepper__dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+}
+
+.ts-stepper--dots.ts-stepper--horizontal .ts-stepper__connector-before,
+.ts-stepper--dots.ts-stepper--horizontal .ts-stepper__connector-after {
+  top: 10px;
+}
+
+.ts-stepper--dots.ts-stepper--vertical .ts-stepper__connector-after {
+  left: 6px;
+  top: 14px;
+}
+
+/* ==========================================================================
+   Typography & Labels
+   ========================================================================== */
+.ts-stepper__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-stepper__title {
+  font-family: var(--ts-font-body, system-ui, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ts-color-text-primary, #1c1917);
+  letter-spacing: -0.01em;
+  transition: color 150ms ease;
+}
+
+.ts-stepper__item--upcoming .ts-stepper__title {
+  color: var(--ts-color-text-tertiary, #a8a29e);
+  font-weight: 400;
+}
+
+.ts-stepper__item--completed .ts-stepper__title {
+  color: var(--ts-color-text-secondary, #57534e);
+}
+
+.ts-stepper__item--error .ts-stepper__title {
+  color: var(--ts-color-error, #dc2626);
+}
+
+.ts-stepper__optional-tag {
+  display: inline-block;
+  font-family: var(--ts-font-mono, monospace);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-tertiary, #a8a29e);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ts-stepper__subtitle {
+  font-size: 0.75rem;
+  color: var(--ts-color-text-secondary, #57534e);
+  margin-top: 2px;
+}
+
+.ts-stepper__description {
+  font-size: 0.75rem;
+  color: var(--ts-color-text-tertiary, #a8a29e);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Interactivity & Focus
+   ========================================================================== */
+.ts-stepper__item--clickable .ts-stepper__header {
+  cursor: pointer;
+}
+
+.ts-stepper__item--clickable .ts-stepper__header:hover .ts-stepper__indicator {
+  border-color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-stepper__item--clickable .ts-stepper__header:hover .ts-stepper__title {
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-stepper__item--clickable .ts-stepper__header:focus-visible {
+  outline: 1px dashed var(--ts-color-text-primary, #1c1917);
+  outline-offset: 2px;
+}
+
+.ts-stepper__item--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}

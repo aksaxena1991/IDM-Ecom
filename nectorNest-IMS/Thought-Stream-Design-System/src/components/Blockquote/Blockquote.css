@@ -1,0 +1,29 @@
+.ts-blockquote {
+  margin: 36px 0;
+  padding: 12px 0 12px 24px;
+  border-left: 2px solid var(--ts-color-primary);
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.ts-blockquote-content {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-subhead-size);
+  font-weight: 400;
+  line-height: var(--ts-text-subhead-line-height);
+  letter-spacing: var(--ts-text-subhead-tracking);
+  color: var(--ts-color-text-primary);
+  margin: 0;
+  font-style: italic;
+}
+
+.ts-blockquote-citation {
+  display: block;
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-caption-size);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ts-color-text-secondary);
+  margin-top: 12px;
+  font-style: normal;
+}

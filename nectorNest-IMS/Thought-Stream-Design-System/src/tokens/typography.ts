@@ -1,0 +1,85 @@
+export const typography = {
+  fonts: {
+    heading: "Libre Baskerville, Georgia, 'Times New Roman', serif",
+    body: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+    mono: "Source Code Pro, 'Fira Code', Consolas, monospace",
+  },
+  scale: {
+    display: {
+      fontFamily: "Libre Baskerville, Georgia, 'Times New Roman', serif",
+      fontSize: '40px',
+      fontWeight: 700,
+      lineHeight: 1.2,
+      letterSpacing: '-0.02em',
+      role: 'Hero article titles',
+    },
+    headline: {
+      fontFamily: "Libre Baskerville, Georgia, 'Times New Roman', serif",
+      fontSize: '30px',
+      fontWeight: 700,
+      lineHeight: 1.3,
+      letterSpacing: '-0.015em',
+      role: 'Post titles',
+    },
+    subhead: {
+      fontFamily: "Libre Baskerville, Georgia, 'Times New Roman', serif",
+      fontSize: '22px',
+      fontWeight: 400,
+      lineHeight: 1.4,
+      letterSpacing: '-0.01em',
+      role: 'Section headings',
+    },
+    bodyLarge: {
+      fontFamily: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+      fontSize: '20px',
+      fontWeight: 400,
+      lineHeight: 1.75,
+      letterSpacing: '0',
+      role: 'Featured paragraph, lede',
+    },
+    body: {
+      fontFamily: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+      fontSize: '17px',
+      fontWeight: 400,
+      lineHeight: 1.8,
+      letterSpacing: '0',
+      role: 'Default reading text',
+    },
+    bodySmall: {
+      fontFamily: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+      fontSize: '15px',
+      fontWeight: 400,
+      lineHeight: 1.7,
+      letterSpacing: '0',
+      role: 'Sidebar text, footnotes',
+    },
+    caption: {
+      fontFamily: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+      fontSize: '13px',
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: '0.01em',
+      role: 'Image captions, dates',
+    },
+    overline: {
+      fontFamily: "Inter, -apple-system, 'Segoe UI', Helvetica, sans-serif",
+      fontSize: '11px',
+      fontWeight: 600,
+      lineHeight: 1.4,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase' as const,
+      role: 'Category labels',
+    },
+    code: {
+      fontFamily: "Source Code Pro, 'Fira Code', Consolas, monospace",
+      fontSize: '15px',
+      fontWeight: 400,
+      lineHeight: 1.7,
+      letterSpacing: '0',
+      role: 'Inline code, code blocks',
+    },
+  },
+} as const;
+
+export type TypographyTokens = typeof typography;
+export type TypographyScaleKey = keyof typeof typography.scale;

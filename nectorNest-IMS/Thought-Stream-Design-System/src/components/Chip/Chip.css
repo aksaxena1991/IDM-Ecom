@@ -1,0 +1,84 @@
+.ts-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--ts-font-body);
+  border-radius: var(--ts-radius-none);
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  user-select: none;
+  white-space: nowrap;
+  transition: var(--ts-transition-standard);
+  outline: none;
+}
+
+/* Filter Chip */
+.ts-chip--filter {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ts-color-text-secondary);
+  background-color: transparent;
+  border-color: var(--ts-border-medium);
+  cursor: pointer;
+}
+
+.ts-chip--filter:hover:not(:disabled) {
+  border-color: var(--ts-color-primary);
+  color: var(--ts-color-text-primary);
+  background-color: var(--ts-color-surface);
+}
+
+.ts-chip--filter.ts-chip--selected {
+  background-color: var(--ts-color-primary);
+  color: var(--ts-color-bg);
+  border-color: var(--ts-color-primary);
+}
+
+.ts-chip--filter:focus-visible {
+  box-shadow: var(--ts-focus-ring);
+}
+
+/* Status Chip */
+.ts-chip--status {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: default;
+}
+
+.ts-chip--status-success {
+  background-color: var(--ts-status-success-bg);
+  color: var(--ts-status-success-text);
+  border-color: var(--ts-status-success-border);
+}
+
+.ts-chip--status-warning {
+  background-color: var(--ts-status-warning-bg);
+  color: var(--ts-status-warning-text);
+  border-color: var(--ts-status-warning-border);
+}
+
+.ts-chip--status-error {
+  background-color: var(--ts-status-error-bg);
+  color: var(--ts-status-error-text);
+  border-color: var(--ts-status-error-border);
+}
+
+.ts-chip--status-info {
+  background-color: var(--ts-color-surface);
+  color: var(--ts-color-primary);
+  border-color: var(--ts-border-medium);
+}
+
+/* Disabled */
+.ts-chip:disabled,
+.ts-chip--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

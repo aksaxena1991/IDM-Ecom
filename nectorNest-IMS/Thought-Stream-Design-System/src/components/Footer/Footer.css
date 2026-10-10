@@ -1,0 +1,280 @@
+/**
+ * ThoughtStream Footer Styles
+ *
+ * Contemplative, architectural footer with 0px geometry,
+ * hairline dividers and peaceful typography.
+ */
+
+.ts-footer {
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--ts-color-bg, #fafaf9);
+  color: var(--ts-color-text-primary, #1c1917);
+  font-family: var(--ts-font-body, system-ui, -apple-system, sans-serif);
+  border-top: 1px solid var(--ts-border-subtle, #e7e5e4);
+  padding: 48px 0 32px 0;
+  position: relative;
+}
+
+.ts-footer *,
+.ts-footer *::before,
+.ts-footer *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+.ts-footer__container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Main Grid */
+.ts-footer__main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+@media (min-width: 768px) {
+  .ts-footer__main-grid {
+    grid-template-columns: minmax(260px, 1.2fr) 2fr;
+    gap: 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ts-footer__main-grid {
+    grid-template-columns: minmax(260px, 1.2fr) minmax(360px, 2.5fr) minmax(240px, 1.2fr);
+    gap: 56px;
+  }
+}
+
+/* Brand Column */
+.ts-footer__brand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ts-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ts-font-heading, 'Libre Baskerville', serif);
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-footer__quote {
+  margin: 0;
+  font-family: var(--ts-font-heading, 'Libre Baskerville', serif);
+  font-style: italic;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--ts-color-text-secondary, #57534e);
+  max-width: 280px;
+}
+
+/* Status Indicator */
+.ts-footer__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--ts-color-surface, #f5f5f4);
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+  font-family: var(--ts-font-mono, 'Source Code Pro', monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--ts-color-text-secondary, #57534e);
+}
+
+.ts-footer__status-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--ts-color-success, #65a30d);
+}
+
+.ts-footer__status-dot--operational {
+  background-color: var(--ts-color-success, #65a30d);
+  box-shadow: 0 0 6px rgba(101, 163, 13, 0.4);
+}
+
+.ts-footer__status-dot--degraded {
+  background-color: var(--ts-color-warning, #ca8a04);
+}
+
+.ts-footer__status-dot--maintenance {
+  background-color: var(--ts-color-text-tertiary, #a8a29e);
+}
+
+/* Column Grid */
+.ts-footer__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 32px;
+}
+
+.ts-footer__col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-footer__col-title {
+  margin: 0 0 16px 0;
+  font-family: var(--ts-font-heading, 'Libre Baskerville', serif);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ts-color-text-primary, #1c1917);
+  letter-spacing: -0.01em;
+}
+
+.ts-footer__col-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ts-footer__col-item {
+  margin: 0;
+  padding: 0;
+}
+
+.ts-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ts-font-body, system-ui, sans-serif);
+  font-size: 0.8125rem;
+  color: var(--ts-color-text-secondary, #57534e);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+
+.ts-footer__link:hover {
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-footer__link-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  font-family: var(--ts-font-mono, monospace);
+  font-size: 0.625rem;
+  background: var(--ts-color-surface-raised, #efedeb);
+  color: var(--ts-color-text-secondary, #57534e);
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+}
+
+.ts-footer__external-icon {
+  color: var(--ts-color-text-tertiary, #a8a29e);
+}
+
+/* Newsletter Column */
+.ts-footer__newsletter-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Hairline Divider */
+.ts-footer__divider {
+  width: 100%;
+  height: 1px;
+  background: var(--ts-border-subtle, #e7e5e4);
+  margin-bottom: 24px;
+}
+
+/* Bottom Bar */
+.ts-footer__bottom-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .ts-footer__bottom-bar {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.ts-footer__bottom-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--ts-color-text-tertiary, #a8a29e);
+}
+
+.ts-footer__copyright {
+  font-family: var(--ts-font-mono, monospace);
+  letter-spacing: -0.01em;
+}
+
+.ts-footer__legal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-footer__legal-link {
+  color: var(--ts-color-text-tertiary, #a8a29e);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.ts-footer__legal-link:hover {
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-footer__legal-sep {
+  color: var(--ts-border-medium, #d6d3d1);
+}
+
+.ts-footer__bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ts-footer__back-to-top {
+  appearance: none;
+  background: var(--ts-color-surface, #f5f5f4);
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+  color: var(--ts-color-text-secondary, #57534e);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: var(--ts-font-body, system-ui, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 140ms ease;
+}
+
+.ts-footer__back-to-top:hover {
+  background: var(--ts-color-surface-raised, #efedeb);
+  color: var(--ts-color-text-primary, #1c1917);
+  border-color: var(--ts-border-medium, #d6d3d1);
+}
+
+.ts-footer__back-to-top:focus-visible {
+  outline: 1px dashed var(--ts-color-text-primary, #1c1917);
+  outline-offset: 2px;
+}

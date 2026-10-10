@@ -1,0 +1,142 @@
+.ts-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: rgba(28, 25, 23, 0.55);
+  backdrop-filter: blur(2px);
+  animation: ts-fade-in 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .ts-modal-overlay,
+.thoughtstream-theme-dark .ts-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.ts-modal {
+  position: relative;
+  width: 100%;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  box-shadow: var(--ts-shadow-none);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  animation: ts-modal-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  max-height: calc(100vh - 48px);
+}
+
+/* Sizes */
+.ts-modal--sm {
+  max-width: 440px;
+}
+
+.ts-modal--md {
+  max-width: 580px;
+}
+
+.ts-modal--lg {
+  max-width: 760px;
+}
+
+.ts-modal-header {
+  padding: 24px 28px 16px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  flex-shrink: 0;
+}
+
+.ts-modal-header-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 16px;
+}
+
+.ts-modal-title {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-subhead-size);
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ts-modal-subtitle {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  color: var(--ts-color-text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.ts-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ts-radius-none);
+  transition: var(--ts-transition-standard);
+  outline: none;
+}
+
+.ts-modal-close:hover {
+  color: var(--ts-color-text-primary);
+  background-color: var(--ts-color-surface);
+}
+
+.ts-modal-close:focus-visible {
+  box-shadow: var(--ts-focus-ring);
+}
+
+.ts-modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-size);
+  line-height: var(--ts-text-body-line-height);
+  color: var(--ts-color-text-primary);
+  box-sizing: border-box;
+}
+
+.ts-modal-footer {
+  padding: 16px 28px 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-surface);
+  flex-shrink: 0;
+}
+
+@keyframes ts-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ts-modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

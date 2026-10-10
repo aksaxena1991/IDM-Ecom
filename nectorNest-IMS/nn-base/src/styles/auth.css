@@ -1,0 +1,450 @@
+/* Thought-Stream Design System Auth Application Styles */
+
+:root {
+  --nn-editorial-bg-gradient: radial-gradient(circle at 10% 20%, rgba(120, 113, 108, 0.08) 0%, transparent 60%);
+}
+
+[data-theme="dark"],
+.thoughtstream-theme-dark {
+  --nn-editorial-bg-gradient: radial-gradient(circle at 10% 20%, rgba(168, 162, 158, 0.08) 0%, transparent 60%);
+}
+
+/* Reset & Base Container */
+.nn-auth-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  font-family: var(--ts-font-body);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Header */
+.nn-auth-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-bg);
+  z-index: 20;
+}
+
+.nn-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nn-auth-logo-badge {
+  width: 36px;
+  height: 36px;
+  background: var(--ts-color-tertiary);
+  color: var(--ts-color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ts-border-medium);
+}
+
+.nn-auth-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nn-auth-brand-name {
+  font-family: var(--ts-font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-auth-brand-sub {
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ts-color-text-tertiary);
+}
+
+.nn-auth-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Split Main Layout */
+.nn-auth-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-width: 1024px) {
+  .nn-auth-main {
+    grid-template-columns: 1fr;
+  }
+
+  .nn-auth-editorial {
+    display: none;
+  }
+}
+
+/* Left Editorial Section */
+.nn-auth-editorial {
+  padding: 64px 56px;
+  border-right: 1px solid var(--ts-border-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--nn-editorial-bg-gradient), var(--ts-color-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.nn-auth-editorial-content {
+  max-width: 620px;
+}
+
+.nn-tagline-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.nn-tagline-pill {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 4px 10px;
+  background: var(--ts-color-surface-raised);
+  border: 1px solid var(--ts-border-medium);
+  color: var(--ts-color-primary);
+}
+
+.nn-tagline-status {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nn-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--ts-color-success, #65A30D);
+  box-shadow: 0 0 0 2px rgba(101, 163, 13, 0.25);
+  animation: nnPulse 2s infinite ease-in-out;
+}
+
+@keyframes nnPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.nn-editorial-title {
+  margin-bottom: 24px;
+  color: var(--ts-color-text-primary);
+  line-height: 1.15;
+}
+
+.nn-editorial-desc {
+  margin-bottom: 40px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Architecture Metrics */
+.nn-architecture-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.nn-metric-card {
+  padding: 16px;
+  background: var(--ts-color-surface-raised);
+  border: 1px solid var(--ts-border-subtle);
+  display: flex;
+  flex-direction: column;
+}
+
+.nn-metric-val {
+  font-family: var(--ts-font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin-bottom: 4px;
+}
+
+.nn-metric-label {
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ts-color-text-tertiary);
+}
+
+/* Terminal Preview */
+.nn-terminal-preview {
+  background: #141210;
+  border: 1px solid #292524;
+  color: #FAFAF9;
+  font-family: var(--ts-font-mono);
+  padding: 14px 18px;
+}
+
+.nn-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #292524;
+  margin-bottom: 12px;
+}
+
+.nn-terminal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.nn-terminal-dots span {
+  width: 9px;
+  height: 9px;
+  background: #44403C;
+  display: block;
+}
+
+.nn-terminal-title {
+  font-size: 11px;
+  color: #A8A29E;
+}
+
+.nn-terminal-body {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #D6D3D1;
+  white-space: pre-wrap;
+  font-family: var(--ts-font-mono);
+}
+
+/* Editorial Footer */
+.nn-editorial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 32px;
+  border-top: 1px solid var(--ts-border-subtle);
+  font-size: 12px;
+  color: var(--ts-color-text-tertiary);
+}
+
+.nn-editorial-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+}
+
+/* Right Form Container */
+.nn-auth-form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 32px;
+  background: var(--ts-color-bg);
+}
+
+.nn-auth-form-card-wrapper {
+  width: 100%;
+  max-width: 500px;
+}
+
+.nn-form-header {
+  margin-bottom: 28px;
+}
+
+.nn-form-title {
+  margin-bottom: 8px;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-form-subtitle {
+  font-size: 15px;
+}
+
+/* Card & Form Details */
+.nn-login-card,
+.nn-signup-card {
+  width: 100%;
+  box-shadow: none !important;
+  border: 1px solid var(--ts-border-medium) !important;
+  border-radius: 0 !important;
+}
+
+.nn-demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  padding: 8px 14px;
+  margin-bottom: 24px;
+}
+
+.nn-demo-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ts-color-text-secondary);
+}
+
+.nn-demo-btn {
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  height: 28px !important;
+}
+
+.nn-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nn-form-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Links & Eye Buttons */
+.nn-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  color: var(--ts-color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.nn-link-button:hover {
+  color: var(--ts-color-text-primary);
+}
+
+.nn-link-button-bold {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--ts-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.nn-link-button-bold:hover {
+  color: var(--ts-color-primary);
+}
+
+.nn-inline-link {
+  color: var(--ts-color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.nn-input-eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-color-text-tertiary);
+  padding: 4px;
+}
+
+.nn-input-eye-btn:hover {
+  color: var(--ts-color-text-primary);
+}
+
+/* Password strength bar */
+.nn-password-strength-container {
+  margin-top: 8px;
+}
+
+.nn-strength-bars {
+  display: flex;
+  gap: 4px;
+  height: 4px;
+  margin-bottom: 6px;
+}
+
+.nn-strength-bar {
+  flex: 1;
+  background: var(--ts-border-subtle);
+  transition: background-color 200ms ease;
+}
+
+.nn-bar--weak {
+  background-color: var(--ts-color-error, #DC2626);
+}
+
+.nn-bar--fair {
+  background-color: var(--ts-color-warning, #CA8A04);
+}
+
+.nn-bar--strong {
+  background-color: var(--ts-color-success, #65A30D);
+}
+
+.nn-strength-text {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+}
+
+/* SSO Area */
+.nn-secondary-auth {
+  margin-bottom: 20px;
+}
+
+.nn-secondary-auth-label {
+  display: block;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nn-sso-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nn-card-footer-switch,
+.nn-signup-footer {
+  text-align: center;
+  margin-top: 8px;
+}

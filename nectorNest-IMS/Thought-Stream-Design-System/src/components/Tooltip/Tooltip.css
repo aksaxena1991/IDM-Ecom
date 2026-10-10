@@ -1,0 +1,96 @@
+.ts-tooltip-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.ts-tooltip-content {
+  position: absolute;
+  z-index: 1000;
+  background-color: var(--ts-tooltip-bg, var(--ts-color-tertiary));
+  color: var(--ts-tooltip-text, var(--ts-color-bg));
+  border: 1px solid var(--ts-border-subtle);
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 8px 14px;
+  border-radius: var(--ts-radius-none);
+  max-width: 240px;
+  white-space: normal;
+  box-shadow: var(--ts-shadow-none);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition-delay: 300ms;
+}
+
+.ts-tooltip-content--visible {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 300ms;
+}
+
+/* Arrow */
+.ts-tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Placement: Top */
+.ts-tooltip--top {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+}
+.ts-tooltip--top .ts-tooltip-arrow {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-color: var(--ts-tooltip-bg, var(--ts-color-tertiary)) transparent transparent transparent;
+}
+
+/* Placement: Bottom */
+.ts-tooltip--bottom {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+}
+.ts-tooltip--bottom .ts-tooltip-arrow {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent var(--ts-tooltip-bg, var(--ts-color-tertiary)) transparent;
+}
+
+/* Placement: Left */
+.ts-tooltip--left {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+}
+.ts-tooltip--left .ts-tooltip-arrow {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 0 6px 6px;
+  border-color: transparent transparent transparent var(--ts-tooltip-bg, var(--ts-color-tertiary));
+}
+
+/* Placement: Right */
+.ts-tooltip--right {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+}
+.ts-tooltip--right .ts-tooltip-arrow {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 6px 6px 0;
+  border-color: transparent var(--ts-tooltip-bg, var(--ts-color-tertiary)) transparent transparent;
+}

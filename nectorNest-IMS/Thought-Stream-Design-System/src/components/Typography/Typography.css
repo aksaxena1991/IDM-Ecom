@@ -1,0 +1,130 @@
+.ts-typography {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Libre Baskerville Heading Stack */
+.ts-typography--display {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-display-size);
+  font-weight: var(--ts-text-display-weight);
+  line-height: var(--ts-text-display-line-height);
+  letter-spacing: var(--ts-text-display-tracking);
+  color: var(--ts-color-tertiary);
+  margin-bottom: 24px;
+}
+
+.ts-typography--headline {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-headline-size);
+  font-weight: var(--ts-text-headline-weight);
+  line-height: var(--ts-text-headline-line-height);
+  letter-spacing: var(--ts-text-headline-tracking);
+  color: var(--ts-color-tertiary);
+  margin-bottom: 16px;
+}
+
+.ts-typography--subhead {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-subhead-size);
+  font-weight: var(--ts-text-subhead-weight);
+  line-height: var(--ts-text-subhead-line-height);
+  letter-spacing: var(--ts-text-subhead-tracking);
+  color: var(--ts-color-text-primary);
+  margin-bottom: 12px;
+}
+
+/* Inter Body / UI Stack */
+.ts-typography--body-large {
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-large-size);
+  font-weight: var(--ts-text-body-large-weight);
+  line-height: var(--ts-text-body-large-line-height);
+  letter-spacing: var(--ts-text-body-large-tracking);
+  color: var(--ts-color-text-primary);
+  margin-bottom: 20px;
+}
+
+.ts-typography--body {
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-size);
+  font-weight: var(--ts-text-body-weight);
+  line-height: var(--ts-text-body-line-height);
+  letter-spacing: var(--ts-text-body-tracking);
+  color: var(--ts-color-text-primary);
+  margin-bottom: 16px;
+}
+
+.ts-typography--body-small {
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-small-size);
+  font-weight: var(--ts-text-body-small-weight);
+  line-height: var(--ts-text-body-small-line-height);
+  letter-spacing: var(--ts-text-body-small-tracking);
+  color: var(--ts-color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.ts-typography--caption {
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-caption-size);
+  font-weight: var(--ts-text-caption-weight);
+  line-height: var(--ts-text-caption-line-height);
+  letter-spacing: var(--ts-text-caption-tracking);
+  color: var(--ts-color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.ts-typography--overline {
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-overline-size);
+  font-weight: var(--ts-text-overline-weight);
+  line-height: var(--ts-text-overline-line-height);
+  letter-spacing: var(--ts-text-overline-tracking);
+  text-transform: uppercase;
+  color: var(--ts-color-primary);
+  margin-bottom: 8px;
+}
+
+/* Source Code Pro Mono Stack */
+.ts-typography--code {
+  font-family: var(--ts-font-mono);
+  font-size: var(--ts-text-code-size);
+  font-weight: var(--ts-text-code-weight);
+  line-height: var(--ts-text-code-line-height);
+  letter-spacing: var(--ts-text-code-tracking);
+  background-color: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  padding: 2px 6px;
+  color: var(--ts-color-text-primary);
+}
+
+pre.ts-typography--code {
+  display: block;
+  padding: 16px;
+  overflow-x: auto;
+  line-height: 1.6;
+  margin: 16px 0;
+}
+
+/* Color overrides */
+.ts-typography--color-primary {
+  color: var(--ts-color-text-primary);
+}
+.ts-typography--color-secondary {
+  color: var(--ts-color-text-secondary);
+}
+.ts-typography--color-tertiary {
+  color: var(--ts-color-text-tertiary);
+}
+.ts-typography--color-brand {
+  color: var(--ts-color-primary);
+}
+
+/* Reading container constraint */
+.ts-reading-measure {
+  max-width: var(--ts-reading-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}

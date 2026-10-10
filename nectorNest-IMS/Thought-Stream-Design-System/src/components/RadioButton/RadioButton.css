@@ -1,0 +1,124 @@
+.ts-radio-wrapper {
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--ts-font-body);
+}
+
+.ts-radio-wrapper--align-start {
+  align-items: flex-start;
+}
+
+.ts-radio-wrapper--align-center {
+  align-items: center;
+}
+
+.ts-radio-wrapper--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ts-radio-circle {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  background-color: var(--ts-color-bg);
+  border: 1.5px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-full); /* Explicit exception for Radio */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--ts-transition-standard);
+  flex-shrink: 0;
+}
+
+.ts-radio-wrapper--align-start .ts-radio-circle {
+  margin-top: 2px;
+}
+
+.ts-radio-wrapper:hover:not(.ts-radio-wrapper--disabled) .ts-radio-circle {
+  border-color: var(--ts-color-primary);
+}
+
+.ts-radio-input:focus-visible + .ts-radio-circle {
+  box-shadow: var(--ts-focus-ring);
+  border-color: var(--ts-color-primary);
+}
+
+.ts-radio-circle--selected {
+  border-color: var(--ts-color-primary);
+}
+
+.ts-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--ts-radius-full);
+  background-color: var(--ts-color-primary);
+}
+
+.ts-radio-label {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ts-color-text-primary);
+  margin-left: 10px;
+  line-height: 1.4;
+}
+
+.ts-radio-description {
+  display: block;
+  font-size: 13px;
+  color: var(--ts-color-text-secondary);
+  margin-top: 2px;
+}
+
+/* RadioGroup */
+.ts-radio-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ts-radio-group-label {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ts-color-text-secondary);
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-radio-group-required {
+  color: var(--ts-color-error);
+}
+
+.ts-radio-group-items {
+  display: flex;
+}
+
+.ts-radio-group-items--vertical {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ts-radio-group-items--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+}
+
+.ts-radio-group-helper {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ts-color-text-tertiary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.ts-radio-group-helper--error {
+  color: var(--ts-color-error);
+}

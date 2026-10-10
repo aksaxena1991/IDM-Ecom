@@ -1,0 +1,316 @@
+/**
+ * ThoughtStream Tabs Styles
+ *
+ * Distraction-free, contemplative tab system.
+ * Strict 0px border radius, hairline borders, and flat plane surfaces.
+ */
+
+.ts-tabs {
+  box-sizing: border-box;
+  display: flex;
+  font-family: var(--ts-font-body, system-ui, -apple-system, sans-serif);
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-tabs *,
+.ts-tabs *::before,
+.ts-tabs *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   Horizontal Tabs Layout
+   ========================================================================== */
+.ts-tabs--horizontal {
+  flex-direction: column;
+  width: 100%;
+}
+
+.ts-tabs--horizontal .ts-tab-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ts-tabs--horizontal .ts-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.ts-tabs--horizontal .ts-tab-panel {
+  padding-top: 20px;
+}
+
+/* ==========================================================================
+   Vertical Tabs Layout
+   ========================================================================== */
+.ts-tabs--vertical {
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 240px;
+}
+
+.ts-tabs--vertical .ts-tab-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 200px;
+  max-width: 260px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ts-border-subtle, #e7e5e4);
+}
+
+.ts-tabs--vertical .ts-tabs__content-area,
+.ts-tabs--vertical .ts-tab-panel {
+  flex: 1;
+  padding-left: 28px;
+}
+
+/* Full Width Modifier */
+.ts-tabs--full-width.ts-tabs--horizontal .ts-tab-list {
+  width: 100%;
+}
+
+.ts-tabs--full-width.ts-tabs--horizontal .ts-tab {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Base Tab Button
+   ========================================================================== */
+.ts-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ts-font-body, system-ui, sans-serif);
+  font-weight: 500;
+  color: var(--ts-color-text-secondary, #57534e);
+  transition: all 150ms ease;
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  text-decoration: none;
+  position: relative;
+}
+
+.ts-tab:hover:not(:disabled) {
+  color: var(--ts-color-text-primary, #1c1917);
+}
+
+.ts-tab:focus-visible {
+  outline: 1px dashed var(--ts-color-text-primary, #1c1917);
+  outline-offset: -2px;
+}
+
+.ts-tab--disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.ts-tab__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.ts-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-family: var(--ts-font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: var(--ts-color-surface-raised, #efedeb);
+  color: var(--ts-color-text-secondary, #57534e);
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+}
+
+.ts-tab--active .ts-tab__badge {
+  background: var(--ts-color-text-primary, #1c1917);
+  color: var(--ts-color-bg, #fafaf9);
+  border-color: var(--ts-color-text-primary, #1c1917);
+}
+
+/* Sizing */
+.ts-tabs--sm .ts-tab {
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+}
+
+.ts-tabs--md .ts-tab {
+  padding: 10px 16px;
+  font-size: 0.875rem;
+}
+
+.ts-tabs--lg .ts-tab {
+  padding: 14px 22px;
+  font-size: 0.9375rem;
+}
+
+/* ==========================================================================
+   Variant: Line (Default)
+   ========================================================================== */
+.ts-tabs--line.ts-tabs--horizontal .ts-tab-list {
+  border-bottom: 1px solid var(--ts-border-subtle, #e7e5e4);
+}
+
+.ts-tabs--line.ts-tabs--horizontal .ts-tab {
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.ts-tabs--line.ts-tabs--horizontal .ts-tab--active {
+  color: var(--ts-color-text-primary, #1c1917);
+  border-bottom-color: var(--ts-color-text-primary, #1c1917);
+  font-weight: 600;
+}
+
+.ts-tabs--line.ts-tabs--vertical .ts-tab {
+  border-left: 2px solid transparent;
+  text-align: left;
+  justify-content: flex-start;
+  padding-left: 14px;
+}
+
+.ts-tabs--line.ts-tabs--vertical .ts-tab--active {
+  color: var(--ts-color-text-primary, #1c1917);
+  border-left-color: var(--ts-color-text-primary, #1c1917);
+  background: var(--ts-color-surface, #f5f5f4);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Variant: Enclosed (Flat Boxed)
+   ========================================================================== */
+.ts-tabs--enclosed.ts-tabs--horizontal .ts-tab-list {
+  border-bottom: 1px solid var(--ts-border-subtle, #e7e5e4);
+  gap: 4px;
+}
+
+.ts-tabs--enclosed.ts-tabs--horizontal .ts-tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  margin-bottom: -1px;
+}
+
+.ts-tabs--enclosed.ts-tabs--horizontal .ts-tab:hover:not(:disabled) {
+  background: var(--ts-color-surface, #f5f5f4);
+}
+
+.ts-tabs--enclosed.ts-tabs--horizontal .ts-tab--active {
+  background: var(--ts-color-bg, #fafaf9);
+  border-color: var(--ts-border-subtle, #e7e5e4);
+  border-bottom-color: var(--ts-color-bg, #fafaf9);
+  color: var(--ts-color-text-primary, #1c1917);
+  font-weight: 600;
+}
+
+.ts-tabs--enclosed.ts-tabs--vertical .ts-tab-list {
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.ts-tabs--enclosed.ts-tabs--vertical .ts-tab {
+  border: 1px solid transparent;
+  justify-content: flex-start;
+}
+
+.ts-tabs--enclosed.ts-tabs--vertical .ts-tab:hover:not(:disabled) {
+  background: var(--ts-color-surface, #f5f5f4);
+}
+
+.ts-tabs--enclosed.ts-tabs--vertical .ts-tab--active {
+  background: var(--ts-color-surface, #f5f5f4);
+  border-color: var(--ts-border-subtle, #e7e5e4);
+  color: var(--ts-color-text-primary, #1c1917);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Variant: Subtle
+   ========================================================================== */
+.ts-tabs--subtle.ts-tabs--horizontal .ts-tab-list {
+  gap: 4px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--ts-border-subtle, #e7e5e4);
+}
+
+.ts-tabs--subtle .ts-tab {
+  border: none;
+}
+
+.ts-tabs--subtle .ts-tab:hover:not(:disabled) {
+  background: var(--ts-color-surface, #f5f5f4);
+}
+
+.ts-tabs--subtle .ts-tab--active {
+  background: var(--ts-color-surface-raised, #efedeb);
+  color: var(--ts-color-text-primary, #1c1917);
+  font-weight: 600;
+}
+
+.ts-tabs--subtle.ts-tabs--vertical .ts-tab {
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   Variant: Pills (0px Sharp Solid Badges)
+   ========================================================================== */
+.ts-tabs--pills.ts-tabs--horizontal .ts-tab-list {
+  gap: 6px;
+  padding-bottom: 12px;
+}
+
+.ts-tabs--pills .ts-tab {
+  border: 1px solid var(--ts-border-subtle, #e7e5e4);
+  background: var(--ts-color-surface, #f5f5f4);
+}
+
+.ts-tabs--pills .ts-tab:hover:not(:disabled) {
+  background: var(--ts-color-surface-raised, #efedeb);
+  border-color: var(--ts-border-medium, #d6d3d1);
+}
+
+.ts-tabs--pills .ts-tab--active {
+  background: var(--ts-color-text-primary, #1c1917);
+  border-color: var(--ts-color-text-primary, #1c1917);
+  color: var(--ts-color-bg, #fafaf9);
+  font-weight: 600;
+}
+
+.ts-tabs--pills.ts-tabs--vertical .ts-tab {
+  margin-bottom: 6px;
+  justify-content: flex-start;
+}
+
+/* ==========================================================================
+   Tab Panel
+   ========================================================================== */
+.ts-tab-panel {
+  outline: none;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--ts-color-text-secondary, #57534e);
+}
+
+.ts-tab-panel:focus-visible {
+  outline: 1px dashed var(--ts-border-medium, #d6d3d1);
+  outline-offset: 4px;
+}

@@ -1,0 +1,203 @@
+/* ThoughtStream Toast / Toasty Styles */
+
+.ts-toast-container {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Placements */
+.ts-toast-container--top-right {
+  top: 24px;
+  right: 24px;
+}
+
+.ts-toast-container--top-left {
+  top: 24px;
+  left: 24px;
+}
+
+.ts-toast-container--top-center {
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.ts-toast-container--bottom-right {
+  bottom: 24px;
+  right: 24px;
+  flex-direction: column-reverse;
+}
+
+.ts-toast-container--bottom-left {
+  bottom: 24px;
+  left: 24px;
+  flex-direction: column-reverse;
+}
+
+.ts-toast-container--bottom-center {
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+  flex-direction: column-reverse;
+}
+
+/* Individual Toast Item */
+.ts-toast {
+  pointer-events: auto;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-left: 3px solid var(--ts-color-primary);
+  border-radius: var(--ts-radius-none);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 14px 16px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--ts-font-body);
+  transition: var(--ts-transition-standard);
+  animation: ts-toast-slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .ts-toast {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  border-color: var(--ts-border-medium);
+}
+
+@keyframes ts-toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Variants */
+.ts-toast--neutral {
+  border-left-color: var(--ts-color-primary);
+}
+
+.ts-toast--info {
+  border-left-color: var(--ts-color-primary);
+}
+
+.ts-toast--success {
+  border-left-color: var(--ts-color-success);
+}
+
+.ts-toast--warning {
+  border-left-color: var(--ts-color-warning);
+}
+
+.ts-toast--error {
+  border-left-color: var(--ts-color-error);
+}
+
+/* Icon */
+.ts-toast-icon-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.ts-toast--neutral .ts-toast-icon-wrap,
+.ts-toast--info .ts-toast-icon-wrap {
+  color: var(--ts-color-primary);
+}
+
+.ts-toast--success .ts-toast-icon-wrap {
+  color: var(--ts-color-success);
+}
+
+.ts-toast--warning .ts-toast-icon-wrap {
+  color: var(--ts-color-warning);
+}
+
+.ts-toast--error .ts-toast-icon-wrap {
+  color: var(--ts-color-error);
+}
+
+/* Text Content */
+.ts-toast-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-toast-title {
+  font-family: var(--ts-font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.ts-toast-description {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  color: var(--ts-color-text-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Action button */
+.ts-toast-action-btn {
+  background: transparent;
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+  padding: 4px 10px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 6px;
+  transition: var(--ts-transition-standard);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ts-toast-action-btn:hover {
+  background-color: var(--ts-color-surface);
+  border-color: var(--ts-border-strong);
+}
+
+/* Close Button */
+.ts-toast-close-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--ts-color-text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--ts-transition-standard);
+  margin-left: 4px;
+}
+
+.ts-toast-close-btn:hover {
+  color: var(--ts-color-text-primary);
+}

@@ -1,0 +1,163 @@
+/* ThoughtStream ProgressBar Component Styles */
+
+.ts-progress-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--ts-font-body);
+}
+
+/* Header with label & percentage */
+.ts-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-progress-label {
+  font-weight: 500;
+  color: var(--ts-color-text-primary);
+}
+
+.ts-progress-value-label {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ts-color-text-secondary);
+  margin-left: auto;
+}
+
+/* Track Base */
+.ts-progress-track {
+  position: relative;
+  width: 100%;
+  background-color: var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Size tiers */
+.ts-progress-track--xs {
+  height: 2px;
+}
+
+.ts-progress-track--sm {
+  height: 4px;
+}
+
+.ts-progress-track--md {
+  height: 8px;
+}
+
+.ts-progress-track--lg {
+  height: 18px;
+}
+
+/* Buffer fill (secondary progress) */
+.ts-progress-buffer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background-color: var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  transition: width 0.25s ease-out;
+}
+
+/* Primary progress bar fill */
+.ts-progress-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--ts-radius-none);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  box-sizing: border-box;
+}
+
+/* Color Variants */
+.ts-progress-fill--primary {
+  background-color: var(--ts-color-text-primary);
+}
+
+.ts-progress-fill--subtle {
+  background-color: var(--ts-color-text-tertiary);
+}
+
+.ts-progress-fill--zen {
+  background-color: #57534E;
+}
+
+.ts-progress-fill--success {
+  background-color: var(--ts-color-success);
+}
+
+.ts-progress-fill--warning {
+  background-color: var(--ts-color-warning);
+}
+
+.ts-progress-fill--error {
+  background-color: var(--ts-color-error);
+}
+
+/* Embedded label inside lg bar */
+.ts-progress-embedded-text {
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ts-color-bg);
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Indeterminate gliding pulse */
+.ts-progress-track--indeterminate .ts-progress-fill {
+  width: 30% !important;
+  animation: ts-progress-indeterminate 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes ts-progress-indeterminate {
+  0% {
+    left: -35%;
+    width: 25%;
+  }
+  50% {
+    width: 50%;
+  }
+  100% {
+    left: 105%;
+    width: 25%;
+  }
+}
+
+/* Stepped / Segmented Progress Bar */
+.ts-progress-stepped {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.ts-progress-step {
+  flex: 1;
+  background-color: var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  transition: background-color var(--ts-transition-fast);
+}
+
+.ts-progress-step--active {
+  background-color: var(--ts-color-text-primary);
+}
+
+.ts-progress-step--completed {
+  background-color: var(--ts-color-text-secondary);
+}

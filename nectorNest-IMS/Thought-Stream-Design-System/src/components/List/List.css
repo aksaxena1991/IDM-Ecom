@@ -1,0 +1,85 @@
+.ts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.ts-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background-color: transparent;
+  transition: var(--ts-transition-standard);
+  font-family: var(--ts-font-body);
+}
+
+.ts-list-item--interactive {
+  cursor: pointer;
+}
+
+.ts-list-item--interactive:hover {
+  background-color: var(--ts-color-surface);
+}
+
+.ts-list-item--interactive:active {
+  background-color: var(--ts-color-surface-raised);
+}
+
+.ts-list-item--interactive:focus-visible {
+  outline: none;
+  box-shadow: var(--ts-focus-ring);
+}
+
+.ts-list-item-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ts-list-item-leading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--ts-color-primary);
+  flex-shrink: 0;
+}
+
+.ts-list-item-text-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ts-list-item-primary {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ts-color-text-primary);
+  line-height: 1.5;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ts-list-item-secondary {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ts-color-text-tertiary);
+  line-height: 1.4;
+  margin: 2px 0 0 0;
+}
+
+.ts-list-item-trailing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 16px;
+  flex-shrink: 0;
+}

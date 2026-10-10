@@ -1,0 +1,209 @@
+.ts-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(28, 25, 23, 0.45);
+  backdrop-filter: blur(2px);
+  animation: ts-fade-in 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .ts-drawer-overlay,
+.thoughtstream-theme-dark .ts-drawer-overlay {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.ts-drawer {
+  position: fixed;
+  background-color: var(--ts-color-bg);
+  box-shadow: var(--ts-shadow-none);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  z-index: 2001;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Placements */
+.ts-drawer--right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-left: 1px solid var(--ts-border-medium);
+  animation: ts-drawer-slide-right 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-drawer--left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  border-right: 1px solid var(--ts-border-medium);
+  animation: ts-drawer-slide-left 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-drawer--top {
+  top: 0;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid var(--ts-border-medium);
+  animation: ts-drawer-slide-top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-drawer--bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--ts-border-medium);
+  animation: ts-drawer-slide-bottom 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sizes for Left & Right */
+.ts-drawer--left.ts-drawer--sm,
+.ts-drawer--right.ts-drawer--sm {
+  width: 320px;
+  max-width: 100vw;
+}
+
+.ts-drawer--left.ts-drawer--md,
+.ts-drawer--right.ts-drawer--md {
+  width: 440px;
+  max-width: 100vw;
+}
+
+.ts-drawer--left.ts-drawer--lg,
+.ts-drawer--right.ts-drawer--lg {
+  width: 640px;
+  max-width: 100vw;
+}
+
+/* Sizes for Top & Bottom */
+.ts-drawer--top.ts-drawer--sm,
+.ts-drawer--bottom.ts-drawer--sm {
+  max-height: 240px;
+}
+
+.ts-drawer--top.ts-drawer--md,
+.ts-drawer--bottom.ts-drawer--md {
+  max-height: 380px;
+}
+
+.ts-drawer--top.ts-drawer--lg,
+.ts-drawer--bottom.ts-drawer--lg {
+  max-height: 540px;
+}
+
+/* Header, Content, Footer */
+.ts-drawer-header {
+  padding: 24px 28px 16px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  flex-shrink: 0;
+}
+
+.ts-drawer-header-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 16px;
+}
+
+.ts-drawer-title {
+  font-family: var(--ts-font-heading);
+  font-size: var(--ts-text-subhead-size);
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ts-drawer-subtitle {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  color: var(--ts-color-text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.ts-drawer-close {
+  background: transparent;
+  border: none;
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ts-radius-none);
+  transition: var(--ts-transition-standard);
+  outline: none;
+}
+
+.ts-drawer-close:hover {
+  color: var(--ts-color-text-primary);
+  background-color: var(--ts-color-surface);
+}
+
+.ts-drawer-close:focus-visible {
+  box-shadow: var(--ts-focus-ring);
+}
+
+.ts-drawer-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  font-family: var(--ts-font-body);
+  font-size: var(--ts-text-body-size);
+  line-height: var(--ts-text-body-line-height);
+  color: var(--ts-color-text-primary);
+  box-sizing: border-box;
+}
+
+.ts-drawer-footer {
+  padding: 16px 28px 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-surface);
+  flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes ts-drawer-slide-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ts-drawer-slide-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ts-drawer-slide-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ts-drawer-slide-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,35 @@
+.ts-divider {
+  border: 0;
+  border-top: 1px solid var(--ts-border-subtle);
+  margin: 24px 0;
+  width: 100%;
+}
+
+.ts-divider--subtle {
+  border-top-color: var(--ts-border-subtle);
+}
+
+.ts-divider--medium {
+  border-top-color: var(--ts-border-medium);
+}
+
+.ts-divider--strong {
+  border-top-color: var(--ts-border-strong);
+}
+
+/* Generous editorial vertical spacing variants */
+.ts-divider--spacing-sm {
+  margin: 12px 0;
+}
+
+.ts-divider--spacing-md {
+  margin: 24px 0;
+}
+
+.ts-divider--spacing-lg {
+  margin: 48px 0;
+}
+
+.ts-divider--spacing-section {
+  margin: 60px 0;
+}

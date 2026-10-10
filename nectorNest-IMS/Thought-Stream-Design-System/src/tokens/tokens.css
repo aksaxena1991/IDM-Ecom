@@ -1,0 +1,292 @@
+/**
+ * ThoughtStream Design System - Design Tokens
+ * Minimal, zen, distraction-free.
+ */
+
+:root,
+[data-theme="light"],
+.thoughtstream-theme-light {
+  /* Brand Palette */
+  --ts-color-primary: #78716C;
+  --ts-color-secondary: #A8A29E;
+  --ts-color-tertiary: #1C1917;
+
+  /* Surface Palette */
+  --ts-color-bg: #FAFAF9;
+  --ts-color-surface: rgba(255, 255, 255, 0.68);
+  --ts-color-surface-raised: rgba(255, 255, 255, 0.85);
+
+  /* Liquid Glass Surface Tokens */
+  --ts-glass-bg: rgba(255, 255, 255, 0.65);
+  --ts-glass-bg-hover: rgba(255, 255, 255, 0.80);
+  --ts-glass-bg-active: rgba(255, 255, 255, 0.90);
+  --ts-glass-bg-subtle: rgba(255, 255, 255, 0.45);
+  --ts-glass-bg-raised: rgba(255, 255, 255, 0.84);
+  --ts-glass-bg-sunken: rgba(245, 245, 244, 0.55);
+
+  /* Liquid Glass Gradients */
+  --ts-glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.45) 100%);
+  --ts-glass-gradient-raised: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(255, 255, 255, 0.62) 100%);
+  --ts-glass-gradient-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.55) 100%);
+  --ts-glass-gradient-sunken: linear-gradient(135deg, rgba(245, 245, 244, 0.65) 0%, rgba(235, 233, 231, 0.40) 100%);
+
+  /* Liquid Glass Borders */
+  --ts-glass-border: rgba(255, 255, 255, 0.68);
+  --ts-glass-border-subtle: rgba(255, 255, 255, 0.45);
+  --ts-glass-border-strong: rgba(255, 255, 255, 0.90);
+  --ts-glass-border-specular: rgba(255, 255, 255, 0.98);
+
+  /* Liquid Glass Optical Filters */
+  --ts-glass-blur: blur(16px) saturate(185%) contrast(102%);
+  --ts-glass-blur-deep: blur(24px) saturate(190%) contrast(105%);
+  --ts-glass-blur-sm: blur(10px) saturate(160%);
+
+  /* Liquid Glass Shadows & Specular Bevels */
+  --ts-glass-shadow-sm: 0 4px 16px 0 rgba(0, 0, 0, 0.04), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85);
+  --ts-glass-shadow-md: 0 8px 32px 0 rgba(0, 0, 0, 0.06), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.90), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.02);
+  --ts-glass-shadow-lg: 0 16px 48px 0 rgba(0, 0, 0, 0.09), inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.03);
+  --ts-glass-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.65);
+  --ts-glass-sheen: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.45) 50%, transparent 80%);
+
+  /* Content Palette */
+  --ts-color-text-primary: #1C1917;
+  --ts-color-text-secondary: #57534E;
+  --ts-color-text-tertiary: #A8A29E;
+
+  /* Border Palette */
+  --ts-border-subtle: #E7E5E4;
+  --ts-border-medium: #D6D3D1;
+  --ts-border-strong: #A8A29E;
+
+  /* Semantic Colors */
+  --ts-color-success: #65A30D;
+  --ts-color-warning: #CA8A04;
+  --ts-color-error: #DC2626;
+  --ts-color-info: #78716C;
+
+  /* Status Chip Palettes */
+  --ts-status-success-bg: #F0FDF4;
+  --ts-status-success-text: #65A30D;
+  --ts-status-success-border: #BBF7D0;
+
+  --ts-status-warning-bg: #FEFCE8;
+  --ts-status-warning-text: #CA8A04;
+  --ts-status-warning-border: #FEF08A;
+
+  --ts-status-error-bg: #FEF2F2;
+  --ts-status-error-text: #DC2626;
+  --ts-status-error-border: #FECACA;
+
+  /* Button Tokens */
+  --ts-btn-primary-bg: #78716C;
+  --ts-btn-primary-text: #FAFAF9;
+  --ts-btn-primary-border: #78716C;
+  --ts-btn-primary-hover: #57534E;
+  --ts-btn-primary-active: #44403C;
+
+  --ts-btn-secondary-bg: transparent;
+  --ts-btn-secondary-text: #78716C;
+  --ts-btn-secondary-border: var(--ts-border-medium);
+  --ts-btn-secondary-hover: var(--ts-color-surface);
+  --ts-btn-secondary-active: var(--ts-border-subtle);
+
+  --ts-btn-ghost-bg: transparent;
+  --ts-btn-ghost-text: #78716C;
+  --ts-btn-ghost-hover: var(--ts-color-surface);
+  --ts-btn-ghost-active: var(--ts-border-subtle);
+
+  /* Tooltip */
+  --ts-tooltip-bg: #1C1917;
+  --ts-tooltip-text: #FAFAF9;
+
+  /* Shadows (Flat Philosophy) */
+  --ts-shadow-none: none;
+  --ts-focus-ring: 0 0 0 2px var(--ts-color-bg), 0 0 0 4px var(--ts-color-primary);
+  --ts-focus-ring-error: 0 0 0 2px var(--ts-color-bg), 0 0 0 4px var(--ts-color-error);
+}
+
+/* Dark Theme (Contemplative Night / Stone Dark) */
+[data-theme="dark"],
+.thoughtstream-theme-dark {
+  /* Brand Palette */
+  --ts-color-primary: #A8A29E;
+  --ts-color-secondary: #78716C;
+  --ts-color-tertiary: #FAFAF9;
+
+  /* Surface Palette */
+  --ts-color-bg: #1C1917;
+  --ts-color-surface: rgba(41, 37, 36, 0.65);
+  --ts-color-surface-raised: rgba(54, 50, 47, 0.78);
+
+  /* Liquid Glass Surface Tokens - Dark */
+  --ts-glass-bg: rgba(36, 32, 29, 0.65);
+  --ts-glass-bg-hover: rgba(48, 43, 39, 0.78);
+  --ts-glass-bg-active: rgba(58, 52, 48, 0.88);
+  --ts-glass-bg-subtle: rgba(28, 25, 23, 0.48);
+  --ts-glass-bg-raised: rgba(50, 45, 41, 0.80);
+  --ts-glass-bg-sunken: rgba(20, 18, 16, 0.62);
+
+  /* Liquid Glass Gradients - Dark */
+  --ts-glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(34, 30, 27, 0.70);
+  --ts-glass-gradient-raised: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(46, 41, 37, 0.80);
+  --ts-glass-gradient-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%), rgba(54, 48, 44, 0.84);
+  --ts-glass-gradient-sunken: linear-gradient(135deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.12) 100%), rgba(20, 18, 16, 0.68);
+
+  /* Liquid Glass Borders - Dark */
+  --ts-glass-border: rgba(255, 255, 255, 0.16);
+  --ts-glass-border-subtle: rgba(255, 255, 255, 0.10);
+  --ts-glass-border-strong: rgba(255, 255, 255, 0.28);
+  --ts-glass-border-specular: rgba(255, 255, 255, 0.42);
+
+  /* Liquid Glass Optical Filters - Dark */
+  --ts-glass-blur: blur(20px) saturate(180%) contrast(108%);
+  --ts-glass-blur-deep: blur(28px) saturate(200%) contrast(112%);
+  --ts-glass-blur-sm: blur(12px) saturate(170%);
+
+  /* Liquid Glass Shadows & Specular Bevels - Dark */
+  --ts-glass-shadow-sm: 0 4px 20px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.16);
+  --ts-glass-shadow-md: 0 10px 36px 0 rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.20), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35);
+  --ts-glass-shadow-lg: 0 20px 60px 0 rgba(0, 0, 0, 0.60), inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.45);
+  --ts-glass-shadow-inner: inset 0 2px 6px 0 rgba(0, 0, 0, 0.50), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.08);
+  --ts-glass-sheen: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.15) 50%, transparent 80%);
+
+  /* Content Palette */
+  --ts-color-text-primary: #FAFAF9;
+  --ts-color-text-secondary: #D6D3D1;
+  --ts-color-text-tertiary: #78716C;
+
+  /* Border Palette */
+  --ts-border-subtle: #2E2A27;
+  --ts-border-medium: #44403C;
+  --ts-border-strong: #78716C;
+
+  /* Semantic Colors */
+  --ts-color-success: #84CC16;
+  --ts-color-warning: #EAB308;
+  --ts-color-error: #EF4444;
+  --ts-color-info: #A8A29E;
+
+  /* Status Chip Palettes */
+  --ts-status-success-bg: rgba(20, 83, 45, 0.35);
+  --ts-status-success-text: #86EFAC;
+  --ts-status-success-border: #166534;
+
+  --ts-status-warning-bg: rgba(113, 63, 18, 0.35);
+  --ts-status-warning-text: #FDE047;
+  --ts-status-warning-border: #854D0E;
+
+  --ts-status-error-bg: rgba(127, 29, 29, 0.35);
+  --ts-status-error-text: #FCA5A5;
+  --ts-status-error-border: #991B1B;
+
+  /* Button Tokens */
+  --ts-btn-primary-bg: #FAFAF9;
+  --ts-btn-primary-text: #1C1917;
+  --ts-btn-primary-border: #FAFAF9;
+  --ts-btn-primary-hover: #E7E5E4;
+  --ts-btn-primary-active: #D6D3D1;
+
+  --ts-btn-secondary-bg: transparent;
+  --ts-btn-secondary-text: #FAFAF9;
+  --ts-btn-secondary-border: var(--ts-border-medium);
+  --ts-btn-secondary-hover: var(--ts-color-surface);
+  --ts-btn-secondary-active: var(--ts-color-surface-raised);
+
+  --ts-btn-ghost-bg: transparent;
+  --ts-btn-ghost-text: #FAFAF9;
+  --ts-btn-ghost-hover: var(--ts-color-surface);
+  --ts-btn-ghost-active: var(--ts-color-surface-raised);
+
+  /* Tooltip */
+  --ts-tooltip-bg: #292524;
+  --ts-tooltip-text: #FAFAF9;
+
+  /* Shadows (Flat Philosophy) */
+  --ts-focus-ring: 0 0 0 2px var(--ts-color-bg), 0 0 0 4px #A8A29E;
+  --ts-focus-ring-error: 0 0 0 2px var(--ts-color-bg), 0 0 0 4px var(--ts-color-error);
+}
+
+:root {
+  /* Typography Font Stacks */
+  --ts-font-heading: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --ts-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --ts-font-mono: 'Source Code Pro', 'Fira Code', Consolas, Monaco, monospace;
+
+  /* Typography Scale */
+  --ts-text-display-size: 40px;
+  --ts-text-display-weight: 700;
+  --ts-text-display-line-height: 1.2;
+  --ts-text-display-tracking: -0.02em;
+
+  --ts-text-headline-size: 30px;
+  --ts-text-headline-weight: 700;
+  --ts-text-headline-line-height: 1.3;
+  --ts-text-headline-tracking: -0.015em;
+
+  --ts-text-subhead-size: 22px;
+  --ts-text-subhead-weight: 400;
+  --ts-text-subhead-line-height: 1.4;
+  --ts-text-subhead-tracking: -0.01em;
+
+  --ts-text-body-large-size: 20px;
+  --ts-text-body-large-weight: 400;
+  --ts-text-body-large-line-height: 1.75;
+  --ts-text-body-large-tracking: 0;
+
+  --ts-text-body-size: 17px;
+  --ts-text-body-weight: 400;
+  --ts-text-body-line-height: 1.8;
+  --ts-text-body-tracking: 0;
+
+  --ts-text-body-small-size: 15px;
+  --ts-text-body-small-weight: 400;
+  --ts-text-body-small-line-height: 1.7;
+  --ts-text-body-small-tracking: 0;
+
+  --ts-text-caption-size: 13px;
+  --ts-text-caption-weight: 400;
+  --ts-text-caption-line-height: 1.5;
+  --ts-text-caption-tracking: 0.01em;
+
+  --ts-text-overline-size: 11px;
+  --ts-text-overline-weight: 600;
+  --ts-text-overline-line-height: 1.4;
+  --ts-text-overline-tracking: 0.08em;
+
+  --ts-text-code-size: 15px;
+  --ts-text-code-weight: 400;
+  --ts-text-code-line-height: 1.7;
+  --ts-text-code-tracking: 0;
+
+  /* Spacing */
+  --ts-space-base: 12px;
+  --ts-space-1: 12px;
+  --ts-space-2: 24px;
+  --ts-space-3: 36px;
+  --ts-space-4: 48px;
+  --ts-space-5: 60px;
+  --ts-space-6: 72px;
+  --ts-space-8: 96px;
+  --ts-space-10: 120px;
+
+  --ts-padding-component-sm: 12px;
+  --ts-padding-component-md: 24px;
+  --ts-padding-component-lg: 48px;
+
+  --ts-section-spacing-mobile: 60px;
+  --ts-section-spacing-tablet: 84px;
+  --ts-section-spacing-desktop: 120px;
+
+  --ts-reading-max-width: 680px;
+
+  /* Border Radii */
+  --ts-radius-none: 0px;
+  --ts-radius-sm: 0px;
+  --ts-radius-md: 0px;
+  --ts-radius-lg: 0px;
+  --ts-radius-xl: 0px;
+  --ts-radius-full: 9999px; /* Strictly for Avatars and Radio Buttons */
+
+  /* Transition for calm, subtle feedback */
+  --ts-transition-standard: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}

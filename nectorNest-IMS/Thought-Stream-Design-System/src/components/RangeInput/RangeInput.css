@@ -1,0 +1,129 @@
+.ts-range-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ts-range-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ts-range-label {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ts-color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-range-value-badge {
+  font-family: var(--ts-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  background-color: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-range-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.ts-range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  pointer-events: none;
+}
+
+.ts-range-track-fill {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  background-color: var(--ts-color-primary);
+  border-radius: var(--ts-radius-none);
+}
+
+.ts-range-input {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ts-range-input:disabled {
+  cursor: not-allowed;
+}
+
+/* Custom Thumb Element */
+.ts-range-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background-color: var(--ts-color-bg);
+  border: 2px solid var(--ts-color-primary);
+  border-radius: var(--ts-radius-none); /* Strict 0px geometric thumb */
+  box-shadow: var(--ts-shadow-none);
+  pointer-events: none;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+  z-index: 1;
+}
+
+.ts-range-input:focus-visible ~ .ts-range-thumb {
+  box-shadow: var(--ts-focus-ring);
+  border-color: var(--ts-color-tertiary);
+}
+
+.ts-range-wrapper--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ts-range-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 0 2px;
+}
+
+.ts-range-mark {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+}
+
+.ts-range-helper {
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ts-color-text-tertiary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.ts-range-helper--error {
+  color: var(--ts-color-error);
+}

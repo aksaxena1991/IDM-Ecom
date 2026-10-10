@@ -1,0 +1,309 @@
+/* ThoughtStream Tree Component Styles */
+
+.ts-tree {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--ts-font-body);
+  user-select: none;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  padding: 8px 0;
+}
+
+.ts-tree--borderless {
+  border: none;
+  padding: 0;
+}
+
+/* Filter Input in Tree Header */
+.ts-tree-search-bar {
+  padding: 8px 12px 12px 12px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-tree-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.ts-tree-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--ts-color-text-tertiary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.ts-tree-search-input {
+  width: 100%;
+  height: 34px;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  padding: 6px 30px 6px 32px;
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  color: var(--ts-color-text-primary);
+  outline: none;
+  box-sizing: border-box;
+  transition: var(--ts-transition-standard);
+}
+
+.ts-tree-search-input:focus {
+  border-color: var(--ts-color-primary);
+  box-shadow: var(--ts-focus-ring);
+}
+
+.ts-tree-search-input::placeholder {
+  color: var(--ts-color-text-tertiary);
+}
+
+.ts-tree-search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  padding: 2px;
+  color: var(--ts-color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color var(--ts-transition-fast);
+}
+
+.ts-tree-search-clear-btn:hover {
+  color: var(--ts-color-text-primary);
+}
+
+/* Category Filter Chips Bar */
+.ts-tree-filter-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ts-tree-filter-category-btn {
+  background: var(--ts-color-surface);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  padding: 3px 8px;
+  font-family: var(--ts-font-body);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  transition: var(--ts-transition-standard);
+}
+
+.ts-tree-filter-category-btn:hover {
+  border-color: var(--ts-border-medium);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-tree-filter-category-btn--active {
+  background-color: var(--ts-color-primary);
+  color: var(--ts-color-bg);
+  border-color: var(--ts-color-primary);
+  font-weight: 500;
+}
+
+/* Match count bar */
+.ts-tree-match-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+  padding: 0 2px;
+}
+
+/* Sortable Tree Drag Styles */
+.ts-tree-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-color-text-tertiary);
+  cursor: grab;
+  padding: 2px;
+  margin-right: 2px;
+  margin-left: -2px;
+  opacity: 0.5;
+  transition: opacity var(--ts-transition-fast), color var(--ts-transition-fast);
+  flex-shrink: 0;
+}
+
+.ts-tree-node-row:hover .ts-tree-drag-handle {
+  opacity: 1;
+}
+
+.ts-tree-drag-handle:active {
+  cursor: grabbing;
+}
+
+.ts-tree-node-row--draggable {
+  cursor: grab;
+}
+
+.ts-tree-node-row--dragging {
+  opacity: 0.35;
+  border-left: 2px dashed var(--ts-color-primary);
+  background-color: var(--ts-color-surface);
+}
+
+.ts-tree-node-row--drop-before {
+  border-top: 2px solid var(--ts-color-primary) !important;
+}
+
+.ts-tree-node-row--drop-after {
+  border-bottom: 2px solid var(--ts-color-primary) !important;
+}
+
+.ts-tree-node-row--drop-inside {
+  background-color: var(--ts-color-surface-raised) !important;
+  outline: 1px solid var(--ts-color-primary) !important;
+}
+
+/* Tree Nodes List */
+.ts-tree-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Tree Node Row */
+.ts-tree-node-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+  padding-right: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color var(--ts-transition-fast), color var(--ts-transition-fast);
+  color: var(--ts-color-text-primary);
+  border-radius: var(--ts-radius-none);
+  position: relative;
+  outline: none;
+}
+
+.ts-tree-node-row:hover:not(.ts-tree-node-row--disabled) {
+  background-color: var(--ts-color-surface);
+}
+
+.ts-tree-node-row:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--ts-color-primary);
+}
+
+.ts-tree-node-row--selected {
+  background-color: var(--ts-color-surface-raised) !important;
+  color: var(--ts-color-text-primary);
+  font-weight: 500;
+  border-left: 2px solid var(--ts-color-primary);
+}
+
+[data-theme="dark"] .ts-tree-node-row--selected {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ts-tree-node-row--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Left Content */
+.ts-tree-node-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+/* Expand / Collapse Chevron Toggle */
+.ts-tree-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ts-color-text-tertiary);
+  transition: transform var(--ts-transition-fast), color var(--ts-transition-fast);
+  outline: none;
+  flex-shrink: 0;
+}
+
+.ts-tree-toggle-btn:hover {
+  color: var(--ts-color-text-primary);
+}
+
+.ts-tree-toggle-placeholder {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Checkbox inside node */
+.ts-tree-checkbox {
+  margin: 0 6px 0 2px;
+  accent-color: var(--ts-color-primary);
+  cursor: pointer;
+}
+
+/* Node Icon */
+.ts-tree-node-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ts-color-text-secondary);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.ts-tree-node-row--selected .ts-tree-node-icon {
+  color: var(--ts-color-primary);
+}
+
+/* Label text */
+.ts-tree-node-label {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.ts-tree-match-highlight {
+  background-color: rgba(120, 113, 108, 0.25);
+  color: var(--ts-color-text-primary);
+  font-weight: 600;
+  padding: 0 1px;
+}
+
+/* Right Content / Actions */
+.ts-tree-node-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.ts-tree-badge {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+}

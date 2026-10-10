@@ -1,0 +1,459 @@
+/**
+ * ThoughtStream Map Component Styles
+ *
+ * Contemplative cartographic telemetry suite with strict 0px geometry,
+ * hairline graticules, high-precision typography, and liquid glass HUD.
+ */
+
+.ts-map-container {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  font-family: var(--ts-font-body);
+  color: var(--ts-color-text-primary);
+  overflow: hidden;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-map-container *,
+.ts-map-container *::before,
+.ts-map-container *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   Header HUD
+   ========================================================================== */
+
+.ts-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--ts-color-bg);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  z-index: 20;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ts-map-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ts-map-title {
+  font-family: var(--ts-font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-map-subtitle {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ts-map-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-map-layer-toggles {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-surface);
+}
+
+.ts-map-layer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--ts-border-subtle);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  transition: var(--ts-transition-standard);
+  outline: none;
+}
+
+.ts-map-layer-btn:last-child {
+  border-right: none;
+}
+
+.ts-map-layer-btn:hover {
+  background: var(--ts-color-surface-raised);
+  color: var(--ts-color-text-primary);
+}
+
+.ts-map-layer-btn--active {
+  background: var(--ts-color-primary) !important;
+  color: var(--ts-color-bg) !important;
+}
+
+/* ==========================================================================
+   Viewport & SVG Stage
+   ========================================================================== */
+
+.ts-map-viewport {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  background: radial-gradient(circle at 50% 50%, var(--ts-color-bg) 0%, var(--ts-color-surface) 100%);
+}
+
+.ts-map-viewport--dragging {
+  cursor: grabbing !important;
+}
+
+.ts-map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Graticules & Equator lines */
+.ts-map-graticule {
+  stroke: var(--ts-border-subtle);
+  stroke-width: 0.75;
+  stroke-dasharray: 2 4;
+  fill: none;
+  pointer-events: none;
+}
+
+.ts-map-graticule--equator,
+.ts-map-graticule--prime {
+  stroke: var(--ts-border-medium);
+  stroke-width: 1;
+  stroke-dasharray: none;
+}
+
+.ts-map-graticule-label {
+  font-family: var(--ts-font-mono);
+  font-size: 9px;
+  fill: var(--ts-color-text-tertiary);
+  pointer-events: none;
+}
+
+/* Landmasses & Regions */
+.ts-map-region {
+  fill: var(--ts-border-subtle);
+  stroke: var(--ts-border-medium);
+  stroke-width: 0.75;
+  stroke-linejoin: miter;
+  transition: fill 0.15s ease, stroke 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.ts-map-region:hover {
+  fill: var(--ts-color-secondary);
+  stroke: var(--ts-color-primary);
+  stroke-width: 1.25;
+}
+
+.ts-map-region--selected {
+  fill: var(--ts-color-primary) !important;
+  stroke: var(--ts-color-text-primary) !important;
+  stroke-width: 1.5;
+}
+
+/* Pins / Markers */
+.ts-map-marker {
+  cursor: pointer;
+}
+
+.ts-map-marker-pin {
+  stroke-width: 1;
+  transition: transform 0.15s ease;
+}
+
+.ts-map-marker:hover .ts-map-marker-pin {
+  transform: scale(1.25);
+}
+
+.ts-map-marker-label {
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--ts-color-text-primary);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ts-map-pulse-rect {
+  animation: ts-map-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: center;
+}
+
+@keyframes ts-map-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Flight Arcs / Connection Paths */
+.ts-map-arc {
+  fill: none;
+  stroke-linecap: square;
+  transition: stroke-width 0.15s ease, stroke 0.15s ease;
+  cursor: pointer;
+}
+
+.ts-map-arc:hover {
+  stroke-width: 2.5 !important;
+}
+
+.ts-map-arc-pulse {
+  fill: none;
+  stroke-dasharray: 6 120;
+  animation: ts-map-arc-flow 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ts-map-arc-flow {
+  0% {
+    stroke-dashoffset: 126;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Bubbles / Graduated Symbols */
+.ts-map-bubble {
+  fill-opacity: 0.45;
+  stroke-width: 1.2;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.ts-map-bubble:hover {
+  fill-opacity: 0.8;
+  stroke-width: 2;
+}
+
+/* ==========================================================================
+   Floating Navigation Controls (Zoom & Presets)
+   ========================================================================== */
+
+.ts-map-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 25;
+}
+
+.ts-map-btn-group {
+  display: flex;
+  flex-direction: column;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.ts-map-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: var(--ts-transition-standard);
+}
+
+.ts-map-btn:last-child {
+  border-bottom: none;
+}
+
+.ts-map-btn:hover {
+  background: var(--ts-color-surface);
+}
+
+.ts-map-btn:active {
+  background: var(--ts-color-surface-raised);
+}
+
+.ts-map-presets-select {
+  padding: 6px 10px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.ts-map-compass {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-primary);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Legend Bar
+   ========================================================================== */
+
+.ts-map-legend {
+  position: absolute;
+  bottom: 46px;
+  left: 16px;
+  padding: 8px 12px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-map-legend-title {
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-map-legend-bar {
+  display: flex;
+  height: 8px;
+  width: 140px;
+  border: 1px solid var(--ts-border-subtle);
+}
+
+.ts-map-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--ts-font-mono);
+  font-size: 9px;
+  color: var(--ts-color-text-tertiary);
+}
+
+/* ==========================================================================
+   Telemetry Footer Bar
+   ========================================================================== */
+
+.ts-map-telemetry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: var(--ts-color-bg);
+  border-top: 1px solid var(--ts-border-subtle);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+  z-index: 20;
+  gap: 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.ts-map-telemetry-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-map-telemetry-label {
+  color: var(--ts-color-text-tertiary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ts-map-telemetry-val {
+  color: var(--ts-color-text-primary);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Floating Tooltip
+   ========================================================================== */
+
+.ts-map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  padding: 8px 12px;
+  background: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-family: var(--ts-font-body);
+  font-size: 12px;
+  transform: translate(12px, 12px);
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-map-tooltip-title {
+  font-family: var(--ts-font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+}
+
+.ts-map-tooltip-meta {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-map-tooltip-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--ts-color-surface-raised);
+  border: 1px solid var(--ts-border-subtle);
+  font-family: var(--ts-font-mono);
+  font-size: 10px;
+  color: var(--ts-color-primary);
+  margin-top: 4px;
+}

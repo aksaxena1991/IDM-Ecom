@@ -1,0 +1,61 @@
+.ts-popover-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.ts-popover-content {
+  position: absolute;
+  z-index: 1500;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-medium);
+  border-radius: var(--ts-radius-none);
+  box-shadow: var(--ts-shadow-none);
+  padding: 16px;
+  box-sizing: border-box;
+  animation: ts-popover-appear 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+/* Placements */
+.ts-popover--bottom-start {
+  top: calc(100% + 6px);
+  left: 0;
+}
+
+.ts-popover--bottom-end {
+  top: calc(100% + 6px);
+  right: 0;
+}
+
+.ts-popover--bottom {
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ts-popover--top-start {
+  bottom: calc(100% + 6px);
+  left: 0;
+}
+
+.ts-popover--top-end {
+  bottom: calc(100% + 6px);
+  right: 0;
+}
+
+.ts-popover--top {
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes ts-popover-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

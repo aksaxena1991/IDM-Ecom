@@ -1,0 +1,199 @@
+/* ThoughtStream Calculator Styles */
+
+.ts-calculator {
+  display: flex;
+  flex-direction: column;
+  width: 310px;
+  background-color: var(--ts-color-bg);
+  border: 1px solid var(--ts-border-subtle);
+  border-radius: var(--ts-radius-none);
+  box-sizing: border-box;
+  font-family: var(--ts-font-body);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Display Pane */
+.ts-calculator-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  background-color: var(--ts-color-surface);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  min-height: 84px;
+  box-sizing: border-box;
+  text-align: right;
+  gap: 4px;
+}
+
+.ts-calculator-expression {
+  font-family: var(--ts-font-mono);
+  font-size: 13px;
+  color: var(--ts-color-text-tertiary);
+  min-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-calculator-result {
+  font-family: var(--ts-font-mono);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--ts-color-text-primary);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+/* History Bar Header */
+.ts-calculator-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-bg);
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-secondary);
+}
+
+.ts-calculator-history-toggle {
+  background: transparent;
+  border: none;
+  color: var(--ts-color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  padding: 2px 4px;
+  transition: color var(--ts-transition-fast);
+}
+
+.ts-calculator-history-toggle:hover {
+  color: var(--ts-color-text-primary);
+}
+
+/* Keypad Grid */
+.ts-calculator-keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background-color: var(--ts-border-subtle);
+  border-bottom: 1px solid var(--ts-border-subtle);
+}
+
+.ts-calculator-btn {
+  background-color: var(--ts-color-bg);
+  border: none;
+  border-radius: var(--ts-radius-none);
+  height: 54px;
+  font-family: var(--ts-font-mono);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ts-color-text-primary);
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--ts-transition-fast);
+  padding: 0;
+}
+
+.ts-calculator-btn:hover {
+  background-color: var(--ts-color-surface-raised);
+}
+
+.ts-calculator-btn:active {
+  background-color: var(--ts-border-subtle);
+}
+
+.ts-calculator-btn:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--ts-color-primary);
+}
+
+/* Operator Keys */
+.ts-calculator-btn--operator {
+  background-color: var(--ts-color-surface);
+  color: var(--ts-color-primary);
+  font-weight: 500;
+}
+
+.ts-calculator-btn--operator:hover {
+  background-color: var(--ts-color-surface-raised);
+}
+
+.ts-calculator-btn--action {
+  color: var(--ts-color-text-secondary);
+  font-size: 15px;
+}
+
+.ts-calculator-btn--equals {
+  background-color: var(--ts-color-primary);
+  color: var(--ts-color-bg);
+  font-weight: 600;
+}
+
+.ts-calculator-btn--equals:hover {
+  background-color: var(--ts-color-text-primary);
+  color: var(--ts-color-bg);
+}
+
+/* History Tape Drawer */
+.ts-calculator-history-drawer {
+  max-height: 180px;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-surface);
+  padding: 8px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+}
+
+.ts-calculator-history-empty {
+  font-size: 12px;
+  color: var(--ts-color-text-tertiary);
+  font-family: var(--ts-font-body);
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.ts-calculator-history-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--ts-radius-none);
+  transition: background-color var(--ts-transition-fast);
+}
+
+.ts-calculator-history-item:hover {
+  background-color: var(--ts-color-bg);
+}
+
+.ts-calculator-history-expr {
+  font-family: var(--ts-font-mono);
+  font-size: 11px;
+  color: var(--ts-color-text-tertiary);
+}
+
+.ts-calculator-history-res {
+  font-family: var(--ts-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+}
