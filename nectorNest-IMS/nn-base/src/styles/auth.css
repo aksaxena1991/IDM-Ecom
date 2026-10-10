@@ -802,6 +802,13 @@ body:has(.nn-gate) {
   line-height: 1.5;
 }
 
+.nn-dashboard {
+  min-height: 100vh;
+  background-color: var(--ts-color-bg);
+  color: var(--ts-color-text-primary);
+  font-family: var(--ts-font-body);
+}
+
 .nn-gate-legal .nn-link-button {
   font-size: inherit;
   color: var(--ts-color-text-secondary);

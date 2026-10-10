@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { AuthLayout } from './components/AuthLayout';
+import { DashboardPage, SESSION_KEY } from './components/DashboardPage';
 import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
 import { ThemeProvider } from '@thoughtstream/ui';
@@ -16,7 +17,8 @@ export const App: React.FC = () => {
           <LoginPage
             onNavigateToSignup={() => navigate('/signup')}
             onLoginSuccess={(data) => {
-              console.log('[nn-base] Authenticated operator:', data);
+              sessionStorage.setItem(SESSION_KEY, JSON.stringify({ email: data.email }));
+              navigate('/dashboard', { replace: true });
             }}
           />
         }
@@ -44,6 +46,8 @@ export const App: React.FC = () => {
           </AuthLayout>
         }
       />
+
+      <Route path="/dashboard" element={<DashboardPage />} />
 
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/login" replace />} />
