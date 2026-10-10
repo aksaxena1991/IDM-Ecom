@@ -21,4 +21,4 @@ SarwaAmrit/
 | `Backend/IMS-BE` | Inventory management API |
 | `Frontend/Shell-Base-FE` | Host shell (Module Federation) |
 | `Frontend/IDM-FE` | Identity portal remote (feature-sliced React app) |
-| `Frontend/IMS-FE` | Inventory remote |
+| `Frontend/IMS-FE` | Inventory remote (feature-sliced React app, port 3002) |
