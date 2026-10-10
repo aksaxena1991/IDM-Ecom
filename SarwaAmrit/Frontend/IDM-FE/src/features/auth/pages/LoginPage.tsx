@@ -1,11 +1,16 @@
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Button, Input, Typography, useToast } from '@thoughtstream/ui'
 import { Eye, EyeOff } from 'lucide-react'
-import { ForgotPasswordModal } from '../../../components/ForgotPasswordModal'
+import { lazyPage } from '../../../core/lazyPage'
 import { useAuth } from '../context/AuthContext'
 import { DEFAULT_TENANT_SLUG } from '../../../core/config'
 import { ApiError, beginSsoLogin, continueOidcAfterSession, loginWithPassword } from '../../../core/api'
+
+const ForgotPasswordModal = lazyPage(
+  () => import('../../../components/ForgotPasswordModal'),
+  'ForgotPasswordModal',
+)
 
 export interface LoginPageProps {
   onNavigateToSignup?: () => void
@@ -234,14 +239,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup, onLogi
           </form>
         </div>
       </div>
-      <ForgotPasswordModal
-        isOpen={isForgotModalOpen}
-        onClose={() => setIsForgotModalOpen(false)}
-        initialEmail={email}
-        onSuccess={(submittedEmail) => {
-          toast.success('Recovery sent', `Reset instructions delivered to ${submittedEmail}`)
-        }}
-      />
+      {isForgotModalOpen && (
+        <Suspense fallback={null}>
+          <ForgotPasswordModal
+            isOpen={isForgotModalOpen}
+            onClose={() => setIsForgotModalOpen(false)}
+            initialEmail={email}
+            onSuccess={(submittedEmail) => {
+              toast.success('Recovery sent', `Reset instructions delivered to ${submittedEmail}`)
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

@@ -40,3 +40,13 @@ export function CardGridSkeleton({ cards = 4 }: { cards?: number }) {
     </section>
   )
 }
+
+export function RouteFallback() {
+  return (
+    <main className="dashboard" role="status" aria-label="Loading page">
+      <Skeleton variant="text" width="32%" height={28} />
+      <Skeleton variant="text" width="54%" height={14} />
+      <CardGridSkeleton cards={4} />
+    </main>
+  )
+}
