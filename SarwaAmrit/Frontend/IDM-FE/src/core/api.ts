@@ -7,6 +7,9 @@ import {
   SSO_BASE_URL,
 } from './config'
 import { createCodeChallenge, createCodeVerifier } from '../features/auth/utils/pkce'
+import { ApiError, parseProblemDetails } from './problemDetails'
+
+export { ApiError } from './problemDetails'
 
 export type TokenSet = {
   access_token: string
@@ -36,38 +39,6 @@ export type SessionMe = {
   expires_at: string
   absolute_expires_at: string
   mfa_verified_at: string | null
-}
-
-export class ApiError extends Error {
-  status: number
-  detail?: string
-  challenge?: string
-  body?: Record<string, unknown>
-
-  constructor(
-    status: number,
-    title: string,
-    detail?: string,
-    extras?: { challenge?: string; body?: Record<string, unknown> },
-  ) {
-    super(detail || title)
-    this.status = status
-    this.detail = detail
-    this.challenge = extras?.challenge
-    this.body = extras?.body
-  }
-}
-
-async function parseError(res: Response): Promise<ApiError> {
-  try {
-    const body = await res.json()
-    return new ApiError(res.status, body.title || res.statusText, body.detail || body.error_description, {
-      challenge: body.challenge,
-      body,
-    })
-  } catch {
-    return new ApiError(res.status, res.statusText)
-  }
 }
 
 export async function loginWithPassword(
@@ -119,7 +90,7 @@ export async function registerUser(input: {
       tenant_slug: input.tenantSlug || 'demo',
     }),
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   return res.json()
 }
 
@@ -168,7 +139,7 @@ export async function exchangeCodeForTokens(code: string, state: string): Promis
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   const tokens = await res.json()
   sessionStorage.removeItem(PKCE_VERIFIER_KEY)
   sessionStorage.removeItem(OAUTH_STATE_KEY)
@@ -186,7 +157,7 @@ export async function refreshTokens(refreshToken: string): Promise<TokenSet> {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   const tokens = await res.json()
   return { ...tokens, obtained_at: Date.now() }
 }
@@ -195,7 +166,7 @@ export async function fetchUserInfo(accessToken: string): Promise<UserInfo> {
   const res = await fetch(`${SSO_BASE_URL}/oauth2/userinfo`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   return res.json()
 }
 
@@ -212,7 +183,7 @@ export async function logoutRemote(): Promise<void> {
 
 export async function fetchSessionMe(): Promise<SessionMe> {
   const res = await fetch(`${SSO_BASE_URL}/session/me`, { credentials: 'include' })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   return res.json()
 }
 
@@ -221,7 +192,7 @@ export async function enrollTotp(): Promise<{ factor_id: string; secret: string;
     method: 'POST',
     credentials: 'include',
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   return res.json()
 }
 
@@ -232,7 +203,7 @@ export async function verifyTotp(code: string): Promise<{ verified: boolean }> {
     credentials: 'include',
     body: JSON.stringify({ code }),
   })
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   return res.json()
 }
 
@@ -259,7 +230,7 @@ export async function ssoJson<T>(
   init: RequestInit = {},
 ): Promise<T> {
   const res = await ssoFetch(path, accessToken, init)
-  if (!res.ok) throw await parseError(res)
+  if (!res.ok) throw await parseProblemDetails(res)
   if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }

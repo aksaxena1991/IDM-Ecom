@@ -6,8 +6,6 @@ import { defineConfig } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REMOTE_ORIGIN = 'http://localhost:3000'
-const DS_ROOT = path.resolve(__dirname, '../DesignSystem/thoughtstream-ui')
-const REPO_ROOT = path.resolve(__dirname, '../../..')
 
 export default defineConfig({
   plugins: [
@@ -39,8 +37,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@thoughtstream/ui/styles.css': path.resolve(DS_ROOT, 'src/styles.css'),
-      '@thoughtstream/ui': path.resolve(DS_ROOT, 'src/index.ts'),
+      '@thoughtstream/ui/styles.css': path.resolve(__dirname, '../DesignSystem/thoughtstream-ui/src/styles.css'),
+      '@thoughtstream/ui': path.resolve(__dirname, '../DesignSystem/thoughtstream-ui/src/index.ts'),
     },
     dedupe: ['react', 'react-dom'],
   },
@@ -53,7 +51,7 @@ export default defineConfig({
     origin: REMOTE_ORIGIN,
     cors: true,
     fs: {
-      allow: [REPO_ROOT],
+      allow: [path.resolve(__dirname, '..')],
     },
   },
   preview: {

@@ -1,5 +1,4 @@
-export { default as App } from './App'
-export { AppRoutes } from './AppRoutes'
+export { default as App, AppRoutes } from './App'
 export { default as IdmRoot } from './IdmRoot'
 export { mount, unmount } from './mount'
 export type { IdmMountOptions } from './mount'
