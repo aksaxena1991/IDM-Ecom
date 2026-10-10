@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Chip, Input } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type RoleItem } from '../../lib/adminApi'
 
@@ -104,54 +105,58 @@ export function RolesPage() {
 
   return (
     <main className="dashboard">
-      <h1>Roles</h1>
+      <h1>RBAC Role Governance</h1>
       <p className="lede">
-        Create RBAC roles and attach permissions. Policies can match <code>subject.roles</code> and{' '}
-        <code>subject.permissions</code> alongside ABAC attributes.
+        Define enterprise RBAC roles, assign fine-grained permissions, and bind them to ABAC policy conditions.
       </p>
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
-        <div>
-          <h2>Tenant roles</h2>
-          <ul className="list">
+        <Card variant="default" padding="medium">
+          <h2>Tenant Roles ({roles.length})</h2>
+          <ul className="list" style={{ marginBottom: '2rem' }}>
             {roles.map((role) => (
               <li key={role.id}>
                 <div className="list-row">
                   <div>
                     <strong>{role.name}</strong>
-                    <div className="muted small">
+                    <div className="muted small" style={{ marginTop: '0.2rem' }}>
                       {role.permissions.length
-                        ? role.permissions.join(', ')
+                        ? `${role.permissions.length} permissions`
                         : 'No permissions'}
-                      {role.is_system ? ' · system' : ''}
+                      {role.is_system ? ' · SYSTEM ROLE' : ''}
                     </div>
                   </div>
-                  <button type="button" className="btn btn-ghost" onClick={() => selectRole(role)}>
-                    Edit
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    {role.is_system && (
+                      <Chip variant="status" tone="info">SYSTEM</Chip>
+                    )}
+                    <Button variant="ghost" size="small" onClick={() => selectRole(role)}>
+                      Edit Role
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
 
-          <h2>Create role</h2>
+          <h2>Create New Role</h2>
           <form className="stack" onSubmit={(e) => void onCreate(e)}>
+            <Input
+              label="Role identifier"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. security_auditor"
+              required
+            />
+            <Input
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief role objective"
+            />
             <label>
-              Name
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="finance_ops"
-                required
-              />
-            </label>
-            <label>
-              Description
-              <input value={description} onChange={(e) => setDescription(e.target.value)} />
-            </label>
-            <label>
-              Permissions (one per line)
+              Permissions (one per line or comma-separated)
               <textarea
                 className="code-area"
                 rows={4}
@@ -159,29 +164,29 @@ export function RolesPage() {
                 onChange={(e) => setPermissionsText(e.target.value)}
               />
             </label>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              Create role
-            </button>
+            <Button type="submit" variant="primary" isLoading={busy}>
+              Create Role
+            </Button>
           </form>
-        </div>
+        </Card>
 
-        <div>
-          <h2>Role details</h2>
+        <Card variant="default" padding="medium">
+          <h2>Role Specifications</h2>
           {selected ? (
             <div className="stack">
-              <p>
-                <strong>{selected.name}</strong>
-                {selected.is_system ? <span className="badge">System</span> : null}
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '1.1rem' }}>{selected.name}</strong>
+                {selected.is_system && (
+                  <Chip variant="status" tone="info">IMMUTABLE SYSTEM ROLE</Chip>
+                )}
+              </div>
+              <Input
+                label="Description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
               <label>
-                Description
-                <input
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                />
-              </label>
-              <label>
-                Permissions
+                Attached Permissions
                 <textarea
                   className="code-area"
                   rows={6}
@@ -189,26 +194,25 @@ export function RolesPage() {
                   onChange={(e) => setEditPermissions(e.target.value)}
                 />
               </label>
-              <div className="toolbar">
-                <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void onSave()}>
-                  Save
-                </button>
+              <div className="btn-row" style={{ marginTop: '0.5rem' }}>
+                <Button variant="primary" disabled={busy} onClick={() => void onSave()} isLoading={busy}>
+                  Save Changes
+                </Button>
                 {!selected.is_system && (
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
+                  <Button
+                    variant="ghost"
                     disabled={busy}
                     onClick={() => void onDelete()}
                   >
-                    Delete
-                  </button>
+                    Delete Role
+                  </Button>
                 )}
               </div>
             </div>
           ) : (
-            <p className="muted">Select a role to edit permissions.</p>
+            <p className="muted">Select a role from the registry to inspect or modify permission scopes.</p>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   )

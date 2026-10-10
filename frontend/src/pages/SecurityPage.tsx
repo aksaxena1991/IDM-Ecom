@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Chip, Input } from '@thoughtstream/ui'
 import { enrollTotp, fetchSessionMe, verifyTotp, type SessionMe } from '../lib/api'
 
 export function SecurityPage() {
@@ -57,32 +58,50 @@ export function SecurityPage() {
 
   return (
     <main className="dashboard">
-      <h1>Security</h1>
-      <p className="lede">Enroll TOTP MFA and refresh step-up for admin writes.</p>
+      <div className="toolbar" style={{ marginBottom: '1.75rem' }}>
+        <div>
+          <h1>Security & Cryptographic MFA</h1>
+          <p className="lede" style={{ marginBottom: 0 }}>
+            Enroll TOTP multi-factor authenticators and manage step-up windows for privileged writes.
+          </p>
+        </div>
+        <div>
+          <Chip
+            variant="status"
+            tone={session?.mfa_verified_at ? 'success' : 'warning'}
+          >
+            {session?.mfa_verified_at ? 'MFA VERIFIED' : 'MFA PENDING'}
+          </Chip>
+        </div>
+      </div>
 
       <section className="detail-grid">
-        <div>
-          <h2>Session</h2>
+        <Card variant="default" padding="medium">
+          <h2>SSO Session Envelope</h2>
           {session ? (
             <dl className="detail-list">
               <div>
-                <dt>Session id</dt>
-                <dd className="mono truncate">{session.session_id}</dd>
+                <dt>Session Identifier</dt>
+                <dd className="mono truncate" title={session.session_id}>{session.session_id}</dd>
               </div>
               <div>
-                <dt>Idle expiry</dt>
-                <dd>{new Date(session.expires_at).toLocaleString()}</dd>
+                <dt>Idle Expiration</dt>
+                <dd className="mono">{new Date(session.expires_at).toLocaleString()}</dd>
               </div>
               <div>
-                <dt>Absolute expiry</dt>
-                <dd>{new Date(session.absolute_expires_at).toLocaleString()}</dd>
+                <dt>Absolute Expiration</dt>
+                <dd className="mono">{new Date(session.absolute_expires_at).toLocaleString()}</dd>
               </div>
               <div>
-                <dt>MFA verified</dt>
-                <dd>
-                  {session.mfa_verified_at
-                    ? new Date(session.mfa_verified_at).toLocaleString()
-                    : 'Not verified'}
+                <dt>MFA Verification Timestamp</dt>
+                <dd className="mono">
+                  {session.mfa_verified_at ? (
+                    <Chip variant="status" tone="success">
+                      {new Date(session.mfa_verified_at).toLocaleString()}
+                    </Chip>
+                  ) : (
+                    <Chip variant="status" tone="warning">Not Verified</Chip>
+                  )}
                 </dd>
               </div>
             </dl>
@@ -92,45 +111,56 @@ export function SecurityPage() {
               or SSO, then return here.
             </p>
           )}
-        </div>
+        </Card>
 
-        <div>
-          <h2>TOTP MFA</h2>
-          <p className="muted small">
-            Flow: enroll (pending) → verify code → factor active / step-up unlocked.
+        <Card variant="default" padding="medium">
+          <h2>TOTP Authenticator Factor</h2>
+          <p className="muted small" style={{ marginBottom: '1.25rem' }}>
+            Flow: Enroll authenticator (pending) → verify code → factor becomes active & step-up is unlocked.
           </p>
           <div className="stack">
-            <button type="button" className="btn btn-secondary" onClick={() => void onEnroll()} disabled={busy}>
-              {enrollment ? 'Re-enroll authenticator' : 'Enroll authenticator'}
-            </button>
+            <Button
+              variant="secondary"
+              onClick={() => void onEnroll()}
+              isLoading={busy}
+            >
+              {enrollment ? 'Re-enroll Authenticator' : 'Enroll Authenticator'}
+            </Button>
+
             {enrollment && (
               <div className="note-block">
-                <p className="badge">Pending verify</p>
-                <p>
-                  <strong>Secret:</strong> <span className="mono">{enrollment.secret}</span>
+                <Chip variant="status" tone="warning">PENDING VERIFICATION</Chip>
+                <p style={{ marginTop: '0.5rem' }}>
+                  <strong>Base32 Secret:</strong> <span className="mono">{enrollment.secret}</span>
                 </p>
-                <p className="mono wrap">{enrollment.otpauth_uri}</p>
+                <p className="mono wrap muted small">{enrollment.otpauth_uri}</p>
               </div>
             )}
+
             <form className="stack" onSubmit={onVerify}>
-              <label>
-                {enrollment ? 'Confirm enrollment code' : 'Step-up / verification code'}
-                <input
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  required
-                />
-              </label>
-              <button type="submit" className="btn btn-primary" disabled={busy}>
-                {enrollment ? 'Activate MFA' : 'Verify code'}
-              </button>
+              <Input
+                label={enrollment ? 'Confirm 6-digit enrollment code' : 'Step-up / verification code'}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="123456"
+                required
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={busy}
+              >
+                {enrollment ? 'Activate Factor' : 'Verify Code & Unlock'}
+              </Button>
             </form>
+
             {message && <p className="ok">{message}</p>}
             {error && <p className="form-error">{error}</p>}
           </div>
-        </div>
+        </Card>
       </section>
     </main>
   )

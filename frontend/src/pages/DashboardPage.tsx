@@ -1,3 +1,4 @@
+import { Card, Chip } from '@thoughtstream/ui'
 import { useAuth } from '../auth/AuthContext'
 
 export function DashboardPage() {
@@ -8,61 +9,103 @@ export function DashboardPage() {
 
   return (
     <main className="dashboard">
-      <h1>Dashboard</h1>
-      <p className="lede">
-        Signed in via SSO. Profile comes from <code>/oauth2/userinfo</code>
-        {isAdmin ? ', including roles, permissions, and ABAC attributes.' : '.'}
-      </p>
+      <div className="toolbar" style={{ marginBottom: '1.75rem' }}>
+        <div>
+          <h1>Identity Dashboard</h1>
+          <p className="lede" style={{ marginBottom: 0 }}>
+            Cryptographically authenticated session. Profile claims validated against <code>/oauth2/userinfo</code>.
+          </p>
+        </div>
+        <div>
+          <Chip variant="status" tone="success">
+            SESSION ACTIVE
+          </Chip>
+        </div>
+      </div>
 
       <section className="detail-grid" aria-label="Logged in user details">
-        <div>
-          <h2>Profile</h2>
+        <Card variant="default" padding="medium">
+          <h2>Subject Profile</h2>
           <dl className="detail-list">
             <div>
-              <dt>Name</dt>
+              <dt>Full Legal Name</dt>
               <dd>{user?.name || '—'}</dd>
             </div>
             <div>
-              <dt>Email</dt>
-              <dd>{user?.email || '—'}</dd>
+              <dt>Principal Email</dt>
+              <dd className="mono">{user?.email || '—'}</dd>
             </div>
             <div>
-              <dt>Subject (sub)</dt>
-              <dd className="mono">{user?.sub || '—'}</dd>
+              <dt>Cryptographic Subject (sub)</dt>
+              <dd className="mono truncate" title={user?.sub}>{user?.sub || '—'}</dd>
             </div>
             <div>
-              <dt>Tenant</dt>
+              <dt>Tenant Partition</dt>
               <dd className="mono">{user?.tenant_id || '—'}</dd>
             </div>
             <div>
-              <dt>Groups</dt>
-              <dd>{user?.groups?.length ? user.groups.join(', ') : 'None'}</dd>
+              <dt>Directory Groups</dt>
+              <dd>
+                {user?.groups?.length ? (
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                    {user.groups.map((g) => (
+                      <Chip key={g} variant="filter" selected={false}>{g}</Chip>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="muted">None assigned</span>
+                )}
+              </dd>
             </div>
             <div>
-              <dt>Console</dt>
-              <dd>{isAdmin ? 'Administrator' : 'User'}</dd>
+              <dt>Access Tier</dt>
+              <dd>
+                <Chip variant="status" tone={isAdmin ? 'warning' : 'info'}>
+                  {isAdmin ? 'ADMINISTRATOR' : 'STANDARD OPERATOR'}
+                </Chip>
+              </dd>
             </div>
           </dl>
-        </div>
+        </Card>
 
-        <div>
-          <h2>RBAC</h2>
+        <Card variant="default" padding="medium">
+          <h2>RBAC Entitlements</h2>
           <dl className="detail-list">
             <div>
-              <dt>Roles</dt>
-              <dd>{roles.length ? roles.join(', ') : 'None'}</dd>
+              <dt>Assigned Roles</dt>
+              <dd>
+                {roles.length ? (
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                    {roles.map((r) => (
+                      <Chip key={r} variant="status" tone="info">{r}</Chip>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="muted">No roles assigned</span>
+                )}
+              </dd>
             </div>
             <div>
-              <dt>Permissions</dt>
-              <dd className="mono">{permissions.length ? permissions.join(', ') : 'None'}</dd>
+              <dt>Cryptographic Permissions</dt>
+              <dd>
+                {permissions.length ? (
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                    {permissions.map((p) => (
+                      <code key={p}>{p}</code>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="muted">No explicit permissions</span>
+                )}
+              </dd>
             </div>
           </dl>
-        </div>
+        </Card>
 
-        <div>
-          <h2>ABAC attributes</h2>
+        <Card variant="default" padding="medium">
+          <h2>ABAC Attributes</h2>
           {Object.keys(attrs).length === 0 ? (
-            <p className="muted">No custom attributes on this account.</p>
+            <p className="muted" style={{ padding: '0.5rem 0' }}>No custom attribute claims found on this account token.</p>
           ) : (
             <dl className="detail-list">
               {Object.entries(attrs).map(([key, value]) => (
@@ -73,25 +116,25 @@ export function DashboardPage() {
               ))}
             </dl>
           )}
-        </div>
+        </Card>
 
-        <div>
-          <h2>Session</h2>
+        <Card variant="default" padding="medium">
+          <h2>OIDC Token Session</h2>
           <dl className="detail-list">
             <div>
-              <dt>Token type</dt>
-              <dd>{tokens?.token_type || 'Bearer'}</dd>
+              <dt>Token Protocol</dt>
+              <dd className="mono">{tokens?.token_type || 'Bearer'}</dd>
             </div>
             <div>
-              <dt>Access token TTL</dt>
-              <dd>{tokens?.expires_in ? `${tokens.expires_in}s` : '—'}</dd>
+              <dt>Access Token TTL</dt>
+              <dd className="mono">{tokens?.expires_in ? `${tokens.expires_in} seconds remaining` : '—'}</dd>
             </div>
             <div>
-              <dt>Scopes</dt>
-              <dd>{tokens?.scope || '—'}</dd>
+              <dt>Authorized Scopes</dt>
+              <dd className="mono">{tokens?.scope || '—'}</dd>
             </div>
           </dl>
-        </div>
+        </Card>
       </section>
     </main>
   )

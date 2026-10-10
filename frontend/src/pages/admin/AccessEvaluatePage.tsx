@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Chip, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type AppItem, type EvaluateResult, type UserItem } from '../../lib/adminApi'
 
@@ -53,56 +54,83 @@ export function AccessEvaluatePage() {
 
   return (
     <main className="dashboard">
-      <h1>Access evaluate</h1>
+      <h1>Access Policy Simulator</h1>
       <p className="lede">
-        Dry-run the RBAC + ABAC + PBAC decision for a user against an application.
+        Dry-run real-time policy arbitration (RBAC + ABAC + PBAC) for any subject against a target client application.
       </p>
       {error && <p className="form-error">{error}</p>}
 
       <form className="stack narrow-form" onSubmit={onEvaluate}>
-        <label>
-          User
-          <select value={userId} onChange={(e) => setUserId(e.target.value)} required>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.email}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Application client_id
-          <select value={clientId} onChange={(e) => setClientId(e.target.value)} required>
-            {apps.map((a) => (
-              <option key={a.id} value={a.client_id}>
-                {a.name} ({a.client_id})
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="submit" className="btn btn-primary" disabled={busy || !userId || !clientId}>
-          {busy ? 'Evaluating…' : 'Evaluate app:access'}
-        </button>
+        <Select
+          label="Subject user principal"
+          value={userId}
+          onChange={setUserId}
+          required
+          searchable
+          options={users.map((u) => ({
+            value: u.id,
+            label: `${u.email} (${u.name || 'Unnamed'})`,
+          }))}
+        />
+        <Select
+          label="Target application client ID"
+          value={clientId}
+          onChange={setClientId}
+          required
+          searchable
+          options={apps.map((a) => ({
+            value: a.client_id,
+            label: `${a.name} — ${a.client_id} (${a.protocol.toUpperCase()})`,
+          }))}
+        />
+        <Button
+          type="submit"
+          variant="primary"
+          isLoading={busy}
+          disabled={!userId || !clientId}
+        >
+          {busy ? 'Simulating Policy Engine…' : 'Evaluate Access Decision'}
+        </Button>
       </form>
 
       {result && (
         <section className="result-panel">
-          <h2>Decision</h2>
-          <p className={result.allowed ? 'ok' : 'form-error'}>
-            {result.allowed ? 'ALLOWED' : 'DENIED'} — {result.message}
-          </p>
-          <dl className="detail-list">
-            <div>
-              <dt>Reason</dt>
-              <dd className="mono">{result.reason}</dd>
+          <Card variant="default" padding="medium">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2>Arbitration Decision</h2>
+              <Chip
+                variant="status"
+                tone={result.allowed ? 'success' : 'error'}
+              >
+                {result.allowed ? 'ACCESS GRANTED' : 'ACCESS DENIED'}
+              </Chip>
             </div>
-            <div>
-              <dt>Matched policies</dt>
-              <dd>
-                {result.matched_policies?.length ? result.matched_policies.join(', ') : 'None'}
-              </dd>
-            </div>
-          </dl>
+
+            <p style={{ marginBottom: '1.25rem', color: result.allowed ? 'var(--ts-color-success)' : 'var(--ts-color-error)', fontWeight: 600 }}>
+              {result.message}
+            </p>
+
+            <dl className="detail-list">
+              <div>
+                <dt>Evaluation Reason</dt>
+                <dd className="mono">{result.reason}</dd>
+              </div>
+              <div>
+                <dt>Matched Policy Rules</dt>
+                <dd>
+                  {result.matched_policies?.length ? (
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                      {result.matched_policies.map((p) => (
+                        <Chip key={p} variant="status" tone="info">{p}</Chip>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="muted">Default tenant rule applied</span>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </Card>
         </section>
       )}
     </main>

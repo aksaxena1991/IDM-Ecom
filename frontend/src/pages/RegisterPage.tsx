@@ -1,5 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { Button, Input } from '@thoughtstream/ui'
+import { Eye, EyeOff } from 'lucide-react'
+import { AuthGate } from '../components/AuthGate'
 import { useAuth } from '../auth/AuthContext'
 import { DEFAULT_TENANT_SLUG } from '../config'
 import { ApiError, continueOidcAfterSession, registerUser } from '../lib/api'
@@ -11,6 +14,7 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -45,74 +49,85 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-shell">
-      <div className="auth-panel">
-        <p className="brand">Nector Nest IDM</p>
-        <h1>Create account</h1>
-        <p className="lede">Register with email, then continue into your secure session.</p>
+    <AuthGate
+      title="Create workspace"
+      subtitle="Register with email, then initialize your secure cryptographic session."
+    >
+      <form className="nn-gate-fields" onSubmit={onSubmit} noValidate>
+        <Input
+          label="Tenant Identifier"
+          type="text"
+          autoComplete="organization"
+          value={tenantSlug}
+          onChange={(e) => setTenantSlug(e.target.value)}
+          placeholder="Tenant slug"
+          required
+          containerClassName="nn-gate-field"
+        />
+        <Input
+          label="Full Legal Name"
+          type="text"
+          autoComplete="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Alex Mercer"
+          containerClassName="nn-gate-field"
+        />
+        <Input
+          label="Corporate Email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="alex@domain.com"
+          required
+          containerClassName="nn-gate-field"
+        />
+        <Input
+          label="Master Passphrase"
+          type={showPassword ? 'text' : 'password'}
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Minimum 8 characters"
+          required
+          minLength={8}
+          containerClassName="nn-gate-field"
+          trailingIcon={
+            <button
+              type="button"
+              className="nn-input-eye-btn"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          }
+        />
+        <Input
+          label="Confirm Passphrase"
+          type={showPassword ? 'text' : 'password'}
+          autoComplete="new-password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          placeholder="Re-enter passphrase"
+          required
+          minLength={8}
+          containerClassName="nn-gate-field"
+        />
+        {error && <p className="form-error">{error}</p>}
 
-        <form className="stack" onSubmit={onSubmit}>
-          <label>
-            Tenant
-            <input
-              type="text"
-              autoComplete="organization"
-              value={tenantSlug}
-              onChange={(e) => setTenantSlug(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Name
-            <input
-              type="text"
-              autoComplete="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </label>
-          <label>
-            Email
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-          </label>
-          <label>
-            Confirm password
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              minLength={8}
-            />
-          </label>
-          {error && <p className="form-error">{error}</p>}
-          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Creating account…' : 'Create account'}
-          </button>
-        </form>
+        <Button type="submit" variant="primary" size="large" fullWidth isLoading={submitting}>
+          {submitting ? 'Initializing account…' : 'Create account'}
+        </Button>
+      </form>
 
-        <p className="footer-note">
-          Already registered? <Link to="/login">Sign in</Link>
-        </p>
-      </div>
-    </div>
+      <p className="nn-gate-legal muted">
+        Already registered?{' '}
+        <Link to="/login" className="nn-link-button">
+          Sign in
+        </Link>
+      </p>
+    </AuthGate>
   )
 }

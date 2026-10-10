@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Checkbox, Chip, Input } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type GroupItem, type UserItem } from '../../lib/adminApi'
 
@@ -73,68 +74,82 @@ export function GroupsPage() {
 
   return (
     <main className="dashboard">
-      <h1>Groups</h1>
-      <p className="lede">Manage directory groups and memberships used in claims and app assignments.</p>
+      <h1>Directory Groups</h1>
+      <p className="lede">
+        Group taxonomy management for token group claims, access assignments, and enterprise team clustering.
+      </p>
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
-        <div>
-          <h2>Groups</h2>
-          <ul className="list">
+        <Card variant="default" padding="medium">
+          <h2>Registered Groups ({groups.length})</h2>
+          <ul className="list" style={{ marginBottom: '2rem' }}>
             {groups.map((g) => (
               <li key={g.id}>
                 <div className="list-row">
                   <div>
                     <strong>{g.name}</strong>
-                    <div className="muted small">
-                      {g.source} · {(g.member_ids || []).length} members
+                    <div className="muted small" style={{ marginTop: '0.2rem' }}>
+                      {g.source.toUpperCase()} · {(g.member_ids || []).length} assigned members
                     </div>
                   </div>
-                  <button type="button" className="btn btn-ghost" onClick={() => openMembers(g)}>
-                    Members
-                  </button>
+                  <Button variant="ghost" size="small" onClick={() => openMembers(g)}>
+                    Manage Members
+                  </Button>
                 </div>
               </li>
             ))}
           </ul>
-          <h2>Create group</h2>
+
+          <h2>Create Directory Group</h2>
           <form className="stack" onSubmit={(e) => void onCreate(e)}>
-            <label>
-              Name
-              <input value={name} onChange={(e) => setName(e.target.value)} required />
-            </label>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              Create
-            </button>
+            <Input
+              label="Group name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. platform-engineers"
+              required
+            />
+            <Button type="submit" variant="primary" isLoading={busy}>
+              Create Group
+            </Button>
           </form>
-        </div>
-        <div>
-          <h2>Members</h2>
+        </Card>
+
+        <Card variant="default" padding="medium">
+          <h2>Group Membership Roster</h2>
           {selected ? (
             <div className="stack">
-              <p className="muted">{selected.name}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong style={{ fontSize: '1.1rem' }}>{selected.name}</strong>
+                <Chip variant="status" tone="info">{`${memberIds.length} ACTIVE MEMBERS`}</Chip>
+              </div>
+
               <ul className="list">
                 {users.map((u) => (
-                  <li key={u.id}>
-                    <label className="list-row">
-                      <span>{u.email}</span>
-                      <input
-                        type="checkbox"
-                        checked={memberIds.includes(u.id)}
-                        onChange={() => toggleMember(u.id)}
-                      />
-                    </label>
+                  <li key={u.id} className="list-row">
+                    <Checkbox
+                      checked={memberIds.includes(u.id)}
+                      onChange={() => toggleMember(u.id)}
+                      label={<span className="mono small">{u.email}</span>}
+                      description={u.name || '—'}
+                    />
                   </li>
                 ))}
               </ul>
-              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void saveMembers()}>
-                Save members
-              </button>
+              <Button
+                variant="primary"
+                disabled={busy}
+                onClick={() => void saveMembers()}
+                isLoading={busy}
+              >
+                Save Member Roster
+              </Button>
             </div>
           ) : (
-            <p className="muted">Select a group to edit members.</p>
+            <p className="muted">Select a directory group to inspect or manage member users.</p>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   )

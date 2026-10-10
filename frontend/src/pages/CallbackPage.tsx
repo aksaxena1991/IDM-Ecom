@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Button, Typography } from '@thoughtstream/ui'
+import { AuthGate } from '../components/AuthGate'
 import { useAuth } from '../auth/AuthContext'
 
 export function CallbackPage() {
@@ -38,22 +40,22 @@ export function CallbackPage() {
 
   if (error) {
     return (
-      <div className="page-center">
-        <div className="auth-panel narrow">
-          <p className="brand">Nector Nest IDM</p>
-          <h1>Sign-in problem</h1>
-          <p className="form-error">{error}</p>
-          <Link className="btn btn-primary" to="/login">
-            Back to login
-          </Link>
-        </div>
-      </div>
+      <AuthGate title="Authentication denied" subtitle="The identity provider rejected this session.">
+        <p className="form-error">{error}</p>
+        <Link to="/login" style={{ textDecoration: 'none', width: '100%' }}>
+          <Button variant="primary" size="large" fullWidth>
+            Return to login gate
+          </Button>
+        </Link>
+      </AuthGate>
     )
   }
 
   return (
-    <div className="page-center">
-      <p className="muted">Completing secure sign-in…</p>
-    </div>
+    <AuthGate title="Nector Nest IDM" subtitle="Exchanging authorization tokens and establishing a secure session.">
+      <Typography variant="caption" color="secondary" className="mono" style={{ textAlign: 'center' }}>
+        Completing OIDC handshake…
+      </Typography>
+    </AuthGate>
   )
 }

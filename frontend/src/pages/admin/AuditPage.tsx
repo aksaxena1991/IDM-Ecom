@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Button, Chip } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type AuditItem } from '../../lib/adminApi'
 import { SSO_BASE_URL } from '../../config'
@@ -45,34 +46,50 @@ export function AuditPage() {
     <main className="dashboard">
       <div className="toolbar">
         <div>
-          <h1>Audit log</h1>
-          <p className="lede">Admin actions and sign-in events for this tenant.</p>
+          <h1>Immutable Audit Ledger</h1>
+          <p className="lede" style={{ marginBottom: 0 }}>
+            Chronological log of administrative actions, identity assertions, and security events.
+          </p>
         </div>
-        <button type="button" className="btn btn-secondary" onClick={() => void downloadCsv()}>
-          Export CSV
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <Chip variant="status" tone="info">{`${items.length} EVENTS RECORDED`}</Chip>
+          <Button variant="secondary" size="small" onClick={() => void downloadCsv()}>
+            Export CSV
+          </Button>
+        </div>
       </div>
+
       {error && <p className="form-error">{error}</p>}
 
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>When</th>
-              <th>Actor</th>
-              <th>Action</th>
-              <th>Target</th>
+              <th>Timestamp (UTC)</th>
+              <th>Principal Actor</th>
+              <th>Action Taxonomy</th>
+              <th>Target Entity</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td>{new Date(item.occurred_at).toLocaleString()}</td>
-                <td>{item.actor}</td>
-                <td className="mono">{item.action}</td>
-                <td className="mono truncate">{item.target || '—'}</td>
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }} className="muted">
+                  No audit events found in this partition.
+                </td>
               </tr>
-            ))}
+            ) : (
+              items.map((item) => (
+                <tr key={item.id}>
+                  <td className="mono small">{new Date(item.occurred_at).toLocaleString()}</td>
+                  <td className="mono">{item.actor}</td>
+                  <td>
+                    <code className="mono">{item.action}</code>
+                  </td>
+                  <td className="mono truncate">{item.target || '—'}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

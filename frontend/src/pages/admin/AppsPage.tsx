@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Checkbox, Chip, Input, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type AppItem, type GroupItem, type UserItem } from '../../lib/adminApi'
 import { ApiError } from '../../lib/api'
@@ -183,86 +184,103 @@ export function AppsPage() {
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
-        <div>
-          <h2>Registered apps</h2>
+        <Card variant="default" padding="medium">
+          <h2>Registered Applications</h2>
           <ul className="list">
             {apps.map((app) => (
               <li key={app.id}>
                 <div className="list-row">
                   <div>
                     <strong>{app.name}</strong>
-                    <div className="muted small mono">
-                      {app.client_id} · {app.protocol} · {app.status}
+                    <div className="muted small mono" style={{ marginTop: '0.2rem' }}>
+                      {app.client_id} · {app.protocol.toUpperCase()}
                     </div>
                   </div>
-                  <div className="btn-row">
-                    <button type="button" className="btn btn-ghost" onClick={() => void loadAttrs(app)}>
-                      Attributes
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost"
-                      onClick={() => void loadAssignments(app)}
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <Chip
+                      variant="status"
+                      tone={app.status === 'active' ? 'success' : 'warning'}
                     >
-                      Assignments
-                    </button>
-                    <button type="button" className="btn btn-ghost" onClick={() => void toggleStatus(app)}>
-                      {app.status === 'active' ? 'Disable' : 'Enable'}
-                    </button>
+                      {app.status.toUpperCase()}
+                    </Chip>
+                    <div className="btn-row">
+                      <Button variant="ghost" size="small" onClick={() => void loadAttrs(app)}>
+                        Attributes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="small"
+                        onClick={() => void loadAssignments(app)}
+                      >
+                        Assignments
+                      </Button>
+                      <Button variant="ghost" size="small" onClick={() => void toggleStatus(app)}>
+                        {app.status === 'active' ? 'Disable' : 'Enable'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
 
-        <div>
-          <h2>Create app</h2>
+        <Card variant="default" padding="medium">
+          <h2>Provision Application</h2>
           <form className="stack" onSubmit={onCreate}>
-            <label>
-              Name
-              <input value={name} onChange={(e) => setName(e.target.value)} required />
-            </label>
-            <label>
-              Protocol
-              <select value={protocol} onChange={(e) => setProtocol(e.target.value as 'oidc' | 'saml')}>
-                <option value="oidc">OIDC</option>
-                <option value="saml">SAML</option>
-              </select>
-            </label>
+            <Input
+              label="Application name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Analytics Portal"
+              required
+            />
+            <Select
+              label="Protocol"
+              value={protocol}
+              onChange={(value) => setProtocol(value as 'oidc' | 'saml')}
+              options={[
+                { value: 'oidc', label: 'OIDC (OpenID Connect)' },
+                { value: 'saml', label: 'SAML 2.0' },
+              ]}
+              required
+            />
             {protocol === 'oidc' ? (
               <label>
-                Redirect URIs (one per line)
+                Authorized Redirect URIs (one per line)
                 <textarea value={redirectUris} onChange={(e) => setRedirectUris(e.target.value)} rows={3} />
               </label>
             ) : (
               <>
-                <label>
-                  ACS URL
-                  <input value={acsUrl} onChange={(e) => setAcsUrl(e.target.value)} required />
-                </label>
-                <label>
-                  SP Entity ID
-                  <input value={entityId} onChange={(e) => setEntityId(e.target.value)} required />
-                </label>
+                <Input
+                  label="Assertion Consumer Service (ACS) URL"
+                  value={acsUrl}
+                  onChange={(e) => setAcsUrl(e.target.value)}
+                  required
+                />
+                <Input
+                  label="Service Provider Entity ID"
+                  value={entityId}
+                  onChange={(e) => setEntityId(e.target.value)}
+                  required
+                />
               </>
             )}
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              Create
-            </button>
+            <Button type="submit" variant="primary" isLoading={busy}>
+              Create Application
+            </Button>
           </form>
 
           {selected && panel === 'attributes' && (
-            <>
+            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--ts-border-subtle)' }}>
               <h2>Attributes · {selected.name}</h2>
-              <label className="list-row">
-                <span className="muted small">Advanced JSON</span>
-                <input
-                  type="checkbox"
+              <div className="list-row" style={{ marginBottom: '1rem' }}>
+                <Checkbox
                   checked={advancedJson}
                   onChange={(e) => setAdvancedJson(e.target.checked)}
+                  label="Advanced JSON mode"
                 />
-              </label>
+              </div>
               {advancedJson ? (
                 <textarea
                   className="code-area"
@@ -271,11 +289,11 @@ export function AppsPage() {
                   rows={8}
                 />
               ) : (
-                <div className="stack">
+                <div className="stack" style={{ marginBottom: '1rem' }}>
                   {attrRows.map((row, idx) => (
                     <div key={idx} className="btn-row">
-                      <input
-                        placeholder="key"
+                      <Input
+                        placeholder="attribute_key"
                         value={row.key}
                         onChange={(e) => {
                           const next = [...attrRows]
@@ -283,8 +301,8 @@ export function AppsPage() {
                           setAttrRows(next)
                         }}
                       />
-                      <input
-                        placeholder="value"
+                      <Input
+                        placeholder="attribute_value"
                         value={row.value}
                         onChange={(e) => {
                           const next = [...attrRows]
@@ -294,78 +312,67 @@ export function AppsPage() {
                       />
                     </div>
                   ))}
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
+                  <Button
+                    variant="ghost"
+                    size="small"
                     onClick={() => setAttrRows((r) => [...r, { key: '', value: '' }])}
                   >
-                    Add attribute
-                  </button>
+                    + Add Attribute
+                  </Button>
                 </div>
               )}
-              <button type="button" className="btn btn-secondary" onClick={() => void saveAttrs()} disabled={busy}>
-                Save attributes
-              </button>
-            </>
+              <Button variant="secondary" onClick={() => void saveAttrs()} isLoading={busy}>
+                Save Attributes
+              </Button>
+            </div>
           )}
 
           {selected && panel === 'assignments' && (
-            <>
+            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--ts-border-subtle)' }}>
               <h2>Assignments · {selected.name}</h2>
-              <p className="muted small">
+              <p className="muted small" style={{ marginBottom: '1rem' }}>
                 When any assignment exists, only assigned users/groups may access (then PBAC applies).
               </p>
               <h3>Users</h3>
-              <ul className="list">
+              <ul className="list" style={{ marginBottom: '1rem' }}>
                 {users.map((u) => (
-                  <li key={u.id}>
-                    <label className="list-row">
-                      <span>
-                        <strong>{u.email}</strong>
-                        <div className="muted small">{u.name || '—'}</div>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={assignments.some(
-                          (a) => a.principal_type === 'user' && a.principal_id === u.id,
-                        )}
-                        onChange={() => toggleAssignment('user', u.id)}
-                      />
-                    </label>
+                  <li key={u.id} className="list-row">
+                    <Checkbox
+                      checked={assignments.some(
+                        (a) => a.principal_type === 'user' && a.principal_id === u.id,
+                      )}
+                      onChange={() => toggleAssignment('user', u.id)}
+                      label={u.email}
+                      description={u.name || '—'}
+                    />
                   </li>
                 ))}
               </ul>
               <h3>Groups</h3>
-              <ul className="list">
+              <ul className="list" style={{ marginBottom: '1rem' }}>
                 {groups.map((g) => (
-                  <li key={g.id}>
-                    <label className="list-row">
-                      <span>
-                        <strong>{g.name}</strong>
-                        <div className="muted small">{g.member_ids.length} members</div>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={assignments.some(
-                          (a) => a.principal_type === 'group' && a.principal_id === g.id,
-                        )}
-                        onChange={() => toggleAssignment('group', g.id)}
-                      />
-                    </label>
+                  <li key={g.id} className="list-row">
+                    <Checkbox
+                      checked={assignments.some(
+                        (a) => a.principal_type === 'group' && a.principal_id === g.id,
+                      )}
+                      onChange={() => toggleAssignment('group', g.id)}
+                      label={g.name}
+                      description={`${g.member_ids.length} members`}
+                    />
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                className="btn btn-secondary"
+              <Button
+                variant="secondary"
                 onClick={() => void saveAssignments()}
-                disabled={busy}
+                isLoading={busy}
               >
-                Save assignments
-              </button>
-            </>
+                Save Assignments
+              </Button>
+            </div>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   )

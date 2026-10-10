@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Button, Card, Checkbox, Input } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type RoleItem, type UserItem } from '../../lib/adminApi'
 
@@ -92,117 +93,117 @@ export function UsersPage() {
 
   return (
     <main className="dashboard">
-      <h1>Users</h1>
+      <h1>Tenant User Directory</h1>
       <p className="lede">
-        Search the tenant directory, edit ABAC subject attributes, and assign multiple RBAC roles.
+        Search the enterprise directory, inspect ABAC subject attributes, and configure multi-role RBAC assignments.
       </p>
       {error && <p className="form-error">{error}</p>}
 
       <div className="toolbar">
-        <input
-          placeholder="Search email…"
+        <Input
+          label="Directory search"
+          placeholder="Filter by email address…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <button type="button" className="btn btn-secondary" onClick={() => void load()}>
-          Search
-        </button>
+        <Button variant="secondary" onClick={() => void load()}>
+          Search directory
+        </Button>
       </div>
 
       <section className="detail-grid">
-        <div>
-          <h2>Directory</h2>
+        <Card variant="default" padding="medium">
+          <h2>Subject Directory ({users.length})</h2>
           <ul className="list">
             {users.map((user) => (
               <li key={user.id}>
                 <div className="list-row">
                   <div>
-                    <strong>{user.email}</strong>
-                    <div className="muted small">
-                      {user.name || '—'} · {user.status}
-                      {user.is_admin ? ' · admin' : ''}
+                    <strong className="mono">{user.email}</strong>
+                    <div className="muted small" style={{ marginTop: '0.2rem' }}>
+                      {user.name || 'No legal name'} · {user.status.toUpperCase()}
+                      {user.is_admin ? ' · PRIVILEGED ADMIN' : ''}
                     </div>
                   </div>
-                  <div className="toolbar">
-                    <button type="button" className="btn btn-ghost" onClick={() => void openAttrs(user)}>
+                  <div className="btn-row">
+                    <Button variant="ghost" size="small" onClick={() => void openAttrs(user)}>
                       Attributes
-                    </button>
-                    <button type="button" className="btn btn-ghost" onClick={() => void openRoles(user)}>
+                    </Button>
+                    <Button variant="ghost" size="small" onClick={() => void openRoles(user)}>
                       Roles
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
 
-        <div>
+        <Card variant="default" padding="medium">
           {panel === 'attributes' ? (
             <>
-              <h2>Subject attributes (ABAC)</h2>
+              <h2>Subject Attributes (ABAC)</h2>
               {selected ? (
                 <div className="stack">
-                  <p className="muted">{selected.email}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="muted small">Configuring:</span>
+                    <strong className="mono small">{selected.email}</strong>
+                  </div>
                   <textarea
                     className="code-area"
                     rows={12}
                     value={attrJson}
                     onChange={(e) => setAttrJson(e.target.value)}
                   />
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <Button
+                    variant="primary"
                     disabled={busy}
                     onClick={() => void saveAttrs()}
+                    isLoading={busy}
                   >
-                    Save attributes
-                  </button>
+                    Save Attributes
+                  </Button>
                 </div>
               ) : (
-                <p className="muted">Select a user to edit attributes.</p>
+                <p className="muted">Select a user principal from the directory to inspect or edit ABAC claims.</p>
               )}
             </>
           ) : (
             <>
-              <h2>Assigned roles (RBAC)</h2>
+              <h2>Assigned Roles (RBAC)</h2>
               {selected ? (
                 <div className="stack">
-                  <p className="muted">{selected.email}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="muted small">Configuring:</span>
+                    <strong className="mono small">{selected.email}</strong>
+                  </div>
                   <ul className="list">
                     {allRoles.map((role) => (
-                      <li key={role.id}>
-                        <label className="list-row">
-                          <span>
-                            <strong>{role.name}</strong>
-                            <div className="muted small">
-                              {role.permissions.join(', ') || 'No permissions'}
-                            </div>
-                          </span>
-                          <input
-                            type="checkbox"
-                            checked={selectedRoleIds.includes(role.id)}
-                            onChange={() => toggleRole(role.id)}
-                          />
-                        </label>
+                      <li key={role.id} className="list-row">
+                        <Checkbox
+                          checked={selectedRoleIds.includes(role.id)}
+                          onChange={() => toggleRole(role.id)}
+                          label={role.name}
+                          description={role.permissions.join(', ') || 'No permissions'}
+                        />
                       </li>
                     ))}
                   </ul>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <Button
+                    variant="primary"
                     disabled={busy}
                     onClick={() => void saveRoles()}
+                    isLoading={busy}
                   >
-                    Save roles
-                  </button>
+                    Save Role Assignments
+                  </Button>
                 </div>
               ) : (
                 <p className="muted">Select a user to assign roles.</p>
               )}
             </>
           )}
-        </div>
+        </Card>
       </section>
     </main>
   )

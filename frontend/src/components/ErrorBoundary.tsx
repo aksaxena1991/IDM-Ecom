@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Button } from '@thoughtstream/ui'
 
 type Props = { children: ReactNode }
 type State = { error: Error | null }
@@ -21,9 +22,9 @@ export class ErrorBoundary extends Component<Props, State> {
           <h1>Something went wrong</h1>
           <p className="lede">Reload the page or sign in again. If it persists, contact your admin.</p>
           <p className="form-error mono">{this.state.error.message}</p>
-          <button type="button" className="btn btn-primary" onClick={() => window.location.assign('/')}>
+          <Button type="button" variant="primary" onClick={() => window.location.assign('/')}>
             Reload
-          </button>
+          </Button>
         </main>
       )
     }

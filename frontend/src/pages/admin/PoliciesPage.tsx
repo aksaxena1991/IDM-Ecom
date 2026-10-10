@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Button, Card, Chip, Input, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../auth/AuthContext'
 import { adminApi, type PolicyItem } from '../../lib/adminApi'
 
@@ -81,76 +82,86 @@ export function PoliciesPage() {
 
   return (
     <main className="dashboard">
-      <h1>Access policies</h1>
+      <h1>PBAC Policy Rules</h1>
       <p className="lede">
-        PBAC rules evaluated on <code>app:access</code> with deny-overrides. Conditions may use RBAC
-        fields (<code>subject.roles</code>, <code>subject.permissions</code>), ABAC attributes, and
-        environment.
+        Policy-Based Access Control engine evaluated on <code>app:access</code> with deny-overrides semantics.
+        Arbitrates across RBAC claims, ABAC attributes, and environmental variables.
       </p>
       {error && <p className="form-error">{error}</p>}
 
       <section className="detail-grid">
-        <div>
-          <h2>Policies</h2>
+        <Card variant="default" padding="medium">
+          <h2>Active Policies ({policies.length})</h2>
           <ul className="list">
             {policies.map((p) => (
               <li key={p.id}>
-                <div className="list-row">
-                  <div>
-                    <strong>
-                      {p.name}{' '}
-                      <span className={`badge ${p.effect === 'deny' ? 'badge-danger' : ''}`}>
-                        {p.effect}
-                      </span>
-                    </strong>
-                    <div className="muted small">
-                      priority {p.priority} · {p.enabled ? 'enabled' : 'disabled'}
+                <div className="list-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <strong>{p.name}</strong>
+                      <Chip
+                        variant="status"
+                        tone={p.effect === 'deny' ? 'error' : 'success'}
+                      >
+                        {p.effect.toUpperCase()}
+                      </Chip>
                     </div>
-                    <pre className="tiny-pre">{JSON.stringify(p.conditions, null, 2)}</pre>
+                    <div className="btn-row">
+                      <Button variant="ghost" size="small" onClick={() => void toggleEnabled(p)}>
+                        {p.enabled ? 'Disable' : 'Enable'}
+                      </Button>
+                      <Button variant="ghost" size="small" onClick={() => void onDelete(p)}>
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                  <div className="btn-row">
-                    <button type="button" className="btn btn-ghost" onClick={() => void toggleEnabled(p)}>
-                      {p.enabled ? 'Disable' : 'Enable'}
-                    </button>
-                    <button type="button" className="btn btn-ghost" onClick={() => void onDelete(p)}>
-                      Delete
-                    </button>
+
+                  <div className="muted small mono" style={{ marginTop: '0.4rem' }}>
+                    Priority: {p.priority} · Status: {p.enabled ? 'Active / Evaluating' : 'Disabled'}
                   </div>
+
+                  <pre className="tiny-pre">{JSON.stringify(p.conditions, null, 2)}</pre>
                 </div>
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
 
-        <div>
-          <h2>Create policy</h2>
+        <Card variant="default" padding="medium">
+          <h2>Author New Policy</h2>
           <form className="stack" onSubmit={onCreate}>
+            <Input
+              label="Policy name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. require_engineering_role"
+              required
+            />
+            <Select
+              label="Evaluation effect"
+              value={effect}
+              onChange={(value) => setEffect(value as 'allow' | 'deny')}
+              options={[
+                { value: 'allow', label: 'ALLOW (Permit action)' },
+                { value: 'deny', label: 'DENY (Override and reject)' },
+              ]}
+              required
+            />
+            <Input
+              label="Priority (higher integer executes first)"
+              type="number"
+              value={priority}
+              onChange={(e) => setPriority(Number(e.target.value))}
+              min={0}
+            />
+            <Input
+              label="Resource target client ID (optional)"
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              placeholder="demo-oidc-app"
+            />
             <label>
-              Name
-              <input value={name} onChange={(e) => setName(e.target.value)} required />
-            </label>
-            <label>
-              Effect
-              <select value={effect} onChange={(e) => setEffect(e.target.value as 'allow' | 'deny')}>
-                <option value="allow">allow</option>
-                <option value="deny">deny</option>
-              </select>
-            </label>
-            <label>
-              Priority
-              <input
-                type="number"
-                value={priority}
-                onChange={(e) => setPriority(Number(e.target.value))}
-                min={0}
-              />
-            </label>
-            <label>
-              Resource client_id (optional)
-              <input value={clientId} onChange={(e) => setClientId(e.target.value)} />
-            </label>
-            <label>
-              Conditions JSON
+              Conditions Rule Specification (JSON)
               <textarea
                 className="code-area"
                 value={conditions}
@@ -158,11 +169,11 @@ export function PoliciesPage() {
                 rows={8}
               />
             </label>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              Create policy
-            </button>
+            <Button type="submit" variant="primary" isLoading={busy}>
+              Create Policy Rule
+            </Button>
           </form>
-        </div>
+        </Card>
       </section>
     </main>
   )
