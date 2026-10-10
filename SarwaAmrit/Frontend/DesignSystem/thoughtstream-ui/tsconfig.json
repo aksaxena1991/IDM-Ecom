@@ -19,11 +19,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Paths */
-    "baseUrl": ".",
+    /* Paths — relative to this config; baseUrl is deprecated in TypeScript 6 */
     "paths": {
-      "@/*": ["src/*"]
-    }
+      "@/*": ["./src/*"]
+  }
   },
   "include": ["src", ".storybook"],
   "exclude": ["node_modules", "dist", "storybook-static"]
