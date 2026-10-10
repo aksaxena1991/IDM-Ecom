@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { AdminRoute } from './components/AdminRoute'
 import { AppLayout } from './components/AppLayout'
@@ -18,90 +18,98 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SecurityPage } from './pages/SecurityPage'
 
-export default function App() {
+/** Route tree only — a host shell can wrap this with its own router/basename. */
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/callback" element={<CallbackPage />} />
+
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/security" element={<SecurityPage />} />
+        <Route
+          path="/admin/apps"
+          element={
+            <AdminRoute anyOf={['apps:read', 'apps:write']}>
+              <AppsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute anyOf={['users:write']}>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/policies"
+          element={
+            <AdminRoute anyOf={['policies:write']}>
+              <PoliciesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/roles"
+          element={
+            <AdminRoute anyOf={['roles:write']}>
+              <RolesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/groups"
+          element={
+            <AdminRoute anyOf={['groups:read', 'groups:write']}>
+              <GroupsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/access"
+          element={
+            <AdminRoute anyOf={['admin:access']}>
+              <AccessEvaluatePage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/audit"
+          element={
+            <AdminRoute anyOf={['audit:read']}>
+              <AuditPage />
+            </AdminRoute>
+          }
+        />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  )
+}
+
+/** IDM application without a router — hosts should provide BrowserRouter. */
+export function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
         <StepUpModalProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/callback" element={<CallbackPage />} />
-
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <AppLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/security" element={<SecurityPage />} />
-                <Route
-                  path="/admin/apps"
-                  element={
-                    <AdminRoute anyOf={['apps:read', 'apps:write']}>
-                      <AppsPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/users"
-                  element={
-                    <AdminRoute anyOf={['users:write']}>
-                      <UsersPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/policies"
-                  element={
-                    <AdminRoute anyOf={['policies:write']}>
-                      <PoliciesPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/roles"
-                  element={
-                    <AdminRoute anyOf={['roles:write']}>
-                      <RolesPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/groups"
-                  element={
-                    <AdminRoute anyOf={['groups:read', 'groups:write']}>
-                      <GroupsPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/access"
-                  element={
-                    <AdminRoute anyOf={['admin:access']}>
-                      <AccessEvaluatePage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/audit"
-                  element={
-                    <AdminRoute anyOf={['audit:read']}>
-                      <AuditPage />
-                    </AdminRoute>
-                  }
-                />
-              </Route>
-
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </BrowserRouter>
+          <AppRoutes />
         </StepUpModalProvider>
       </AuthProvider>
     </ErrorBoundary>
   )
 }
+
+export default App

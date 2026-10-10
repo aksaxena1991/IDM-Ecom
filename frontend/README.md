@@ -24,7 +24,7 @@ Frontend for the custom SSO backend.
   - Audit log + CSV export
 - **MFA step-up modal** — retries admin writes after `challenge: mfa_step_up`
 
-## Run
+## Run (standalone)
 
 ```bash
 # Backend on :8000 first
@@ -39,6 +39,35 @@ npm run dev
 ```
 
 Open http://localhost:3000
+
+## Micro frontend
+
+This app is a Module Federation **remote** (`idm`) and can also run standalone.
+
+| Surface | URL |
+|---------|-----|
+| Standalone / remote entry | http://localhost:3000 (`/remoteEntry.js`) |
+| Host shell | http://localhost:3003 |
+
+Exposed modules: `idm/IdmRoot`, `idm/App`, `idm/AppRoutes`, `idm/LoginPage`, `idm/RegisterPage`, `idm/DashboardPage`, `idm/AppLayout`, `idm/AuthProvider`.
+
+Hosts that share React can render `idm/IdmRoot` inside their own router.
+Hosts that do not share React (typical Vite 8 + React 19 setup) should call `idm/mount`:
+
+```ts
+const { mount } = await import('idm/mount')
+const unmount = mount(document.getElementById('idm-root')!)
+```
+
+```bash
+# Terminal 1 — IDM remote
+cd frontend && npm run dev
+
+# Terminal 2 — host shell
+cd ../shell && npm install && npm run dev
+```
+
+Open http://localhost:3003 to load IDM through the shell.
 
 Anubhav Saxena (from backend seed): see backend README.
 
