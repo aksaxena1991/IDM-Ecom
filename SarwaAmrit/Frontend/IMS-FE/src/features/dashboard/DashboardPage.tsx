@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+import { clearOidcSession, logoutRemote } from '../../core/api';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { InventoryScreen } from './screens/InventoryScreen';
 import { WarehousesScreen } from './screens/WarehousesScreen';
@@ -80,6 +81,8 @@ const DashboardView: React.FC = () => {
   };
 
   const handleLogout = () => {
+    void logoutRemote();
+    clearOidcSession();
     sessionStorage.removeItem(SESSION_KEY);
     navigate('/login');
   };

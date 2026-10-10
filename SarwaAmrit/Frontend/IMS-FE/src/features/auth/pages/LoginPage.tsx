@@ -11,6 +11,8 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { ForgotPasswordModal } from '../../../components/ForgotPasswordModal';
+import { ApiError, beginSsoLogin, continueOidcAfterSession, loginWithPassword } from '../../../core/api';
+import { DEFAULT_TENANT_SLUG } from '../../../core/config';
 
 export interface LoginPageProps {
   onNavigateToSignup?: () => void;
@@ -48,7 +50,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showMfa, setShowMfa] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,43 +90,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        credentials: 'include',
-        body: new URLSearchParams({
-          email: email.trim(),
-          password,
-          redirect: '/',
-        }),
+      await loginWithPassword(email.trim(), password, DEFAULT_TENANT_SLUG, mfaCode || undefined);
+      toast.success('Signed in', `Welcome back, ${email.trim()}`);
+      onLoginSuccess?.({
+        email: email.trim(),
+        rememberMe: false,
+        tenantId: DEFAULT_TENANT_SLUG,
       });
-
-      if (response.ok) {
-        toast.success('Signed in', `Welcome back, ${email.trim()}`);
-        onLoginSuccess?.({
-          email: email.trim(),
-          rememberMe: false,
-          tenantId: 'org_nectornest_prod',
-        });
-        return;
-      }
-
-      const text = await response.text();
-      const errorMatch = text.match(/class=['"]error['"]>(.*?)<\/p>/i);
-      const message = (errorMatch?.[1] || '').replace(/<[^>]+>/g, '').trim();
-      if (response.status === 429 || /locked/i.test(message || text)) {
+      await continueOidcAfterSession();
+    } catch (err) {
+      const detail = err instanceof ApiError ? `${err.message} ${err.detail || ''}` : '';
+      if (err instanceof ApiError && err.status === 429) {
         toast.error('Sign in failed', 'Account temporarily locked');
         return;
       }
-      if (/mfa/i.test(message)) {
+      if (err instanceof ApiError && (err.body?.mfa_required || (err.status === 401 && /mfa/i.test(detail)))) {
+        setShowMfa(true);
         toast.error('Sign in failed', 'MFA code required');
         return;
       }
-      setPasswordError(message || 'Invalid credentials');
-      toast.error('Sign in failed', message || 'Invalid credentials');
-    } catch {
-      toast.error('Sign in failed', 'Could not reach the login service');
+      const message = err instanceof ApiError ? err.detail || err.message : 'Invalid credentials';
+      setPasswordError(message);
+      toast.error('Sign in failed', message);
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSso = async () => {
+    setIsLoading(true);
+    try {
+      await beginSsoLogin();
+    } catch (err) {
+      toast.error('Sign in failed', err instanceof Error ? err.message : 'Could not start SSO login');
       setIsLoading(false);
     }
   };
@@ -194,6 +194,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   </button>
                 }
               />
+              {showMfa && (
+                <Input
+                  label="MFA One-Time Passcode"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="6-digit code"
+                  value={mfaCode}
+                  onChange={(event) => setMfaCode(event.target.value)}
+                  containerClassName="nn-gate-field"
+                />
+              )}
             </div>
 
             <div className="nn-gate-forgot">
@@ -221,6 +233,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               variant="secondary"
               size="large"
               fullWidth
+              onClick={handleSso}
+              disabled={isLoading}
             >
               Login with SSO
             </Button>

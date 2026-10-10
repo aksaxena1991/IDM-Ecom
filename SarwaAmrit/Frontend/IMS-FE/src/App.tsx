@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { DashboardPage, SESSION_KEY } from './features/dashboard/DashboardPage';
+import { CallbackPage } from './features/auth/pages/CallbackPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignupPage } from './features/auth/pages/SignupPage';
 
@@ -11,16 +12,10 @@ export const App: React.FC = () => {
     <Routes>
       <Route
         path="/login"
-        element={
-          <LoginPage
-            onNavigateToSignup={() => navigate('/signup')}
-            onLoginSuccess={(data) => {
-              sessionStorage.setItem(SESSION_KEY, JSON.stringify({ email: data.email }));
-              navigate('/dashboard', { replace: true });
-            }}
-          />
-        }
+        element={<LoginPage onNavigateToSignup={() => navigate('/signup')} />}
       />
+
+      <Route path="/callback" element={<CallbackPage />} />
 
       <Route
         path="/signup"

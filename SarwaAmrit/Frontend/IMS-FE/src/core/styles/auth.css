@@ -750,6 +750,14 @@ body:has(.nn-gate) {
   line-height: 1.6;
 }
 
+.form-error {
+  margin: 0 0 16px;
+  width: 100%;
+  text-align: center;
+  color: var(--ts-color-danger, #f87171);
+  font-size: 13px;
+}
+
 .nn-gate-fields {
   width: 100%;
   display: flex;

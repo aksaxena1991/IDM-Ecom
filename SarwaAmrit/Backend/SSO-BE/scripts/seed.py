@@ -102,22 +102,20 @@ async def seed() -> None:
             await db.flush()
             db.add(GroupMembership(group_id=group.id, user_id=user.id))
 
-        oidc_result = await db.execute(
-            select(Application)
-            .where(Application.tenant_id == tenant.id)
-            .where(Application.client_id == "demo-oidc-app")
+        await _ensure_oidc_app(
+            db,
+            tenant_id=tenant.id,
+            name="Demo OIDC App",
+            client_id="demo-oidc-app",
+            redirect_uris=["http://localhost:3000/callback", "http://127.0.0.1:3000/callback"],
         )
-        if oidc_result.scalar_one_or_none() is None:
-            db.add(
-                Application(
-                    tenant_id=tenant.id,
-                    name="Demo OIDC App",
-                    client_id="demo-oidc-app",
-                    protocol=AppProtocol.oidc,
-                    status=AppStatus.active,
-                    config={"redirect_uris": ["http://localhost:3000/callback", "http://127.0.0.1:3000/callback"]},
-                )
-            )
+        await _ensure_oidc_app(
+            db,
+            tenant_id=tenant.id,
+            name="IMS OIDC App",
+            client_id="ims-oidc-app",
+            redirect_uris=["http://localhost:3001/callback", "http://127.0.0.1:3001/callback"],
+        )
 
         saml_result = await db.execute(
             select(Application)
@@ -303,8 +301,48 @@ async def seed() -> None:
         else:
             print("Admin password / SCIM token: set via SEED_* env (use SEED_PRINT_SECRETS=1 to print)")
         print("OIDC client_id: demo-oidc-app")
+        print("OIDC client_id: ims-oidc-app")
         print("SAML client_id: demo-saml-app")
         print(f"RBAC roles: {SYSTEM_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
+
+
+async def _ensure_oidc_app(
+    db,
+    *,
+    tenant_id,
+    name: str,
+    client_id: str,
+    redirect_uris: list[str],
+) -> Application:
+    stmt = (
+        select(Application)
+        .where(Application.tenant_id == tenant_id)
+        .where(Application.client_id == client_id)
+    )
+    application = (await db.execute(stmt)).scalar_one_or_none()
+    if application is None:
+        application = Application(
+            tenant_id=tenant_id,
+            name=name,
+            client_id=client_id,
+            protocol=AppProtocol.oidc,
+            status=AppStatus.active,
+            config={"redirect_uris": list(redirect_uris)},
+        )
+        db.add(application)
+        await db.flush()
+        return application
+
+    application.name = name
+    application.protocol = AppProtocol.oidc
+    application.status = AppStatus.active
+    config = dict(application.config or {})
+    existing = [str(uri) for uri in (config.get("redirect_uris") or [])]
+    merged = list(dict.fromkeys([*existing, *redirect_uris]))
+    config["redirect_uris"] = merged
+    application.config = config
+    await db.flush()
+    return application
 
 
 async def _ensure_attributes(db, model, owner_field: str, owner_id, attributes: dict) -> None:
