@@ -17,6 +17,21 @@ def test_redirect_allowlist_relative_only():
     assert safe_redirect_path("https://evil.com") == "/"
     assert safe_redirect_path("http://evil.com/x") == "/"
     assert safe_redirect_path(None) == "/"
+    # Same-origin absolute resume (e.g. after SSO authorize → hosted login)
+    assert (
+        safe_redirect_path(
+            "http://localhost:8000/oauth2/authorize?client_id=demo",
+            base_url="http://localhost:8000",
+        )
+        == "/oauth2/authorize?client_id=demo"
+    )
+    assert (
+        safe_redirect_path(
+            "http://evil.com/oauth2/authorize",
+            base_url="http://localhost:8000",
+        )
+        == "/"
+    )
 
 
 def test_mfa_encrypt_v2_roundtrip_and_legacy_decrypt(monkeypatch):

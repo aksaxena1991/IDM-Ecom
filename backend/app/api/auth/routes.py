@@ -353,7 +353,11 @@ async def authorize(
 
     session = await get_current_session(request, db, redis)
     if session is None:
-        qs = urlencode({"redirect": str(request.url)})
+        # Relative path only so hosted login's safe_redirect_path can resume authorize
+        return_to = request.url.path
+        if request.url.query:
+            return_to = f"{return_to}?{request.url.query}"
+        qs = urlencode({"redirect": return_to})
         return RedirectResponse(url=f"/login?{qs}", status_code=302)
 
     user_result = await db.execute(select(User).where(User.id == session.user_id))
