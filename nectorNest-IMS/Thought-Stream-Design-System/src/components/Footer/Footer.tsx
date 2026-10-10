@@ -23,6 +23,8 @@ export interface FooterStatus {
 }
 
 export interface FooterProps extends React.HTMLAttributes<HTMLElement> {
+  /** Footer presentation variant: 'default' (full multi-column) or 'minimal' (slim single-tier bar) */
+  variant?: 'default' | 'minimal';
   /** Brand logo or title element */
   brand?: React.ReactNode;
   /** Contemplative motto, manifesto quote, or short bio */
@@ -58,6 +60,7 @@ export interface FooterProps extends React.HTMLAttributes<HTMLElement> {
 export const Footer = forwardRef<HTMLElement, FooterProps>(
   (
     {
+      variant = 'default',
       brand,
       quote = 'In quiet thought, clarity emerges.',
       columns = [],
@@ -79,6 +82,8 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
     },
     ref
   ) => {
+    const isMinimal = variant === 'minimal';
+
     const handleBackToTop = () => {
       if (onBackToTop) {
         onBackToTop();
@@ -98,28 +103,97 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
     return (
       <footer
         ref={ref}
-        className={`ts-footer ${className}`.trim()}
+        className={`ts-footer ${isMinimal ? 'ts-footer--minimal' : ''} ${className}`.trim()}
         role="contentinfo"
         {...props}
       >
         <div className="ts-footer__container">
-          {/* Main Grid: Brand + Columns + Newsletter */}
-          <div className="ts-footer__main-grid">
-            {/* Brand & Manifesto Statement */}
-            <div className="ts-footer__brand-col">
-              {brand ? (
-                <div className="ts-footer__brand">{brand}</div>
-              ) : (
-                <div className="ts-footer__brand">
-                  <Sparkles size={18} />
-                  <span>ThoughtStream</span>
+          {!isMinimal && (
+            <>
+              {/* Main Grid: Brand + Columns + Newsletter */}
+              <div className="ts-footer__main-grid">
+                {/* Brand & Manifesto Statement */}
+                <div className="ts-footer__brand-col">
+                  {brand ? (
+                    <div className="ts-footer__brand">{brand}</div>
+                  ) : (
+                    <div className="ts-footer__brand">
+                      <Sparkles size={18} />
+                      <span>ThoughtStream</span>
+                    </div>
+                  )}
+
+                  {quote && <blockquote className="ts-footer__quote">"{quote}"</blockquote>}
+
+                  {status && (
+                    <div className="ts-footer__status-badge">
+                      <span
+                        className={[
+                          'ts-footer__status-dot',
+                          `ts-footer__status-dot--${status.state || 'operational'}`,
+                        ].join(' ')}
+                        aria-hidden="true"
+                      />
+                      <span className="ts-footer__status-label">{status.label}</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Link Columns */}
+                {columns.length > 0 && (
+                  <div className="ts-footer__columns">
+                    {columns.map((col, idx) => (
+                      <div key={col.id || idx} className="ts-footer__col">
+                        <h4 className="ts-footer__col-title">{col.title}</h4>
+                        <ul className="ts-footer__col-list">
+                          {col.links.map((link, lIdx) => (
+                            <li key={link.id || lIdx} className="ts-footer__col-item">
+                              <a
+                                href={link.href || '#'}
+                                className="ts-footer__link"
+                                onClick={(e) => handleLinkClick(e, link)}
+                                target={link.external ? '_blank' : undefined}
+                                rel={link.external ? 'noopener noreferrer' : undefined}
+                              >
+                                <span>{link.label}</span>
+                                {link.badge && (
+                                  <span className="ts-footer__link-badge">{link.badge}</span>
+                                )}
+                                {link.external && (
+                                  <ExternalLink size={12} className="ts-footer__external-icon" />
+                                )}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Newsletter / Custom Widget Slot */}
+                {newsletterSlot && (
+                  <div className="ts-footer__newsletter-col">{newsletterSlot}</div>
+                )}
+              </div>
+
+              {/* Children slot for customized layout */}
+              {children}
+
+              {/* Hairline Separator */}
+              <div className="ts-footer__divider" aria-hidden="true" />
+            </>
+          )}
+
+          {/* Bottom Bar: Copyright, Legal, Back to top */}
+          <div className="ts-footer__bottom-bar">
+            <div className="ts-footer__bottom-left">
+              {isMinimal && brand && (
+                <div className="ts-footer__minimal-brand">{brand}</div>
               )}
 
-              {quote && <blockquote className="ts-footer__quote">"{quote}"</blockquote>}
-
-              {status && (
-                <div className="ts-footer__status-badge">
+              {isMinimal && status && (
+                <div className="ts-footer__status-badge ts-footer__status-badge--minimal">
                   <span
                     className={[
                       'ts-footer__status-dot',
@@ -130,55 +204,7 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
                   <span className="ts-footer__status-label">{status.label}</span>
                 </div>
               )}
-            </div>
 
-            {/* Link Columns */}
-            {columns.length > 0 && (
-              <div className="ts-footer__columns">
-                {columns.map((col, idx) => (
-                  <div key={col.id || idx} className="ts-footer__col">
-                    <h4 className="ts-footer__col-title">{col.title}</h4>
-                    <ul className="ts-footer__col-list">
-                      {col.links.map((link, lIdx) => (
-                        <li key={link.id || lIdx} className="ts-footer__col-item">
-                          <a
-                            href={link.href || '#'}
-                            className="ts-footer__link"
-                            onClick={(e) => handleLinkClick(e, link)}
-                            target={link.external ? '_blank' : undefined}
-                            rel={link.external ? 'noopener noreferrer' : undefined}
-                          >
-                            <span>{link.label}</span>
-                            {link.badge && (
-                              <span className="ts-footer__link-badge">{link.badge}</span>
-                            )}
-                            {link.external && (
-                              <ExternalLink size={12} className="ts-footer__external-icon" />
-                            )}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Newsletter / Custom Widget Slot */}
-            {newsletterSlot && (
-              <div className="ts-footer__newsletter-col">{newsletterSlot}</div>
-            )}
-          </div>
-
-          {/* Children slot for customized layout */}
-          {children}
-
-          {/* Hairline Separator */}
-          <div className="ts-footer__divider" aria-hidden="true" />
-
-          {/* Bottom Bar: Copyright, Legal, Back to top */}
-          <div className="ts-footer__bottom-bar">
-            <div className="ts-footer__bottom-left">
               <span className="ts-footer__copyright">{copyright}</span>
 
               {legalLinks && legalLinks.length > 0 && (
@@ -219,6 +245,8 @@ export const Footer = forwardRef<HTMLElement, FooterProps>(
               )}
             </div>
           </div>
+
+          {isMinimal && children}
         </div>
       </footer>
     );

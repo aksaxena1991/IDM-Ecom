@@ -7,15 +7,8 @@ import {
   
 } from '@thoughtstream/ui';
 import {
-  Box,
-  
-  ClipboardCheck,
-  Download,
   Eye,
   EyeOff,
-  Package,
-  Truck,
-  Warehouse,
 } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
@@ -23,18 +16,6 @@ export interface LoginPageProps {
   onNavigateToSignup?: () => void;
   onLoginSuccess?: (data: { email: string; rememberMe: boolean; tenantId: string }) => void;
 }
-
-const NODES = [
-  { id: 'hub', label: 'Fulfillment hub', icon: Warehouse },
-  { id: 'fleet', label: 'Fleet lane', icon: Truck },
-  { id: 'catalog', label: 'Catalog cell', icon: Package },
-] as const;
-
-const OUTCOMES = [
-  { id: 'pick', label: 'Pick list', icon: Box },
-  { id: 'ledger', label: 'Download ledger', icon: Download },
-  { id: 'confirm', label: 'Confirmed transfer', icon: ClipboardCheck },
-] as const;
 
 const NestMark: React.FC = () => (
   <div className="nn-gate-mark" aria-hidden="true">
@@ -72,7 +53,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [activeNode, setActiveNode] = useState<(typeof NODES)[number]['id']>('fleet');
 
   const handleValidate = () => {
     let isValid = true;

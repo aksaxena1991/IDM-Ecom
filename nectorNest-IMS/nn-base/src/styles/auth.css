@@ -802,11 +802,218 @@ body:has(.nn-gate) {
   line-height: 1.5;
 }
 
-.nn-dashboard {
+.nn-dashboard,
+.nn-dashboard-layout {
   min-height: 100vh;
+  width: 100%;
+  display: flex;
   background-color: var(--ts-color-bg);
   color: var(--ts-color-text-primary);
   font-family: var(--ts-font-body);
+}
+
+.nn-dashboard-sidebar-wrap {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 30;
+}
+
+.nn-dashboard-viewport {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--ts-color-bg);
+}
+
+.nn-dashboard-topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background-color: var(--ts-color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  flex-shrink: 0;
+}
+
+.nn-dashboard-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nn-dashboard-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--ts-color-text-secondary);
+}
+
+.nn-dashboard-breadcrumb-sep {
+  color: var(--ts-color-text-tertiary);
+}
+
+.nn-dashboard-breadcrumb-current {
+  font-weight: 600;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-dashboard-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nn-icon-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-text-secondary);
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 120ms ease;
+  border-radius: 0 !important;
+}
+
+.nn-icon-btn:hover {
+  background: var(--ts-color-surface);
+  color: var(--ts-color-text-primary);
+  border-color: var(--ts-border-medium);
+}
+
+.nn-icon-btn:focus-visible {
+  outline: 1px dashed var(--ts-color-text-primary);
+  outline-offset: 2px;
+}
+
+.nn-dashboard-main {
+  flex: 1;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.nn-dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nn-dashboard-title {
+  margin: 0 0 6px 0;
+  font-family: var(--ts-font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-dashboard-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ts-color-text-secondary);
+  line-height: 1.5;
+}
+
+.nn-dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.nn-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nn-metric-label {
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  color: var(--ts-color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nn-metric-value {
+  font-family: var(--ts-font-mono);
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: var(--ts-color-text-primary);
+  line-height: 1.2;
+}
+
+.nn-metric-trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--ts-color-text-secondary);
+}
+
+.nn-metric-trend--positive {
+  color: var(--ts-color-success);
+}
+
+.nn-nodes-table-wrap {
+  border: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-bg);
+}
+
+.nn-nodes-table-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nn-nodes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.nn-nodes-table th {
+  padding: 12px 20px;
+  font-family: var(--ts-font-mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ts-color-text-tertiary);
+  border-bottom: 1px solid var(--ts-border-subtle);
+  background: var(--ts-color-surface);
+}
+
+.nn-nodes-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--ts-border-subtle);
+  color: var(--ts-color-text-primary);
+}
+
+.nn-nodes-table tr:last-child td {
+  border-bottom: none;
+}
+
+.nn-dashboard-footer {
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .nn-gate-legal .nn-link-button {

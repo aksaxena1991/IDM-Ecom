@@ -48,8 +48,18 @@
 }
 
 .ts-sidebar--collapsed .ts-sidebar__header {
-  padding: 0 10px;
-  justify-content: center;
+  padding: 0 8px;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.ts-sidebar--collapsed .ts-sidebar__header-content {
+  flex-shrink: 0;
+}
+
+.ts-sidebar--collapsed .ts-sidebar__collapse-btn {
+  width: 20px;
+  height: 20px;
 }
 
 .ts-sidebar__header-content {

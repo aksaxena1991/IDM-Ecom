@@ -30,6 +30,8 @@ export interface SidebarNavGroup {
 }
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
+  /** Compact icon-rail mode (starts collapsed into slim rail) */
+  compact?: boolean;
   /** Controlled collapsed state (icon-only mode) */
   collapsed?: boolean;
   /** Initial collapsed state for uncontrolled usage */
@@ -48,8 +50,12 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   groups?: SidebarNavGroup[];
   /** Header slot (brand, workspace switcher, emblem) */
   header?: React.ReactNode;
+  /** Custom collapsed header emblem (optional override) */
+  collapsedHeader?: React.ReactNode;
   /** Footer slot (user profile, telemetry, theme switch) */
   footer?: React.ReactNode;
+  /** Custom collapsed footer (optional override) */
+  collapsedFooter?: React.ReactNode;
   /** Global item click listener */
   onItemClick?: (item: SidebarNavItem) => void;
   children?: React.ReactNode;
@@ -74,6 +80,7 @@ const SidebarContext = createContext<SidebarContextValue>({
 export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
   (
     {
+      compact,
       collapsed: controlledCollapsed,
       defaultCollapsed = false,
       onCollapseChange,
@@ -83,7 +90,9 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       position = 'left',
       groups = [],
       header,
+      collapsedHeader,
       footer,
+      collapsedFooter,
       onItemClick,
       children,
       className = '',
@@ -92,7 +101,13 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
     },
     ref
   ) => {
-    const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
+    const initialCollapsed =
+      controlledCollapsed !== undefined
+        ? controlledCollapsed
+        : compact !== undefined
+        ? compact
+        : defaultCollapsed;
+    const [internalCollapsed, setInternalCollapsed] = useState(initialCollapsed);
     const isCollapsed =
       controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
 
@@ -110,7 +125,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
     const classes = [
       'ts-sidebar',
       `ts-sidebar--${position}`,
-      isCollapsed ? 'ts-sidebar--collapsed' : 'ts-sidebar--expanded',
+      isCollapsed ? 'ts-sidebar--collapsed ts-sidebar--compact' : 'ts-sidebar--expanded',
       className,
     ]
       .filter(Boolean)
@@ -133,15 +148,17 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           {...props}
         >
           {/* Header Area */}
-          {(header || collapsible) && (
+          {(header || collapsedHeader || collapsible) && (
             <div className="ts-sidebar__header">
               <div className="ts-sidebar__header-content">
                 {!isCollapsed && header}
                 {isCollapsed && (
                   <div className="ts-sidebar__header-collapsed-emblem">
                     {/* Render simplified emblem or first letter if collapsed */}
-                    {header ? (
-                      <div className="ts-sidebar__header-icon-wrap">{header}</div>
+                    {collapsedHeader || header ? (
+                      <div className="ts-sidebar__header-icon-wrap">
+                        {collapsedHeader || header}
+                      </div>
                     ) : null}
                   </div>
                 )}
@@ -174,9 +191,9 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           </div>
 
           {/* Footer Area */}
-          {footer && (
+          {(footer || collapsedFooter) && (
             <div className="ts-sidebar__footer">
-              {footer}
+              {isCollapsed ? (collapsedFooter || footer) : footer}
             </div>
           )}
         </aside>
