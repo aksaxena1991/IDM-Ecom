@@ -3,6 +3,7 @@ import App from './App'
 import '@thoughtstream/ui/styles.css'
 import './index.css'
 import './core/styles/theme.css'
+import './core/styles/auth.css'
 
 /**
  * Drop-in remote root for Module Federation hosts.

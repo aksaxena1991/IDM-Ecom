@@ -12,6 +12,7 @@ import { UsersPage } from './features/admin/users/pages/UsersPage'
 import { CallbackPage } from './features/auth/pages/CallbackPage'
 import { LoginPage } from './features/auth/pages/LoginPage'
 import { RegisterPage } from './features/auth/pages/RegisterPage'
+import { SignupPage } from './features/auth/pages/SignupPage'
 import { SecurityPage } from './features/security/pages/SecurityPage'
 import { DashboardPage } from './features/workspace/pages/DashboardPage'
 
@@ -21,6 +22,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/callback" element={<CallbackPage />} />
 
       <Route
