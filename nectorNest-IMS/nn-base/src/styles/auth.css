@@ -450,11 +450,18 @@
 }
 
 /* Login gate — layout from the reference, stone theme from Thought Stream */
+html:has(.nn-gate),
+body:has(.nn-gate) {
+  margin: 0;
+  overflow: hidden;
+}
+
 .nn-gate {
   --nn-gate-canvas: #0c0a09;
   --nn-gate-panel: #141210;
   --nn-gate-panel-raised: #292524;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   position: relative;
   overflow: hidden;
   background: var(--nn-gate-canvas);
@@ -553,16 +560,18 @@
 .nn-gate-scrim {
   position: relative;
   z-index: 2;
-  min-height: 100vh;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   display: grid;
   place-items: center;
-  padding: 88px 24px 72px;
+  padding: 20px;
 }
 
 .nn-gate-modal {
   width: min(920px, 100%);
   display: grid;
-  grid-template-columns: minmax(280px, 0.92fr) minmax(320px, 1.08fr);
+  grid-template-columns: minmax(320px, 1.08fr) minmax(320px, 1.08fr);
   background: var(--nn-gate-panel-raised);
   border: 1px solid var(--ts-border-medium);
   box-shadow: var(--ts-glass-shadow-lg);
