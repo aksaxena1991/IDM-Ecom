@@ -3,12 +3,13 @@ import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { AuthLayout } from './components/AuthLayout';
 import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
-
+import { ThemeProvider } from '@thoughtstream/ui';
 export const App: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Routes>
+    <ThemeProvider defaultTheme="light">
+      <Routes>
       <Route
         path="/login"
         element={
@@ -54,6 +55,8 @@ export const App: React.FC = () => {
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+    </ThemeProvider>
+    
   );
 };
 
