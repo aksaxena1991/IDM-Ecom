@@ -68,7 +68,7 @@ curl -s http://localhost:8000/.well-known/openid-configuration | head
 | Item | Value |
 |------|-------|
 | Admin email | See [README.md](../README.md) (seeded admin) |
-| OIDC `client_id` | `demo-oidc-app` |
+| OIDC `client_id` | `idm-oidc-app` |
 | Redirect URIs | `http://localhost:3000/callback`, `http://127.0.0.1:3000/callback` |
 | Session cookie | `sso_session` (HttpOnly) |
 | CORS (SPA) | `http://localhost:3000` (configure via `CORS_ORIGINS`) |
@@ -81,7 +81,7 @@ Set `BASE_URL` in `.env` to the public URL of SSO in each environment (used as O
 
 Every client needs an **application** record with:
 
-- `client_id` (returned on create, or use seed `demo-oidc-app`)
+- `client_id` (returned on create, or use seed `idm-oidc-app`)
 - Protocol: `oidc` or `saml`
 - **Exact** redirect URI(s) — wildcards are rejected
 
@@ -299,7 +299,7 @@ Minimal start:
 
 ```javascript
 const SSO = "http://localhost:8000";
-const CLIENT_ID = "demo-oidc-app";
+const CLIENT_ID = "idm-oidc-app";
 const REDIRECT_URI = "http://localhost:3000/callback";
 
 async function login() {
@@ -486,7 +486,7 @@ Example — allow only the `app_operator` role:
   "effect": "allow",
   "priority": 20,
   "actions": ["app:access"],
-  "resource_match": { "client_id": "demo-oidc-app" },
+  "resource_match": { "client_id": "idm-oidc-app" },
   "conditions": {
     "all": [{ "attr": "subject.roles", "op": "contains", "value": "app_operator" }]
   }
@@ -504,7 +504,7 @@ Content-Type: application/json
 
 {
   "user_id": "<uuid>",
-  "client_id": "demo-oidc-app",
+  "client_id": "idm-oidc-app",
   "action": "app:access"
 }
 ```
@@ -645,7 +645,7 @@ Interactive explorer: `{SSO}/docs`.
 ## Smoke test (demo OIDC app)
 
 1. Start SSO on port `8000`.  
-2. Point a client at redirect `http://localhost:3000/callback` with `client_id=demo-oidc-app`.  
+2. Point a client at redirect `http://localhost:3000/callback` with `client_id=idm-oidc-app`.  
 3. Run PKCE authorize → sign in → receive `code` → token → userinfo.  
 4. Confirm `email` / `roles` / `attributes` from userinfo.  
 5. Optionally open the reference SPA: `cd frontend && npm run dev`.

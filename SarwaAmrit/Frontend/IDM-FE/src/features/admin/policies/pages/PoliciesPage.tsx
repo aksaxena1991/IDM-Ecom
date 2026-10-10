@@ -17,7 +17,7 @@ export function PoliciesPage() {
   const [name, setName] = useState('')
   const [effect, setEffect] = useState<'allow' | 'deny'>('allow')
   const [priority, setPriority] = useState(10)
-  const [clientId, setClientId] = useState('demo-oidc-app')
+  const [clientId, setClientId] = useState('idm-oidc-app')
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS)
   const [busy, setBusy] = useState(false)
 
@@ -158,7 +158,7 @@ export function PoliciesPage() {
               label="Resource target client ID (optional)"
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
-              placeholder="demo-oidc-app"
+              placeholder="idm-oidc-app"
             />
             <label>
               Conditions Rule Specification (JSON)

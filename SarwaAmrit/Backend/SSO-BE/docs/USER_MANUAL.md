@@ -52,12 +52,12 @@ Configured via env when running `python scripts/seed.py` (see `.env.example`):
 | Item | Env | Default |
 |------|-----|---------|
 | Admin email | `SEED_ADMIN_EMAIL` | `aksaxena1991@gmail.com` |
-| Password | `SEED_ADMIN_PASSWORD` | `ChangeMe-Admin-2026!` |
+| Password | `SEED_ADMIN_PASSWORD` | `@Admin2026` |
 | SCIM bearer | `SEED_SCIM_TOKEN` | `scim-demo-token-change-me` |
 | Tenant slug | — | `demo` |
-| OIDC client_id | — | `demo-oidc-app` |
+| OIDC client_id | — | `idm-oidc-app` |
 | Redirect URI | — | `http://localhost:3000/callback` |
-| SAML client_id | — | `demo-saml-app` |
+| SAML client_id | — | `idm-saml-app` |
 | Seeded roles | — | `admin`, `user`, `app_operator` |
 
 Password and SCIM token are printed only when `SEED_PRINT_SECRETS=1`. Metrics: `GET /metrics` with `Authorization: Bearer $METRICS_TOKEN`.
@@ -245,7 +245,7 @@ Built-ins (not stored in attribute tables): `email`, `is_admin`, `groups`, `role
   "priority": 20,
   "enabled": true,
   "actions": ["app:access"],
-  "resource_match": { "client_id": "demo-oidc-app" },
+  "resource_match": { "client_id": "idm-oidc-app" },
   "conditions": {
     "all": [
       { "attr": "subject.roles", "op": "contains", "value": "app_operator" }
@@ -265,7 +265,7 @@ Authorization: Bearer <admin_access_token>
 
 {
   "user_id": "<uuid>",
-  "client_id": "demo-oidc-app",
+  "client_id": "idm-oidc-app",
   "action": "app:access"
 }
 ```

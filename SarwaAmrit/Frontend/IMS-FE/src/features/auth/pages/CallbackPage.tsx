@@ -10,6 +10,10 @@ export const CallbackPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (sessionStorage.getItem(SESSION_KEY)) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     const oauthError = params.get('error');
     if (oauthError) {
       setError(params.get('error_description') || 'Access was denied by policy.');

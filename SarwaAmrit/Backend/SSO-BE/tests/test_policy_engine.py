@@ -106,14 +106,14 @@ def test_group_contains_and_resource_match():
         effect="allow",
         priority=1,
         actions=["app:access"],
-        resource_match={"client_id": "demo-oidc-app"},
+        resource_match={"client_id": "idm-oidc-app"},
         conditions={"all": [{"attr": "subject.groups", "op": "contains", "value": "Admins"}]},
     )
     hit = evaluate(
         [rule],
         action="app:access",
         subject={"groups": ["Admins"]},
-        resource={"client_id": "demo-oidc-app"},
+        resource={"client_id": "idm-oidc-app"},
         environment={},
     )
     miss = evaluate(

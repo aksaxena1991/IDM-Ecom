@@ -88,34 +88,50 @@ export async function continueOidcAfterSession(): Promise<void> {
   await beginSsoLogin()
 }
 
+const inflightCodeExchanges = new Map<string, Promise<TokenSet>>()
+
 export async function exchangeCodeForTokens(code: string, state: string): Promise<TokenSet> {
-  const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY)
-  const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY)
-  if (!expectedState || state !== expectedState) {
-    throw new Error('Invalid OAuth state. Please try signing in again.')
-  }
-  if (!verifier) {
-    throw new Error('Missing PKCE verifier. Please try signing in again.')
-  }
+  const key = `${code}:${state}`
+  const existing = inflightCodeExchanges.get(key)
+  if (existing) return existing
 
-  const body = new URLSearchParams({
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: OIDC_REDIRECT_URI,
-    client_id: OIDC_CLIENT_ID,
-    code_verifier: verifier,
-  })
+  const promise = (async () => {
+    const expectedState = sessionStorage.getItem(OAUTH_STATE_KEY)
+    const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY)
+    if (!expectedState || state !== expectedState) {
+      throw new Error('Invalid OAuth state. Please try signing in again.')
+    }
+    if (!verifier) {
+      throw new Error('Missing PKCE verifier. Please try signing in again.')
+    }
 
-  const res = await fetch(`${SSO_BASE_URL}/oauth2/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  if (!res.ok) throw await parseProblemDetails(res)
-  const tokens = await res.json()
-  sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-  sessionStorage.removeItem(OAUTH_STATE_KEY)
-  return { ...tokens, obtained_at: Date.now() }
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: OIDC_REDIRECT_URI,
+      client_id: OIDC_CLIENT_ID,
+      code_verifier: verifier,
+    })
+
+    const res = await fetch(`${SSO_BASE_URL}/oauth2/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    })
+    if (!res.ok) throw await parseProblemDetails(res)
+    const tokens = await res.json()
+    sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+    sessionStorage.removeItem(OAUTH_STATE_KEY)
+    return { ...tokens, obtained_at: Date.now() } as TokenSet
+  })()
+
+  inflightCodeExchanges.set(key, promise)
+  try {
+    return await promise
+  } catch (err) {
+    inflightCodeExchanges.delete(key)
+    throw err
+  }
 }
 
 export async function fetchUserInfo(accessToken: string): Promise<UserInfo> {

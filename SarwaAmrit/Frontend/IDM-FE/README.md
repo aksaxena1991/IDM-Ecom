@@ -80,6 +80,6 @@ Anubhav Saxena (from backend seed): see backend README.
 | Variable | Default |
 |----------|---------|
 | `VITE_SSO_BASE_URL` | `http://localhost:8000` |
-| `VITE_OIDC_CLIENT_ID` | `demo-oidc-app` |
+| `VITE_OIDC_CLIENT_ID` | `idm-oidc-app` |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:3000/callback` |
 | `VITE_OIDC_SCOPE` | `openid profile email groups admin` |

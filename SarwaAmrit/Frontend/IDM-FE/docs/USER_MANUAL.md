@@ -29,7 +29,7 @@ Defaults from backend `SEED_*` env (see backend `.env.example`):
 | Field | Default |
 |-------|---------|
 | Email | `aksaxena1991@gmail.com` |
-| Password | `ChangeMe-Admin-2026!` |
+| Password | `@Admin2026` |
 | Tenant | `demo` |
 
 After first login you should see admin nav links matching your permissions.
@@ -39,7 +39,7 @@ After first login you should see admin nav links matching your permissions.
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `VITE_SSO_BASE_URL` | `http://localhost:8000` | SSO API |
-| `VITE_OIDC_CLIENT_ID` | `demo-oidc-app` | Portal OIDC client |
+| `VITE_OIDC_CLIENT_ID` | `idm-oidc-app` | Portal OIDC client |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:3000/callback` | Must match app config |
 | `VITE_OIDC_SCOPE` | `openid profile email groups admin` | Include `admin` for console |
 
@@ -69,7 +69,7 @@ Use this when you already have (or will create) an SSO session on the backend ho
 | Symptom | What to do |
 |---------|------------|
 | Redirect loops / callback error | Confirm backend app redirect URI includes `http://localhost:3000/callback` |
-| `access_denied` | Your user failed PBAC/RBAC/ABAC for `demo-oidc-app` — ask an admin or re-seed |
+| `access_denied` | Your user failed PBAC/RBAC/ABAC for `idm-oidc-app` — ask an admin or re-seed |
 | MFA required | Enroll on **Security**, or enter code on login |
 | CORS errors | Backend `CORS_ORIGINS` must include `http://localhost:3000` |
 
@@ -221,7 +221,7 @@ Tips:
 
 **Purpose:** Dry-run an access decision without logging the user in.
 
-1. Pick or paste a **user id** and **client id** (e.g. `demo-oidc-app`).
+1. Pick or paste a **user id** and **client id** (e.g. `idm-oidc-app`).
 2. Run evaluate.
 3. Read `allowed`, `reason`, `message`, and `matched_policies`.
 

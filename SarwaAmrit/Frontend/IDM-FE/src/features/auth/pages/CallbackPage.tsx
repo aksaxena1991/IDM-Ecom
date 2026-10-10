@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Typography } from '@thoughtstream/ui'
 import { AuthGate } from '../../../components/AuthGate'
 import { useAuth } from '../context/AuthContext'
@@ -7,10 +7,14 @@ import { useAuth } from '../context/AuthContext'
 export function CallbackPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { completeOidcCallback } = useAuth()
+  const { completeOidcCallback, isAuthenticated, loading } = useAuth()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
     const oauthError = params.get('error')
     if (oauthError) {
       setError(params.get('error_description') || 'Access was denied by policy.')
@@ -36,7 +40,11 @@ export function CallbackPage() {
     return () => {
       cancelled = true
     }
-  }, [params, completeOidcCallback, navigate])
+  }, [params, completeOidcCallback, navigate, isAuthenticated])
+
+  if (!loading && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   if (error) {
     return (

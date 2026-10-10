@@ -24,7 +24,7 @@ export function AccessEvaluatePage() {
         setUsers(u.items)
         setApps(a.items)
         setUserId((prev) => prev || u.items[0]?.id || '')
-        const demo = a.items.find((x) => x.client_id === 'demo-oidc-app')
+        const demo = a.items.find((x) => x.client_id === 'idm-oidc-app')
         setClientId((prev) => prev || demo?.client_id || a.items[0]?.client_id || '')
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load catalogs')

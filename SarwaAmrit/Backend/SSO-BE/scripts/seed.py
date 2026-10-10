@@ -3,7 +3,7 @@
 Credentials come from environment (never hardcode production secrets):
 
   SEED_ADMIN_EMAIL       default: aksaxena1991@gmail.com
-  SEED_ADMIN_PASSWORD    default: ChangeMe-Admin-2026!
+  SEED_ADMIN_PASSWORD    default: @Admin2026
   SEED_ADMIN_NAME        default: Anubhav Saxena
   SEED_SCIM_TOKEN        default: scim-demo-token-change-me
   SEED_PRINT_SECRETS     set to 1/true to print password + SCIM token
@@ -47,7 +47,7 @@ from app.models.entities import (
 from app.services.role_service import ADMIN_PERMISSION, DEFAULT_USER_ROLE, SYSTEM_ADMIN_ROLE
 
 ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "aksaxena1991@gmail.com").strip().lower()
-ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "ChangeMe-Admin-2026!")
+ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "@Admin2026")
 ADMIN_NAME = os.environ.get("SEED_ADMIN_NAME", "Anubhav Saxena")
 SCIM_PLAIN = os.environ.get("SEED_SCIM_TOKEN", "scim-demo-token-change-me")
 PRINT_SECRETS = os.environ.get("SEED_PRINT_SECRETS", "").strip().lower() in {"1", "true", "yes"}
@@ -106,7 +106,7 @@ async def seed() -> None:
             db,
             tenant_id=tenant.id,
             name="Demo OIDC App",
-            client_id="demo-oidc-app",
+            client_id="idm-oidc-app",
             redirect_uris=["http://localhost:3000/callback", "http://127.0.0.1:3000/callback"],
         )
         await _ensure_oidc_app(
@@ -120,14 +120,14 @@ async def seed() -> None:
         saml_result = await db.execute(
             select(Application)
             .where(Application.tenant_id == tenant.id)
-            .where(Application.client_id == "demo-saml-app")
+            .where(Application.client_id == "idm-saml-app")
         )
         if saml_result.scalar_one_or_none() is None:
             db.add(
                 Application(
                     tenant_id=tenant.id,
                     name="Demo SAML App",
-                    client_id="demo-saml-app",
+                    client_id="idm-saml-app",
                     protocol=AppProtocol.saml,
                     status=AppStatus.active,
                     config={
@@ -300,9 +300,9 @@ async def seed() -> None:
             print(f"SCIM bearer token: {SCIM_PLAIN}")
         else:
             print("Admin password / SCIM token: set via SEED_* env (use SEED_PRINT_SECRETS=1 to print)")
-        print("OIDC client_id: demo-oidc-app")
+        print("OIDC client_id: idm-oidc-app")
         print("OIDC client_id: ims-oidc-app")
-        print("SAML client_id: demo-saml-app")
+        print("SAML client_id: idm-saml-app")
         print(f"RBAC roles: {SYSTEM_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
 
 

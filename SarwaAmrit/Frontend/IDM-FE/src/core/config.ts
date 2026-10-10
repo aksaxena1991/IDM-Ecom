@@ -1,5 +1,5 @@
 export const SSO_BASE_URL = import.meta.env.VITE_SSO_BASE_URL ?? 'http://localhost:8000'
-export const OIDC_CLIENT_ID = import.meta.env.VITE_OIDC_CLIENT_ID ?? 'demo-oidc-app'
+export const OIDC_CLIENT_ID = import.meta.env.VITE_OIDC_CLIENT_ID ?? 'idm-oidc-app'
 export const OIDC_REDIRECT_URI =
   import.meta.env.VITE_OIDC_REDIRECT_URI ?? 'http://localhost:3000/callback'
 export const OIDC_SCOPE =
