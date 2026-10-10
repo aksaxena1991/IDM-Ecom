@@ -127,10 +127,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </header>
 
         <div className="nn-gate-stage">
-          <div className="nn-gate-stage-head">
-            <span>Choose a node</span>
-            <span className="nn-gate-view-all">+ View all</span>
-          </div>
+          
           <div className="nn-gate-stage-row">
             {NODES.concat(NODES).map((node, index) => {
               const Icon = node.icon;
@@ -159,67 +156,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           aria-labelledby="nn-gate-title"
         >
           <section className="nn-gate-steps">
-            <div className="nn-gate-step">
-              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
-                1. Pick a node
-              </Typography>
-              <div className="nn-gate-tiles" role="listbox" aria-label="Pick a node">
-                {NODES.map((node) => {
-                  const Icon = node.icon;
-                  const selected = activeNode === node.id;
-                  return (
-                    <button
-                      key={node.id}
-                      type="button"
-                      role="option"
-                      aria-selected={selected}
-                      aria-label={node.label}
-                      className={`nn-gate-tile${selected ? ' is-selected' : ''}`}
-                      onClick={() => setActiveNode(node.id)}
-                    >
-                      <Icon size={22} />
-                      {selected && (
-                        <span className="nn-gate-check">
-                          <Check size={12} strokeWidth={3} />
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            
 
-            <div className="nn-gate-step">
-              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
-                2. Say what you need
-              </Typography>
-              <div className="nn-gate-prompt">
-                <span>transfer 240 units to hub east</span>
-                <span className="nn-gate-prompt-mark" aria-hidden="true">?</span>
-              </div>
-            </div>
+            
 
-            <div className="nn-gate-step">
-              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
-                3. Open the ledger
-              </Typography>
-              <div className="nn-gate-tiles">
-                {OUTCOMES.map((item) => {
-                  const Icon = item.icon;
-                  const featured = item.id === 'ledger';
-                  return (
-                    <div
-                      key={item.id}
-                      className={`nn-gate-tile nn-gate-tile--static${featured ? ' is-featured' : ''}`}
-                      aria-hidden="true"
-                    >
-                      <Icon size={22} />
-                      {featured && <span className="nn-gate-tile-caption">Download</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            
           </section>
 
           <form className="nn-gate-auth" onSubmit={handleLogin} noValidate>
