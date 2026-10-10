@@ -4,6 +4,7 @@ import {
   Input,
   Typography,
   useToast,
+  Divider,
 } from '@thoughtstream/ui';
 import {
   Box,
@@ -117,37 +118,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   return (
     <div className="nn-gate" data-theme="dark">
-      <div className="nn-gate-backdrop" aria-hidden="true">
-        <header className="nn-gate-topbar">
-          <div className="nn-gate-topbar-mark">NN</div>
-          <nav className="nn-gate-topbar-links">
-            <span>App</span>
-            <span>Login</span>
-          </nav>
-        </header>
-
-        <div className="nn-gate-stage">
-          
-          <div className="nn-gate-stage-row">
-            {NODES.concat(NODES).map((node, index) => {
-              const Icon = node.icon;
-              return (
-                <div className="nn-gate-stage-tile" key={`${node.id}-${index}`}>
-                  <Icon size={22} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <footer className="nn-gate-site-footer">
-          <span>NectorNest</span>
-          <span>Terms</span>
-          <span>Privacy Policy</span>
-          <span>Status</span>
-        </footer>
-      </div>
-
       <div className="nn-gate-scrim">
         <div
           className="nn-gate-modal"
@@ -156,21 +126,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           aria-labelledby="nn-gate-title"
         >
           <section className="nn-gate-steps">
-            
-
-            
-
-            
           </section>
-
-          <form className="nn-gate-auth" onSubmit={handleLogin} noValidate>
+<form className="nn-gate-auth" onSubmit={handleLogin} noValidate>
             <div className="nn-gate-auth-tools">
               <Button type="button" variant="secondary" size="small">
                 Contact
               </Button>
-              <Button type="button" variant="secondary" size="small">
-                Login
-              </Button>
+              
             </div>
 
             <NestMark />
@@ -240,7 +202,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               fullWidth
               isLoading={isLoading}
             >
-              Sign in
+              Login with Email
+            </Button>
+             <span>or</span>
+            <Button
+              type="submit"
+              variant="secondary"
+              size="large"
+              fullWidth
+              isLoading={isLoading}
+            >
+              Login with SSO
             </Button>
 
             <Typography variant="caption" color="secondary" className="nn-gate-legal">
@@ -253,8 +225,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </form>
         </div>
       </div>
-
-      <ForgotPasswordModal
+<ForgotPasswordModal
         isOpen={isForgotModalOpen}
         onClose={() => setIsForgotModalOpen(false)}
         initialEmail={email}
