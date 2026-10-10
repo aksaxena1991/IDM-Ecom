@@ -241,7 +241,7 @@ class AccessPolicy(Base):
 
 
 class Role(Base):
-    """RBAC role. Admins create roles; users may hold many roles."""
+    """RBAC role. Platform-Admins create roles; users may hold many roles."""
 
     __tablename__ = "roles"
     __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_role_tenant_name"),)

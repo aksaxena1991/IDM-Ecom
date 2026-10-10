@@ -252,7 +252,7 @@ Authorization: Bearer <access_token>
   "sub": "user-uuid",
   "email": "user@example.com",
   "name": "User Name",
-  "groups": ["Admins"],
+  "groups": ["Platform-Admins"],
   "roles": ["admin", "user"],
   "permissions": ["admin:access", "apps:write", "portal:access"],
   "attributes": { "department": "engineering", "clearance": 5 },

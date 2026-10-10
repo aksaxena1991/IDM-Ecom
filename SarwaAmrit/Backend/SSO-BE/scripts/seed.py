@@ -93,11 +93,11 @@ async def seed() -> None:
             user.status = UserStatus.active
 
         group_result = await db.execute(
-            select(Group).where(Group.tenant_id == tenant.id).where(Group.name == "Admins")
+            select(Group).where(Group.tenant_id == tenant.id).where(Group.name == "Platform-Admins")
         )
         group = group_result.scalar_one_or_none()
         if group is None:
-            group = Group(tenant_id=tenant.id, name="Admins", source=GroupSource.manual)
+            group = Group(tenant_id=tenant.id, name="Platform-Admins", source=GroupSource.manual)
             db.add(group)
             await db.flush()
             db.add(GroupMembership(group_id=group.id, user_id=user.id))
