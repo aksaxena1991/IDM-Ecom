@@ -105,7 +105,7 @@ async def seed() -> None:
         await _ensure_oidc_app(
             db,
             tenant_id=tenant.id,
-            name="Demo OIDC App",
+            name="IDM OIDC App",
             client_id="idm-oidc-app",
             redirect_uris=["http://localhost:3000/callback", "http://127.0.0.1:3000/callback"],
         )
@@ -126,7 +126,7 @@ async def seed() -> None:
             db.add(
                 Application(
                     tenant_id=tenant.id,
-                    name="Demo SAML App",
+                    name="IDM SAML App",
                     client_id="idm-saml-app",
                     protocol=AppProtocol.saml,
                     status=AppStatus.active,
