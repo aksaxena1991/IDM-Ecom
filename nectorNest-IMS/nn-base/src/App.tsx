@@ -4,12 +4,10 @@ import { AuthLayout } from './components/AuthLayout';
 import { DashboardPage, SESSION_KEY } from './components/DashboardPage';
 import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
-import { ThemeProvider } from '@thoughtstream/ui';
 export const App: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <ThemeProvider defaultTheme="light">
       <Routes>
       <Route
         path="/login"
@@ -52,8 +50,6 @@ export const App: React.FC = () => {
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-    </ThemeProvider>
-    
   );
 };
 
