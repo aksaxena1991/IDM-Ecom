@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Button, Card, Chip, Select } from '@thoughtstream/ui'
+import { Button, Card, Chip, Select, Skeleton } from '@thoughtstream/ui'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type AppItem, type EvaluateResult, type UserItem } from '../../../../core/adminApi'
 
@@ -12,9 +12,13 @@ export function AccessEvaluatePage() {
   const [result, setResult] = useState<EvaluateResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     void (async () => {
       try {
         const [u, a] = await Promise.all([
@@ -28,6 +32,8 @@ export function AccessEvaluatePage() {
         setClientId((prev) => prev || demo?.client_id || a.items[0]?.client_id || '')
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load catalogs')
+      } finally {
+        setReady(true)
       }
     })()
   }, [accessToken])
@@ -60,6 +66,14 @@ export function AccessEvaluatePage() {
       </p>
       {error && <p className="form-error">{error}</p>}
 
+      {!ready ? (
+        <div className="narrow-form" role="status" aria-label="Loading" style={{ display: 'grid', gap: '1rem' }}>
+          <Skeleton variant="text" width="42%" />
+          <Skeleton variant="rectangular" height={44} />
+          <Skeleton variant="text" width="56%" />
+          <Skeleton variant="rectangular" height={44} />
+        </div>
+      ) : (
       <form className="stack narrow-form" onSubmit={onEvaluate}>
         <Select
           label="Subject user principal"
@@ -92,6 +106,7 @@ export function AccessEvaluatePage() {
           {busy ? 'Simulating Policy Engine…' : 'Evaluate Access Decision'}
         </Button>
       </form>
+      )}
 
       {result && (
         <section className="result-panel">

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Checkbox, Input } from '@thoughtstream/ui'
+import { ListSkeleton } from '../../../../components/ContentSkeleton'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type RoleItem, type UserItem } from '../../../../core/adminApi'
 
@@ -14,9 +15,13 @@ export function UsersPage() {
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const [usersRes, rolesRes] = await Promise.all([
         adminApi.listUsers(accessToken, q || undefined),
@@ -27,6 +32,8 @@ export function UsersPage() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load users')
+    } finally {
+      setReady(true)
     }
   }, [accessToken, q])
 
@@ -114,6 +121,9 @@ export function UsersPage() {
       <section className="detail-grid">
         <Card variant="default" padding="medium">
           <h2>Subject Directory ({users.length})</h2>
+          {!ready ? (
+            <ListSkeleton />
+          ) : (
           <ul className="list">
             {users.map((user) => (
               <li key={user.id}>
@@ -137,6 +147,7 @@ export function UsersPage() {
               </li>
             ))}
           </ul>
+          )}
         </Card>
 
         <Card variant="default" padding="medium">

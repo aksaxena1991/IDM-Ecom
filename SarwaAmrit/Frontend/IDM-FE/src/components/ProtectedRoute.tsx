@@ -1,16 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../features/auth/context/AuthContext'
+import { SessionSkeleton } from './ContentSkeleton'
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
   const location = useLocation()
 
   if (loading) {
-    return (
-      <div className="page-center">
-        <p className="muted">Checking session…</p>
-      </div>
-    )
+    return <SessionSkeleton />
   }
 
   if (!isAuthenticated) {

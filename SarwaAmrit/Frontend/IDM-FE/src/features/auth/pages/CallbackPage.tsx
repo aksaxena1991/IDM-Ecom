@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { Button, Typography } from '@thoughtstream/ui'
+import { Button, Skeleton, Typography } from '@thoughtstream/ui'
 import { AuthGate } from '../../../components/AuthGate'
 import { useAuth } from '../context/AuthContext'
 
@@ -61,9 +61,13 @@ export function CallbackPage() {
 
   return (
     <AuthGate title="Sarwa Amrit IDM" subtitle="Exchanging authorization tokens and establishing a secure session.">
-      <Typography variant="caption" color="secondary" className="mono" style={{ textAlign: 'center' }}>
-        Completing OIDC handshake…
-      </Typography>
+      <div role="status" aria-label="Completing sign-in" style={{ display: 'grid', gap: '0.75rem' }}>
+        <Skeleton variant="rectangular" height={44} />
+        <Skeleton variant="text" count={2} />
+        <Typography variant="caption" color="secondary" className="mono" style={{ textAlign: 'center' }}>
+          Completing OIDC handshake…
+        </Typography>
+      </div>
     </AuthGate>
   )
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Button, Card, Checkbox, Chip, Input } from '@thoughtstream/ui'
+import { ListSkeleton } from '../../../../components/ContentSkeleton'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type GroupItem, type UserItem } from '../../../../core/adminApi'
 
@@ -12,9 +13,13 @@ export function GroupsPage() {
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const [g, u] = await Promise.all([
         adminApi.listGroups(accessToken),
@@ -25,6 +30,8 @@ export function GroupsPage() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load groups')
+    } finally {
+      setReady(true)
     }
   }, [accessToken])
 
@@ -83,6 +90,9 @@ export function GroupsPage() {
       <section className="detail-grid">
         <Card variant="default" padding="medium">
           <h2>Registered Groups ({groups.length})</h2>
+          {!ready ? (
+            <ListSkeleton />
+          ) : (
           <ul className="list" style={{ marginBottom: '2rem' }}>
             {groups.map((g) => (
               <li key={g.id}>
@@ -100,6 +110,7 @@ export function GroupsPage() {
               </li>
             ))}
           </ul>
+          )}
 
           <h2>Create Directory Group</h2>
           <form className="stack" onSubmit={(e) => void onCreate(e)}>

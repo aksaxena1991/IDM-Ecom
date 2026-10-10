@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button, Card, Chip, Input, Multiselect, Panel, PanelGroup, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../../auth/context/AuthContext'
+import { ListSkeleton } from '../../../../components/ContentSkeleton'
 import { adminApi, type AppItem, type PolicyItem } from '../../../../core/adminApi'
 
 const DEFAULT_CONDITIONS = `{
@@ -21,11 +22,15 @@ export function PoliciesPage() {
   const [apps, setApps] = useState<AppItem[]>([])
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
   const [openPolicyIds, setOpenPolicyIds] = useState<string[]>([])
   const seenPolicyIds = useRef(new Set<string>())
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const [policyRes, appRes] = await Promise.all([
         adminApi.listPolicies(accessToken),
@@ -36,6 +41,8 @@ export function PoliciesPage() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load policies')
+    } finally {
+      setReady(true)
     }
   }, [accessToken])
 
@@ -108,7 +115,9 @@ export function PoliciesPage() {
       <section className="detail-grid">
         <section>
           <h2>Active Policies ({policies.length})</h2>
-          {policies.length === 0 ? (
+          {!ready ? (
+            <ListSkeleton />
+          ) : policies.length === 0 ? (
             <p className="muted">No policies yet.</p>
           ) : (
             <PanelGroup allowMultiple value={openPolicyIds} onValueChange={setOpenPolicyIds}>

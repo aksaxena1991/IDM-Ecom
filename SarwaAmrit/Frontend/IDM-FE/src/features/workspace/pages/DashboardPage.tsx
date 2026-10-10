@@ -1,4 +1,5 @@
 import { Card, Chip } from '@thoughtstream/ui'
+import { CardGridSkeleton } from '../../../components/ContentSkeleton'
 import { useAuth } from '../../auth/context/AuthContext'
 
 export function DashboardPage() {
@@ -6,6 +7,14 @@ export function DashboardPage() {
   const attrs = user?.attributes || {}
   const roles = user?.roles || []
   const permissions = user?.permissions || []
+
+  if (!user) {
+    return (
+      <main className="dashboard">
+        <CardGridSkeleton />
+      </main>
+    )
+  }
 
   return (
     <main className="dashboard">

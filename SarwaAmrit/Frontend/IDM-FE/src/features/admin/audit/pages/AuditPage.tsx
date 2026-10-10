@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Chip } from '@thoughtstream/ui'
+import { TableSkeleton } from '../../../../components/ContentSkeleton'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type AuditItem } from '../../../../core/adminApi'
 import { SSO_BASE_URL } from '../../../../core/config'
@@ -8,15 +9,21 @@ export function AuditPage() {
   const { accessToken } = useAuth()
   const [items, setItems] = useState<AuditItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const res = await adminApi.listAudit(accessToken)
       setItems(res.items)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load audit events')
+    } finally {
+      setReady(true)
     }
   }, [accessToken])
 
@@ -62,6 +69,9 @@ export function AuditPage() {
       {error && <p className="form-error">{error}</p>}
 
       <div className="table-wrap">
+        {!ready ? (
+          <TableSkeleton />
+        ) : (
         <table>
           <thead>
             <tr>
@@ -92,6 +102,7 @@ export function AuditPage() {
             )}
           </tbody>
         </table>
+        )}
       </div>
     </main>
   )

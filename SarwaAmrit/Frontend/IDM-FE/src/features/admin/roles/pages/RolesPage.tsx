@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Button, Card, Chip, Input } from '@thoughtstream/ui'
+import { ListSkeleton } from '../../../../components/ContentSkeleton'
 import { useAuth } from '../../../auth/context/AuthContext'
 import { adminApi, type RoleItem } from '../../../../core/adminApi'
 
@@ -9,6 +10,7 @@ export function RolesPage() {
   const [selected, setSelected] = useState<RoleItem | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [permissionsText, setPermissionsText] = useState('apps:read')
@@ -16,13 +18,18 @@ export function RolesPage() {
   const [editPermissions, setEditPermissions] = useState('')
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const res = await adminApi.listRoles(accessToken)
       setRoles(res.items)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load roles')
+    } finally {
+      setReady(true)
     }
   }, [accessToken])
 
@@ -114,6 +121,9 @@ export function RolesPage() {
       <section className="detail-grid">
         <Card variant="default" padding="medium">
           <h2>Tenant Roles ({roles.length})</h2>
+          {!ready ? (
+            <ListSkeleton />
+          ) : (
           <ul className="list" style={{ marginBottom: '2rem' }}>
             {roles.map((role) => (
               <li key={role.id}>
@@ -139,6 +149,7 @@ export function RolesPage() {
               </li>
             ))}
           </ul>
+          )}
 
           <h2>Create New Role</h2>
           <form className="stack" onSubmit={(e) => void onCreate(e)}>

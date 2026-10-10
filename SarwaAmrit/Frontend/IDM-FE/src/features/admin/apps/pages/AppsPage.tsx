@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Button, Card, Checkbox, Chip, Input, Select } from '@thoughtstream/ui'
 import { useAuth } from '../../../auth/context/AuthContext'
+import { ListSkeleton } from '../../../../components/ContentSkeleton'
 import { adminApi, type AppItem, type GroupItem, type UserItem } from '../../../../core/adminApi'
 import { ApiError } from '../../../../core/api'
 
@@ -24,9 +25,13 @@ export function AppsPage() {
   const [acsUrl, setAcsUrl] = useState('http://localhost:9000/acs')
   const [entityId, setEntityId] = useState('https://sp.example.com')
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
 
   const load = useCallback(async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setReady(true)
+      return
+    }
     try {
       const [appsRes, usersRes, groupsRes] = await Promise.all([
         adminApi.listApps(accessToken),
@@ -39,6 +44,8 @@ export function AppsPage() {
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load apps')
+    } finally {
+      setReady(true)
     }
   }, [accessToken])
 
@@ -186,6 +193,9 @@ export function AppsPage() {
       <section className="detail-grid">
         <Card variant="default" padding="medium">
           <h2>Registered Applications</h2>
+          {!ready ? (
+            <ListSkeleton />
+          ) : (
           <ul className="list">
             {apps.map((app) => (
               <li key={app.id}>
@@ -223,6 +233,7 @@ export function AppsPage() {
               </li>
             ))}
           </ul>
+          )}
         </Card>
 
         <Card variant="default" padding="medium">

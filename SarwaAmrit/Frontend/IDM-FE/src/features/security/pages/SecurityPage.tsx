@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Button, Card, Chip, Input } from '@thoughtstream/ui'
+import { Button, Card, Chip, Input, Skeleton } from '@thoughtstream/ui'
 import { enrollTotp, fetchSessionMe, verifyTotp, type SessionMe } from '../../../core/api'
 
 export function SecurityPage() {
@@ -13,12 +13,15 @@ export function SecurityPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [ready, setReady] = useState(false)
 
   async function refreshSession() {
     try {
       setSession(await fetchSessionMe())
     } catch {
       setSession(null)
+    } finally {
+      setReady(true)
     }
   }
 
@@ -86,7 +89,9 @@ export function SecurityPage() {
       <section className="detail-grid">
         <Card variant="default" padding="medium">
           <h2>SSO Session Envelope</h2>
-          {session ? (
+          {!ready ? (
+            <Skeleton variant="text" count={4} />
+          ) : session ? (
             <dl className="detail-list">
               <div>
                 <dt>Session Identifier</dt>
