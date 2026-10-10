@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import {
   Button,
   Input,
-  Checkbox,
-  Card,
   Typography,
-  Divider,
   useToast,
 } from '@thoughtstream/ui';
 import {
-  Mail,
-  Lock,
-  ArrowRight,
+  Box,
+  Check,
+  ClipboardCheck,
+  Download,
   Eye,
   EyeOff,
-  Building,
-  KeySquare,
+  Package,
+  Truck,
+  Warehouse,
 } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
@@ -23,6 +22,41 @@ export interface LoginPageProps {
   onNavigateToSignup?: () => void;
   onLoginSuccess?: (data: { email: string; rememberMe: boolean; tenantId: string }) => void;
 }
+
+const NODES = [
+  { id: 'hub', label: 'Fulfillment hub', icon: Warehouse },
+  { id: 'fleet', label: 'Fleet lane', icon: Truck },
+  { id: 'catalog', label: 'Catalog cell', icon: Package },
+] as const;
+
+const OUTCOMES = [
+  { id: 'pick', label: 'Pick list', icon: Box },
+  { id: 'ledger', label: 'Download ledger', icon: Download },
+  { id: 'confirm', label: 'Confirmed transfer', icon: ClipboardCheck },
+] as const;
+
+const NestMark: React.FC = () => (
+  <div className="nn-gate-mark" aria-hidden="true">
+    <span className="nn-gate-particle nn-gate-particle--a" />
+    <span className="nn-gate-particle nn-gate-particle--b" />
+    <span className="nn-gate-particle nn-gate-particle--c" />
+    <span className="nn-gate-particle nn-gate-particle--d" />
+    <svg viewBox="0 0 64 48" className="nn-gate-mark-svg">
+      <rect x="22" y="6" width="8" height="8" fill="currentColor" />
+      <rect x="30" y="6" width="8" height="8" fill="currentColor" />
+      <rect x="14" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="14" width="8" height="8" fill="var(--ts-color-success)" />
+      <rect x="30" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="38" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="14" y="22" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="22" width="8" height="8" />
+      <rect x="30" y="22" width="8" height="8" />
+      <rect x="38" y="22" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="30" width="8" height="8" fill="currentColor" />
+      <rect x="30" y="30" width="8" height="8" fill="currentColor" />
+    </svg>
+  </div>
+);
 
 export const LoginPage: React.FC<LoginPageProps> = ({
   onNavigateToSignup,
@@ -32,32 +66,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [tenantId, setTenantId] = useState('org_nectornest_prod');
-  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Forgot password modal state
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [activeNode, setActiveNode] = useState<(typeof NODES)[number]['id']>('fleet');
 
   const handleValidate = () => {
     let isValid = true;
 
     if (!email.trim()) {
-      setEmailError('Operator email is required');
+      setEmailError('Email is required');
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setEmailError('Enter a valid operator email address');
+      setEmailError('Enter a valid email address');
       isValid = false;
     } else {
       setEmailError(null);
     }
 
     if (!password) {
-      setPasswordError('Account security key / password is required');
+      setPasswordError('Password is required');
       isValid = false;
     } else if (password.length < 6) {
       setPasswordError('Password must contain at least 6 characters');
@@ -69,116 +99,190 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     return isValid;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleLogin = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!handleValidate()) return;
 
     setIsLoading(true);
-
-    setTimeout(() => {
+    window.setTimeout(() => {
       setIsLoading(false);
-      toast.success(
-        'Authentication Successful',
-        `Welcome back to NectorNest IMS, ${email}`
-      );
-      if (onLoginSuccess) {
-        onLoginSuccess({ email, rememberMe, tenantId });
-      }
-    }, 1200);
-  };
-
-  const handleDemoFill = () => {
-    setEmail('operator@nectornest.io');
-    setPassword('Passphrase2026!');
-    setEmailError(null);
-    setPasswordError(null);
-    toast.info('Demo Credentials Loaded', 'Click "Authenticate & Enter" to proceed');
+      toast.success('Signed in', `Welcome back, ${email}`);
+      onLoginSuccess?.({
+        email,
+        rememberMe: false,
+        tenantId: 'org_nectornest_prod',
+      });
+    }, 900);
   };
 
   return (
-    <>
-      <Card variant="elevated" padding="large" className="nn-login-card">
-        {/* Quick demo helper banner */}
-        <div className="nn-demo-banner">
-          <div className="nn-demo-banner-text">
-            <KeySquare size={14} />
-            <span>Demonstration environment mode</span>
+    <div className="nn-gate" data-theme="dark">
+      <div className="nn-gate-backdrop" aria-hidden="true">
+        <header className="nn-gate-topbar">
+          <div className="nn-gate-topbar-mark">NN</div>
+          <nav className="nn-gate-topbar-links">
+            <span>App</span>
+            <span>Login</span>
+          </nav>
+        </header>
+
+        <div className="nn-gate-stage">
+          <div className="nn-gate-stage-head">
+            <span>Choose a node</span>
+            <span className="nn-gate-view-all">+ View all</span>
           </div>
-          <Button
-            variant="ghost"
-            size="small"
-            onClick={handleDemoFill}
-            className="nn-demo-btn"
-          >
-            Auto-fill Credentials
-          </Button>
+          <div className="nn-gate-stage-row">
+            {NODES.concat(NODES).map((node, index) => {
+              const Icon = node.icon;
+              return (
+                <div className="nn-gate-stage-tile" key={`${node.id}-${index}`}>
+                  <Icon size={22} />
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <form onSubmit={handleLogin} noValidate>
-          <div className="nn-form-stack">
-            {/* Tenant / Organization Domain */}
-            <Input
-              label="Organization Tenant Domain"
-              value={tenantId}
-              onChange={(e) => setTenantId(e.target.value)}
-              placeholder="e.g. org_nectornest_prod"
-              leadingIcon={<Building size={16} />}
-              helperText="Determines regional ledger routing"
-              required
-            />
+        <footer className="nn-gate-site-footer">
+          <span>NectorNest</span>
+          <span>Terms</span>
+          <span>Privacy Policy</span>
+          <span>Status</span>
+        </footer>
+      </div>
 
-            {/* Email Field */}
-            <Input
-              label="Operator Work Email"
-              type="email"
-              placeholder="operator@domain.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError(null);
-              }}
-              error={emailError || undefined}
-              leadingIcon={<Mail size={16} />}
-              autoComplete="email"
-              required
-            />
+      <div className="nn-gate-scrim">
+        <div
+          className="nn-gate-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="nn-gate-title"
+        >
+          <section className="nn-gate-steps">
+            <div className="nn-gate-step">
+              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
+                1. Pick a node
+              </Typography>
+              <div className="nn-gate-tiles" role="listbox" aria-label="Pick a node">
+                {NODES.map((node) => {
+                  const Icon = node.icon;
+                  const selected = activeNode === node.id;
+                  return (
+                    <button
+                      key={node.id}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      aria-label={node.label}
+                      className={`nn-gate-tile${selected ? ' is-selected' : ''}`}
+                      onClick={() => setActiveNode(node.id)}
+                    >
+                      <Icon size={22} />
+                      {selected && (
+                        <span className="nn-gate-check">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-            {/* Password Field */}
-            <Input
-              label="Password / Access Key"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••••••"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (passwordError) setPasswordError(null);
-              }}
-              error={passwordError || undefined}
-              leadingIcon={<Lock size={16} />}
-              trailingIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="nn-input-eye-btn"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              }
-              autoComplete="current-password"
-              required
-            />
+            <div className="nn-gate-step">
+              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
+                2. Say what you need
+              </Typography>
+              <div className="nn-gate-prompt">
+                <span>transfer 240 units to hub east</span>
+                <span className="nn-gate-prompt-mark" aria-hidden="true">?</span>
+              </div>
+            </div>
 
-            {/* Remember Me and Forgot Password Action Row */}
-            <div className="nn-form-row-between">
-              <Checkbox
-                label="Remember node authorization for 30 days"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+            <div className="nn-gate-step">
+              <Typography variant="overline" color="secondary" className="nn-gate-step-label">
+                3. Open the ledger
+              </Typography>
+              <div className="nn-gate-tiles">
+                {OUTCOMES.map((item) => {
+                  const Icon = item.icon;
+                  const featured = item.id === 'ledger';
+                  return (
+                    <div
+                      key={item.id}
+                      className={`nn-gate-tile nn-gate-tile--static${featured ? ' is-featured' : ''}`}
+                      aria-hidden="true"
+                    >
+                      <Icon size={22} />
+                      {featured && <span className="nn-gate-tile-caption">Download</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <form className="nn-gate-auth" onSubmit={handleLogin} noValidate>
+            <div className="nn-gate-auth-tools">
+              <Button type="button" variant="secondary" size="small">
+                Contact
+              </Button>
+              <Button type="button" variant="secondary" size="small">
+                Login
+              </Button>
+            </div>
+
+            <NestMark />
+
+            <Typography id="nn-gate-title" variant="headline" as="h1" className="nn-gate-title">
+              Sign in to the nest
+            </Typography>
+            <Typography variant="bodySmall" color="secondary" className="nn-gate-subtitle">
+              Your inventory sidekick for nodes, ledgers, and fulfillment — ready whenever you are.
+            </Typography>
+
+            <div className="nn-gate-fields">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="Your Email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  if (emailError) setEmailError(null);
+                }}
+                error={emailError || undefined}
+                autoComplete="email"
+                required
+                containerClassName="nn-gate-field"
               />
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  if (passwordError) setPasswordError(null);
+                }}
+                error={passwordError || undefined}
+                autoComplete="current-password"
+                required
+                containerClassName="nn-gate-field"
+                trailingIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="nn-input-eye-btn"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                }
+              />
+            </div>
 
+            <div className="nn-gate-forgot">
               <button
                 type="button"
                 className="nn-link-button"
@@ -188,73 +292,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </button>
             </div>
 
-            {/* Submit Button */}
             <Button
               type="submit"
               variant="primary"
               size="large"
               fullWidth
               isLoading={isLoading}
-              rightIcon={<ArrowRight size={18} />}
             >
-              Authenticate & Enter
+              Sign in
             </Button>
-          </div>
-        </form>
 
-        <Divider spacing="large" />
-
-        {/* SSO & Alternative Authentications */}
-        <div className="nn-secondary-auth">
-          <Typography variant="caption" color="secondary" className="nn-secondary-auth-label">
-            ENTERPRISE SINGLE SIGN-ON (SSO)
-          </Typography>
-
-          <div className="nn-sso-grid">
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => toast.info('Okta SAML 2.0', 'Redirecting to identity provider...')}
-            >
-              Okta Verify
-            </Button>
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => toast.info('Azure Entra ID', 'Redirecting to Microsoft identity...')}
-            >
-              Microsoft Entra
-            </Button>
-          </div>
+            <Typography variant="caption" color="secondary" className="nn-gate-legal">
+              By continuing, you agree to our Terms and Privacy Policy.
+              {' '}
+              <button type="button" className="nn-link-button" onClick={onNavigateToSignup}>
+                Create a nest account
+              </button>
+            </Typography>
+          </form>
         </div>
+      </div>
 
-        {/* Navigation to Signup */}
-        <div className="nn-card-footer-switch">
-          <Typography variant="bodySmall" color="secondary">
-            Need an enterprise operator account?{' '}
-            <button
-              type="button"
-              className="nn-link-button-bold"
-              onClick={onNavigateToSignup}
-            >
-              Create new nest account
-            </button>
-          </Typography>
-        </div>
-      </Card>
-
-      {/* Forgot Password Modal */}
       <ForgotPasswordModal
         isOpen={isForgotModalOpen}
         onClose={() => setIsForgotModalOpen(false)}
         initialEmail={email}
         onSuccess={(submittedEmail) => {
-          toast.success(
-            'Recovery Token Transmitted',
-            `Reset instructions delivered to ${submittedEmail}`
-          );
+          toast.success('Recovery sent', `Reset instructions delivered to ${submittedEmail}`);
         }}
       />
-    </>
+    </div>
   );
 };

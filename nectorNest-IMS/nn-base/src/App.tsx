@@ -13,19 +13,12 @@ export const App: React.FC = () => {
       <Route
         path="/login"
         element={
-          <AuthLayout
-            title="Operator Sign In"
-            subtitle="Authenticate with your decentralized node identity"
-            activeTab="login"
-            onNavigate={(path) => navigate(path)}
-          >
-            <LoginPage
-              onNavigateToSignup={() => navigate('/signup')}
-              onLoginSuccess={(data) => {
-                console.log('[nn-base] Authenticated operator:', data);
-              }}
-            />
-          </AuthLayout>
+          <LoginPage
+            onNavigateToSignup={() => navigate('/signup')}
+            onLoginSuccess={(data) => {
+              console.log('[nn-base] Authenticated operator:', data);
+            }}
+          />
         }
       />
 
