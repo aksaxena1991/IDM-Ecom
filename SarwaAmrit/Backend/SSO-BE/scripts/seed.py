@@ -207,31 +207,7 @@ async def seed() -> None:
                 ]
             },
         )
-        await _ensure_policy(
-            db,
-            tenant_id=tenant.id,
-            name="allow-admin-or-owning-department",
-            description="Allow app access for admins (flag/role/permission), or matching department.",
-            effect=PolicyEffect.allow,
-            priority=10,
-            actions=["app:access"],
-            conditions={
-                "any": [
-                    {"attr": "subject.is_admin", "op": "eq", "value": True},
-                    {"attr": "subject.roles", "op": "contains", "value": PLATFORM_SUPER_ADMIN_ROLE},
-                    {"attr": "subject.permissions", "op": "contains", "value": PLATFORM_SUPER_ADMIN_PERMISSION},
-                    {
-                        "all": [
-                            {
-                                "attr": "subject.department",
-                                "op": "eq",
-                                "value_from": "resource.owner_department",
-                            }
-                        ]
-                    },
-                ]
-            },
-        )
+        
         
 
         super_admin_role = await _ensure_role(

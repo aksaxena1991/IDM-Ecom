@@ -28,14 +28,7 @@ READ_IMPLIED_BY_WRITE: dict[str, tuple[str, ...]] = {
 SYSTEM_PERMISSIONS = frozenset(
     {
         PLATFORM_SUPER_ADMIN_ACCESS,
-        APPS_READ,
-        APPS_WRITE,
-        USERS_WRITE,
-        ROLES_WRITE,
-        POLICIES_WRITE,
-        AUDIT_READ,
-        GROUPS_READ,
-        GROUPS_WRITE,
+        
     }
 )
 

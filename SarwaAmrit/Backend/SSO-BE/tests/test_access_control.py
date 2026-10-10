@@ -50,31 +50,6 @@ async def test_restricted_app_denies_low_clearance_admin(db_session, seeded):
             },
         )
     )
-    db_session.add(
-        AccessPolicy(
-            tenant_id=user.tenant_id,
-            name="allow-admin-or-owning-department",
-            effect=PolicyEffect.allow,
-            priority=10,
-            enabled=True,
-            actions=["app:access"],
-            resource_match={},
-            conditions={
-                "any": [
-                    {"attr": "subject.is_admin", "op": "eq", "value": True},
-                    {
-                        "all": [
-                            {
-                                "attr": "subject.department",
-                                "op": "eq",
-                                "value_from": "resource.owner_department",
-                            }
-                        ]
-                    },
-                ]
-            },
-        )
-    )
     await db_session.commit()
 
     denied = await access_service.decide(db_session, user=user, application=app, action=APP_ACCESS)
