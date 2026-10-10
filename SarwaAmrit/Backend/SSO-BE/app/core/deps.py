@@ -14,7 +14,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.middleware import ProblemDetail
 from app.core.permissions import (
-    ADMIN_ACCESS,
+    PLATFORM_SUPER_ADMIN_ACCESS,
     APPS_READ,
     APPS_WRITE,
     AUDIT_READ,
@@ -142,7 +142,7 @@ async def _user_has_any_permission(db: AsyncSession, user: User, permissions: tu
     if await role_service.is_admin_principal(db, user.id, is_admin_flag=user.is_admin):
         return True
     held = set(await role_service.user_permissions(db, user.id))
-    if ADMIN_ACCESS in held or "admin:*" in held or "*" in held:
+    if PLATFORM_SUPER_ADMIN_ACCESS in held or "admin:*" in held or "*" in held:
         return True
     for perm in permissions:
         if perm in held:

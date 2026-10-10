@@ -44,7 +44,7 @@ from app.models.entities import (
     UserRole,
     UserStatus,
 )
-from app.services.role_service import SUPER_ADMIN_PERMISSION, DEFAULT_USER_ROLE, PLATFORM_SUPER_ADMIN_ROLE, PLATFORM_ADMIN_ROLE
+from app.services.role_service import PLATFORM_SUPER_ADMIN_PERMISSION, DEFAULT_USER_ROLE, PLATFORM_SUPER_ADMIN_ROLE, PLATFORM_ADMIN_ROLE
 
 ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "aksaxena1991@gmail.com").strip().lower()
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "@Admin2026")
@@ -219,7 +219,7 @@ async def seed() -> None:
                 "any": [
                     {"attr": "subject.is_admin", "op": "eq", "value": True},
                     {"attr": "subject.roles", "op": "contains", "value": PLATFORM_SUPER_ADMIN_ROLE},
-                    {"attr": "subject.permissions", "op": "contains", "value": SUPER_ADMIN_PERMISSION},
+                    {"attr": "subject.permissions", "op": "contains", "value": PLATFORM_SUPER_ADMIN_PERMISSION},
                     {
                         "all": [
                             {
@@ -253,7 +253,7 @@ async def seed() -> None:
             name=PLATFORM_SUPER_ADMIN_ROLE,
             description="Full platform access for super admins",
             permissions=[
-                SUPER_ADMIN_PERMISSION,
+                PLATFORM_SUPER_ADMIN_PERMISSION,
                 "apps:read",
                 "apps:write",
                 "users:write",

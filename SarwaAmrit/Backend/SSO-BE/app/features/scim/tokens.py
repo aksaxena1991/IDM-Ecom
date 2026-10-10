@@ -13,14 +13,14 @@ from sqlalchemy import select
 from app.core.deps import _rate_limited
 from app.core.deps import DbDep, RedisDep, require_permission
 from app.core.middleware import ProblemDetail
-from app.core.permissions import ADMIN_ACCESS, USERS_WRITE
+from app.core.permissions import PLATFORM_SUPER_ADMIN_ACCESS, USERS_WRITE
 from app.core.security import generate_token, hash_token
 from app.models.entities import ScimToken, User
 from app.features.audit.services import audit_service
 
 router = APIRouter(prefix="/v1", tags=["scim-tokens"])
 
-ScimTokenAdminDep = Annotated[User, Depends(_rate_limited(require_permission(USERS_WRITE, ADMIN_ACCESS)))]
+ScimTokenAdminDep = Annotated[User, Depends(_rate_limited(require_permission(USERS_WRITE, PLATFORM_SUPER_ADMIN_ACCESS)))]
 
 
 class ScimTokenCreate(BaseModel):

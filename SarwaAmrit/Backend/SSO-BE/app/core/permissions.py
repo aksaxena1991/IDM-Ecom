@@ -5,7 +5,7 @@ Custom permissions may still be attached to roles; these constants are enforced 
 
 from __future__ import annotations
 
-ADMIN_ACCESS = "platform-super-admin:access"
+PLATFORM_SUPER_ADMIN_ACCESS = "platform-super-admin:access"
 APPS_READ = "apps:read"
 APPS_WRITE = "apps:write"
 USERS_WRITE = "users:write"
@@ -22,12 +22,12 @@ GROUPS_WRITE = "groups:write"
 READ_IMPLIED_BY_WRITE: dict[str, tuple[str, ...]] = {
     APPS_READ: (APPS_WRITE,),
     GROUPS_READ: (GROUPS_WRITE,),
-    AUDIT_READ: (ADMIN_ACCESS,),
+    AUDIT_READ: (PLATFORM_SUPER_ADMIN_ACCESS,),
 }
 
 SYSTEM_PERMISSIONS = frozenset(
     {
-        ADMIN_ACCESS,
+        PLATFORM_SUPER_ADMIN_ACCESS,
         APPS_READ,
         APPS_WRITE,
         USERS_WRITE,
@@ -40,7 +40,7 @@ SYSTEM_PERMISSIONS = frozenset(
 )
 
 __all__ = [
-    "ADMIN_ACCESS",
+    "PLATFORM_SUPER_ADMIN_ACCESS",
     "APPS_READ",
     "APPS_WRITE",
     "USERS_WRITE",
