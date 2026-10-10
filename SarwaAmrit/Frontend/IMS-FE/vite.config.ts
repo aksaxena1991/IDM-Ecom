@@ -9,15 +9,14 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'nn_ims',
+      name: 'nn_base',
       filename: 'remoteEntry.js',
       exposes: {
         './App': './src/App.tsx',
-        './ImsShell': './src/features/shell/pages/ImsShell.tsx',
-        './CatalogPage': './src/features/catalog/pages/CatalogPage.tsx',
-        './StockPage': './src/features/stock/pages/StockPage.tsx',
-        './ReceivingPage': './src/features/receiving/pages/ReceivingPage.tsx',
-        './AdjustmentsPage': './src/features/adjustments/pages/AdjustmentsPage.tsx',
+        './LoginPage': './src/features/auth/pages/LoginPage.tsx',
+        './SignupPage': './src/features/auth/pages/SignupPage.tsx',
+        './ForgotPasswordModal': './src/components/ForgotPasswordModal.tsx',
+        './AuthLayout': './src/components/AuthLayout.tsx',
       },
       shared: ['react', 'react-dom', 'react-router-dom'],
     }),
@@ -30,12 +29,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3002,
+    port: 3001,
     strictPort: false,
     host: '127.0.0.1',
   },
   preview: {
-    port: 3002,
+    port: 3001,
     strictPort: false,
     host: '127.0.0.1',
   },

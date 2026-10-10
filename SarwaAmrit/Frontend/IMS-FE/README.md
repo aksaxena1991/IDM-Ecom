@@ -1,18 +1,18 @@
-# IMS-FE — Inventory micro-frontend
+# Shell-Base-FE
 
-NectorNest inventory remote (`nn_ims`) built with React + TypeScript + Vite Module Federation and `@thoughtstream/ui`.
+NectorNest base micro-frontend (`nn_base`) — auth + operations dashboard.
 
-## Directory layout
+Migrated from `nectorNest-IMS/nn-base` into a feature-sliced layout.
+
+## Layout
 
 ```text
-IMS-FE/src/
-├── core/styles/ims.css
+Shell-Base-FE/src/
+├── core/styles/auth.css
+├── components/          # AuthLayout, ForgotPasswordModal
 ├── features/
-│   ├── shell/pages/ImsShell.tsx
-│   ├── catalog/pages/CatalogPage.tsx
-│   ├── stock/pages/StockPage.tsx
-│   ├── receiving/pages/ReceivingPage.tsx
-│   └── adjustments/pages/AdjustmentsPage.tsx
+│   ├── auth/pages/      # LoginPage, SignupPage
+│   └── dashboard/       # DashboardPage + screens/*
 ├── App.tsx
 ├── main.tsx
 └── index.ts
@@ -21,22 +21,21 @@ IMS-FE/src/
 ## Run
 
 ```bash
-cd SarwaAmrit/Frontend/IMS-FE
+cd SarwaAmrit/Frontend/Shell-Base-FE
 npm install
-npm run dev        # http://127.0.0.1:3002
+npm run dev        # http://127.0.0.1:3001
 npm run typecheck
 npm run build
 ```
 
-## Federation exposes
+## Federation exposes (`nn_base`)
 
 | Expose | Path |
 |--------|------|
-| `nn_ims/App` | `./src/App.tsx` |
-| `nn_ims/ImsShell` | `./src/features/shell/pages/ImsShell.tsx` |
-| `nn_ims/CatalogPage` | `./src/features/catalog/pages/CatalogPage.tsx` |
-| `nn_ims/StockPage` | `./src/features/stock/pages/StockPage.tsx` |
-| `nn_ims/ReceivingPage` | `./src/features/receiving/pages/ReceivingPage.tsx` |
-| `nn_ims/AdjustmentsPage` | `./src/features/adjustments/pages/AdjustmentsPage.tsx` |
+| `./App` | `src/App.tsx` |
+| `./LoginPage` | `src/features/auth/pages/LoginPage.tsx` |
+| `./SignupPage` | `src/features/auth/pages/SignupPage.tsx` |
+| `./ForgotPasswordModal` | `src/components/ForgotPasswordModal.tsx` |
+| `./AuthLayout` | `src/components/AuthLayout.tsx` |
 
-Remote entry (after build/preview): `http://127.0.0.1:3002/assets/remoteEntry.js`
+Design system: `@thoughtstream/ui` → `../DesignSystem/thoughtstream-ui`.

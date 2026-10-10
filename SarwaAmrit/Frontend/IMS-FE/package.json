@@ -1,16 +1,17 @@
 {
-  "name": "ims-fe",
+  "name": "shell-base-fe",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview --port 3002",
+    "preview": "vite preview --port 3001",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@thoughtstream/ui": "file:../DesignSystem/thoughtstream-ui",
+    "lucide-react": "^0.475.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
