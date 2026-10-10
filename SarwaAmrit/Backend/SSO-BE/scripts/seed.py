@@ -44,7 +44,7 @@ from app.models.entities import (
     UserRole,
     UserStatus,
 )
-from app.services.role_service import PLATFORM_SUPER_ADMIN_PERMISSION, DEFAULT_USER_ROLE, PLATFORM_SUPER_ADMIN_ROLE, PLATFORM_ADMIN_ROLE
+from app.services.role_service import PLATFORM_SUPER_ADMIN_PERMISSION, PLATFORM_SUPER_ADMIN_ROLE, PLATFORM_ADMIN_ROLE
 
 ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "aksaxena1991@gmail.com").strip().lower()
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "@Admin2026")
@@ -232,20 +232,7 @@ async def seed() -> None:
                 ]
             },
         )
-        await _ensure_policy(
-            db,
-            tenant_id=tenant.id,
-            name="allow-app-operator-role",
-            description="Allow app:access when the user holds the app_operator RBAC role.",
-            effect=PolicyEffect.allow,
-            priority=15,
-            actions=["app:access"],
-            conditions={
-                "all": [
-                    {"attr": "subject.roles", "op": "contains", "value": "app_operator"},
-                ]
-            },
-        )
+        
 
         super_admin_role = await _ensure_role(
             db,
@@ -268,19 +255,12 @@ async def seed() -> None:
         user_role = await _ensure_role(
             db,
             tenant_id=tenant.id,
-            name=DEFAULT_USER_ROLE,
-            description="Default role for signed-up users",
+            name=PLATFORM_ADMIN_ROLE,
+            description="Platform-level access for admins",
             permissions=["portal:access"],
             is_system=True,
         )
-        await _ensure_role(
-            db,
-            tenant_id=tenant.id,
-            name="app_operator",
-            description="Can access applications; useful for PBAC role checks",
-            permissions=["apps:read"],
-            is_system=False,
-        )
+        
 
         await _ensure_user_role(db, user.id, super_admin_role.id)
         await _ensure_user_role(db, user.id, user_role.id)
@@ -303,7 +283,7 @@ async def seed() -> None:
         print("OIDC client_id: idm-oidc-app")
         print("OIDC client_id: ims-oidc-app")
         print("SAML client_id: idm-saml-app")
-        print(f"RBAC roles: {PLATFORM_SUPER_ADMIN_ROLE}, {DEFAULT_USER_ROLE}, app_operator")
+        print(f"RBAC roles: {PLATFORM_SUPER_ADMIN_ROLE}, {PLATFORM_ADMIN_ROLE}")
 
 
 async def _ensure_oidc_app(

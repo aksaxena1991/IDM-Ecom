@@ -193,7 +193,7 @@ class RoleService:
         return await self.list_user_roles(db, user_id)
 
     async def assign_default_user_role(self, db: AsyncSession, user_id: uuid.UUID, tenant_id: uuid.UUID) -> None:
-        role = await self.get_role_by_name(db, tenant_id, DEFAULT_USER_ROLE)
+        role = await self.get_role_by_name(db, tenant_id, PLATFORM_ADMIN_ROLE)
         if role is None:
             return
         existing = await db.execute(

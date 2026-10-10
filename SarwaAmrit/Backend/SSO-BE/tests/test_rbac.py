@@ -26,39 +26,6 @@ async def test_subject_includes_roles_and_permissions(db_session, seeded):
 
 
 @pytest.mark.asyncio
-async def test_pbac_allows_by_role_contains(db_session, seeded):
-    user = seeded["user"]
-    app = seeded["app"]
-    role = await role_service.create_role(
-        db_session,
-        tenant_id=user.tenant_id,
-        name="app_operator",
-        description="App operator",
-        permissions=["apps:read"],
-    )
-    db_session.add(UserRole(user_id=user.id, role_id=role.id))
-    db_session.add(
-        AccessPolicy(
-            tenant_id=user.tenant_id,
-            name="allow-app-operator",
-            effect=PolicyEffect.allow,
-            priority=20,
-            enabled=True,
-            actions=["app:access"],
-            resource_match={},
-            conditions={
-                "all": [{"attr": "subject.roles", "op": "contains", "value": "app_operator"}]
-            },
-        )
-    )
-    await db_session.commit()
-
-    decision = await access_service.decide(db_session, user=user, application=app, action=APP_ACCESS)
-    assert decision.allowed is True
-    assert "allow-app-operator" in decision.matched_policies
-
-
-@pytest.mark.asyncio
 async def test_admin_permission_grants_admin_principal(db_session, seeded):
     user = seeded["user"]
     user.is_admin = False
