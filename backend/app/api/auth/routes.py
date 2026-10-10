@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.core.errors import ProblemDetail
 from app.core.security import generate_token, hash_password, verify_password
 from app.models.entities import Tenant, User, UserStatus
+from app.api.auth.hosted_pages import legal_page_html, login_html, signup_html
 from app.core.redirects import safe_redirect_path
 from app.services.access_service import APP_ACCESS, AccessDenied, access_service
 from app.services.audit_service import audit_service
@@ -55,62 +56,14 @@ class SignupResponse(BaseModel):
     email: EmailStr
 
 
-PAGE_STYLES = """
-body{font-family:system-ui,sans-serif;max-width:420px;margin:4rem auto;padding:0 1rem}
-input,button{display:block;width:100%;margin:.5rem 0;padding:.6rem}
-p.muted{color:#555;font-size:.95rem}
-a{color:#0b57d0}
-.error{color:#b00020}
-"""
-
-LOGIN_HTML = """
-<!DOCTYPE html>
-<html><head><title>SSO Login</title>
-<style>
-{styles}
-</style></head>
-<body>
-<h1>Sign in</h1>
-<form method="post" action="/login">
-  <input type="hidden" name="redirect" value="{redirect}"/>
-  <label>Email <input name="email" type="email" required/></label>
-  <label>Password <input name="password" type="password" required/></label>
-  <label>MFA code (if enrolled) <input name="mfa_code" inputmode="numeric"/></label>
-  <button type="submit">Continue</button>
-</form>
-{error}
-<p class="muted">No account? <a href="/signup?redirect={redirect}">Sign up</a></p>
-</body></html>
-"""
-
-SIGNUP_HTML = """
-<!DOCTYPE html>
-<html><head><title>SSO Sign up</title>
-<style>
-{styles}
-</style></head>
-<body>
-<h1>Create account</h1>
-<form method="post" action="/signup">
-  <input type="hidden" name="redirect" value="{redirect}"/>
-  <label>Name <input name="name" type="text" autocomplete="name"/></label>
-  <label>Email <input name="email" type="email" required autocomplete="email"/></label>
-  <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password"/></label>
-  <label>Confirm password <input name="confirm_password" type="password" required minlength="8" autocomplete="new-password"/></label>
-  <button type="submit">Create account</button>
-</form>
-{error}
-<p class="muted">Already have an account? <a href="/login?redirect={redirect}">Sign in</a></p>
-</body></html>
-"""
-
-
 def _login_html(redirect: str = "/", error: str = "") -> str:
-    return LOGIN_HTML.format(styles=PAGE_STYLES, redirect=redirect, error=error)
+    settings = get_settings()
+    return login_html(redirect=redirect, error=error, brand=settings.app_name.replace(" Backend", " Portal"))
 
 
 def _signup_html(redirect: str = "/", error: str = "") -> str:
-    return SIGNUP_HTML.format(styles=PAGE_STYLES, redirect=redirect, error=error)
+    settings = get_settings()
+    return signup_html(redirect=redirect, error=error, brand=settings.app_name.replace(" Backend", " Portal"))
 
 
 def _validate_password(password: str) -> str | None:
@@ -196,6 +149,26 @@ async def login_page(redirect: str = "/") -> HTMLResponse:
 @router.get("/signup", response_class=HTMLResponse)
 async def signup_page(redirect: str = "/") -> HTMLResponse:
     return HTMLResponse(_signup_html(redirect=safe_redirect_path(redirect)))
+
+
+@router.get("/legal/terms", response_class=HTMLResponse)
+async def legal_terms() -> HTMLResponse:
+    return HTMLResponse(
+        legal_page_html(
+            title="Terms of Service",
+            body="Placeholder terms for the SSO Portal demo. Replace with your organization’s legal terms before production.",
+        )
+    )
+
+
+@router.get("/legal/privacy", response_class=HTMLResponse)
+async def legal_privacy() -> HTMLResponse:
+    return HTMLResponse(
+        legal_page_html(
+            title="Privacy Policy",
+            body="Placeholder privacy policy for the SSO Portal demo. Replace with your organization’s privacy policy before production.",
+        )
+    )
 
 async def _authenticate(
     db: DbDep,
@@ -310,13 +283,14 @@ async def signup_form(
     redis: RedisDep,
     email: str = Form(...),
     password: str = Form(...),
-    confirm_password: str = Form(...),
+    confirm_password: str | None = Form(None),
     name: str | None = Form(None),
     tenant_slug: str = Form("demo"),
     redirect: str = Form("/"),
 ):
     settings = get_settings()
-    if password != confirm_password:
+    confirm = confirm_password if confirm_password is not None else password
+    if password != confirm:
         return HTMLResponse(
             _signup_html(redirect=redirect, error="<p class='error'>Passwords do not match</p>"),
             status_code=400,
