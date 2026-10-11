@@ -1,0 +1,6 @@
+.f7-crown {
+  font-size: var(--f7-text-display);
+  width: calc(80 * var(--f7-rpx));
+  height: calc(80 * var(--f7-rpx));
+  filter: drop-shadow(0 calc(4 * var(--f7-rpx)) calc(12 * var(--f7-rpx)) rgba(255, 210, 63, 0.5));
+}

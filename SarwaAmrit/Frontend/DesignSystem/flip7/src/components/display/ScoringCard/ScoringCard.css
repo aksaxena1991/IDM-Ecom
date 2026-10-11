@@ -1,0 +1,87 @@
+.f7-score-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-sm);
+  width: 100%;
+  min-height: calc(96 * var(--f7-rpx));
+  padding: var(--f7-space-md) var(--f7-space-md) var(--f7-space-md) var(--f7-space-lg);
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  overflow: hidden;
+}
+
+.f7-score-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(6 * var(--f7-rpx));
+  background: var(--f7-color-primary-light);
+}
+
+.f7-score-card--highlighted {
+  background: linear-gradient(90deg, #fff8dc 0%, var(--f7-color-card) 70%);
+  box-shadow: var(--f7-shadow-accent-glow);
+}
+
+.f7-score-card--highlighted::before {
+  background: var(--f7-color-accent);
+}
+
+.f7-score-card--boom {
+  background: linear-gradient(90deg, #ffe4dc 0%, var(--f7-color-card) 70%);
+  animation: f7-boom-pulse 2s infinite;
+}
+
+.f7-score-card--boom::before {
+  background: var(--f7-color-coral);
+}
+
+.f7-score-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.f7-score-card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--f7-space-sm);
+}
+
+.f7-score-card-title {
+  font-size: var(--f7-text-h3);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-score-card-score {
+  font-size: var(--f7-text-h2);
+  font-weight: var(--f7-weight-extra);
+  color: var(--f7-color-primary);
+}
+
+.f7-score-card--highlighted .f7-score-card-score {
+  color: var(--f7-color-accent-dark);
+}
+
+.f7-score-card--boom .f7-score-card-score {
+  color: var(--f7-color-coral);
+}
+
+.f7-score-card-meta {
+  margin-top: var(--f7-space-xs);
+  font-size: var(--f7-text-sm);
+  color: var(--f7-color-primary);
+}
+
+.f7-score-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-xs);
+  flex-shrink: 0;
+}

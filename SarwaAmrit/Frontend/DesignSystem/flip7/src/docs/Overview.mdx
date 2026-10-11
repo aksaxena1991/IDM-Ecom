@@ -1,0 +1,56 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Overview" />
+
+<div style={{ maxWidth: '720px', margin: '0 auto', fontFamily: "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif", color: '#1E8C86' }}>
+
+# Flip7
+
+<p style={{ fontSize: '20px', lineHeight: '1.6', color: '#2BA8A2', marginTop: '12px', marginBottom: '32px' }}>
+  Retro-playful teal-coral-gold design system for the Flip7 card game scoring mini-program. Vintage board-game warmth, modern mobile UX — every element feels like a game piece you want to tap.
+</p>
+
+---
+
+## Design language
+
+Flip7 blends BounceBox's bubbly energy with QuizForge's competitive gamification. The palette is lifted from the original Flip7 packaging: teal fields, cream cards, gold CTAs, and coral for BOOM energy.
+
+### Principles
+
+1. **Colored glow shadows** on interactive elements — never plain black shadows for taps.
+2. **Pill buttons** (999rpx) with a bounce curve and 72rpx minimum touch targets.
+3. **Cream surfaces** (`#FFF8E7`) for inputs and logo plates.
+4. **Left-border accents** on cards to communicate default / highlight / BOOM state.
+5. **Dashed section dividers** and folded-ribbon banners for retro packaging cues.
+6. **Celebrate in brand color** — gold for first, silver for second, coral for third and BOOM.
+7. **Emoji in view containers**, not raw text nodes, so WeChat alignment stays consistent.
+
+### Units
+
+The spec is written in **rpx**. Storybook maps `1rpx = 1px` via `--f7-rpx`. Host apps can remount `ThemeProvider` with a different `rpx` scale.
+
+---
+
+## Consume in a React app
+
+```bash
+npm install @flip7/ui
+```
+
+```tsx
+import '@flip7/ui/styles.css';
+import { ThemeProvider, Logo, Button, ScoringCard } from '@flip7/ui';
+
+export function SetupHeader() {
+  return (
+    <ThemeProvider>
+      <Logo banner="SCORE TRACKER" />
+      <Button variant="primary">Start Round</Button>
+      <ScoringCard title="Maya" score={21} state="highlighted" />
+    </ThemeProvider>
+  );
+}
+```
+
+</div>

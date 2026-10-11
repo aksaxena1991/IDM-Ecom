@@ -1,0 +1,30 @@
+.f7-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--f7-radius-round);
+  font-weight: var(--f7-weight-extra);
+  font-size: var(--f7-text-sm);
+  letter-spacing: var(--f7-tracking-h2);
+  color: #fff;
+  flex-shrink: 0;
+  border: calc(3 * var(--f7-rpx)) solid rgba(255, 255, 255, 0.55);
+}
+
+.f7-avatar--teal {
+  background: linear-gradient(180deg, var(--f7-color-primary-light), var(--f7-color-primary-dark));
+}
+
+.f7-avatar--gold {
+  background: linear-gradient(180deg, var(--f7-color-accent-light), var(--f7-color-accent-dark));
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-avatar--silver {
+  background: linear-gradient(180deg, #f4f4f4, #9aa0a6);
+  color: #3d4348;
+}
+
+.f7-avatar--coral {
+  background: linear-gradient(180deg, var(--f7-color-coral-light), var(--f7-color-coral-dark));
+}

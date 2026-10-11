@@ -1,0 +1,42 @@
+.f7-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(40 * var(--f7-rpx));
+  padding: 0 var(--f7-space-sm);
+  border-radius: var(--f7-radius-round);
+  font-size: var(--f7-text-xs);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  text-transform: uppercase;
+}
+
+.f7-badge--gold {
+  background: var(--f7-color-accent);
+  color: var(--f7-color-primary-dark);
+  box-shadow: var(--f7-shadow-accent-glow);
+}
+
+.f7-badge--teal {
+  background: var(--f7-color-primary);
+  color: #fff;
+  box-shadow: var(--f7-shadow-teal-glow);
+}
+
+.f7-badge--coral {
+  background: var(--f7-color-coral);
+  color: #fff;
+  box-shadow: var(--f7-shadow-coral-glow);
+}
+
+.f7-badge--sky {
+  background: var(--f7-color-sky);
+  color: #fff;
+  box-shadow: var(--f7-shadow-sky-glow);
+}
+
+.f7-badge--cream {
+  background: var(--f7-color-cream);
+  color: var(--f7-color-primary-dark);
+  border: calc(2 * var(--f7-rpx)) solid var(--f7-color-primary-dark);
+}

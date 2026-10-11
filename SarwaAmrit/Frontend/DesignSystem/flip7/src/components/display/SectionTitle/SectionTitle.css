@@ -1,0 +1,30 @@
+.f7-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-xs);
+  width: 100%;
+  padding-bottom: var(--f7-space-xs);
+  border-bottom: calc(3 * var(--f7-rpx)) dashed var(--f7-color-primary-light);
+}
+
+.f7-section-title-emoji {
+  width: calc(36 * var(--f7-rpx));
+  height: calc(36 * var(--f7-rpx));
+  font-size: var(--f7-text-h2);
+}
+
+.f7-section-title-text {
+  margin: 0;
+  font-size: var(--f7-text-h3);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-section-title--inverse {
+  border-bottom-color: rgba(255, 248, 231, 0.45);
+}
+
+.f7-section-title--inverse .f7-section-title-text {
+  color: var(--f7-color-cream);
+}

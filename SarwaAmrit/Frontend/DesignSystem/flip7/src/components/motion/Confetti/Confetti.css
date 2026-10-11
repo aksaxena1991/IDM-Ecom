@@ -1,0 +1,24 @@
+.f7-confetti {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 4;
+}
+
+.f7-confetti-piece {
+  position: absolute;
+  top: calc(-16 * var(--f7-rpx));
+  display: block;
+  animation-name: f7-confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.f7-confetti-piece--rect {
+  border-radius: calc(2 * var(--f7-rpx));
+}
+
+.f7-confetti-piece--circle {
+  border-radius: 50%;
+}

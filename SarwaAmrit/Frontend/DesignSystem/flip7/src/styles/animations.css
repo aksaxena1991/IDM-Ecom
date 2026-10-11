@@ -1,0 +1,69 @@
+@keyframes f7-crown-bounce {
+  0% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  25% {
+    transform: translateY(calc(-10 * var(--f7-rpx))) rotate(6deg);
+  }
+  50% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  75% {
+    transform: translateY(calc(-6 * var(--f7-rpx))) rotate(4deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+}
+
+@keyframes f7-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes f7-boom-pulse {
+  0%,
+  100% {
+    box-shadow: var(--f7-shadow-coral-glow);
+    border-color: var(--f7-color-coral);
+  }
+  50% {
+    box-shadow: 0 calc(6 * var(--f7-rpx)) calc(28 * var(--f7-rpx)) rgba(239, 108, 74, 0.55);
+    border-color: var(--f7-color-coral-light);
+  }
+}
+
+@keyframes f7-confetti-fall {
+  0% {
+    transform: translate3d(0, calc(-24 * var(--f7-rpx)), 0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--f7-confetti-drift, 20px), calc(420 * var(--f7-rpx)), 0)
+      rotate(var(--f7-confetti-spin, 540deg));
+    opacity: 0;
+  }
+}
+
+.f7-anim-crown {
+  animation: f7-crown-bounce 1.5s infinite;
+  transform-origin: center bottom;
+}
+
+.f7-anim-glow {
+  animation: f7-glow-pulse 2s infinite;
+}
+
+.f7-anim-boom {
+  animation: f7-boom-pulse 2s infinite;
+}

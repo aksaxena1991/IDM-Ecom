@@ -1,0 +1,44 @@
+.f7-counter {
+  width: calc(80 * var(--f7-rpx));
+  height: calc(80 * var(--f7-rpx));
+  min-width: calc(80 * var(--f7-rpx));
+  min-height: calc(80 * var(--f7-rpx));
+  border-radius: var(--f7-radius-md);
+  border: calc(3 * var(--f7-rpx)) solid transparent;
+  font-family: var(--f7-font-body);
+  font-size: var(--f7-text-h1);
+  font-weight: var(--f7-weight-extra);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform var(--f7-duration-micro) var(--f7-ease-bounce),
+    box-shadow var(--f7-duration-micro) var(--f7-ease-bounce);
+}
+
+.f7-counter:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.f7-counter:focus-visible {
+  outline: none;
+  box-shadow: var(--f7-shadow-focus);
+}
+
+.f7-counter:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.f7-counter--plus {
+  color: #fff;
+  background: linear-gradient(180deg, var(--f7-color-primary-light), var(--f7-color-primary));
+  border-color: var(--f7-color-primary-dark);
+  box-shadow: var(--f7-shadow-teal-glow);
+}
+
+.f7-counter--minus {
+  color: #fff;
+  background: linear-gradient(180deg, var(--f7-color-coral-light), var(--f7-color-coral));
+  border-color: var(--f7-color-coral-dark);
+  box-shadow: var(--f7-shadow-coral-glow);
+}

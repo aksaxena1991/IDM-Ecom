@@ -1,0 +1,15 @@
+/* Main style aggregator — package export @flip7/ui/styles.css */
+@import './tokens/tokens.css';
+@import './styles/theme.css';
+@import './styles/animations.css';
+@import './components/brand/Logo/Logo.css';
+@import './components/actions/Button/Button.css';
+@import './components/actions/CounterButton/CounterButton.css';
+@import './components/actions/Input/Input.css';
+@import './components/display/ScoringCard/ScoringCard.css';
+@import './components/display/VictoryRanking/VictoryRanking.css';
+@import './components/display/SectionTitle/SectionTitle.css';
+@import './components/display/Avatar/Avatar.css';
+@import './components/display/Badge/Badge.css';
+@import './components/motion/Confetti/Confetti.css';
+@import './components/motion/Crown/Crown.css';

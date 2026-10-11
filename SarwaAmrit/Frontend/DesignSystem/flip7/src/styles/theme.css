@@ -1,0 +1,66 @@
+.flip7-root,
+.flip7-root *,
+.flip7-root *::before,
+.flip7-root *::after {
+  box-sizing: border-box;
+}
+
+.flip7-root {
+  font-family: var(--f7-font-body);
+  font-size: var(--f7-text-body);
+  font-weight: var(--f7-weight-medium);
+  line-height: 1.4;
+  color: var(--f7-color-primary-dark);
+  background: var(--f7-color-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+.f7-type-display,
+.f7-type-h1,
+.f7-type-h2 {
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-headline);
+  line-height: 1.15;
+}
+
+.f7-type-display {
+  font-size: var(--f7-text-display);
+}
+
+.f7-type-h1 {
+  font-size: var(--f7-text-h1);
+}
+
+.f7-type-h2 {
+  font-size: var(--f7-text-h2);
+  letter-spacing: var(--f7-tracking-h2);
+}
+
+.f7-type-h3 {
+  font-size: var(--f7-text-h3);
+  font-weight: var(--f7-weight-bold);
+  letter-spacing: var(--f7-tracking-h2);
+}
+
+.f7-type-body {
+  font-size: var(--f7-text-body);
+  font-weight: var(--f7-weight-medium);
+}
+
+.f7-type-sm {
+  font-size: var(--f7-text-sm);
+  font-weight: var(--f7-weight-medium);
+}
+
+.f7-type-xs {
+  font-size: var(--f7-text-xs);
+  font-weight: var(--f7-weight-medium);
+}
+
+.f7-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}

@@ -1,0 +1,100 @@
+.f7-ranking {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--f7-space-sm);
+  width: 100%;
+}
+
+.f7-ranking-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-sm);
+  min-height: var(--f7-touch-min);
+  padding: var(--f7-space-sm) var(--f7-space-md) var(--f7-space-sm) var(--f7-space-lg);
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  overflow: hidden;
+}
+
+.f7-ranking-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(6 * var(--f7-rpx));
+  background: var(--f7-color-primary-light);
+}
+
+.f7-ranking-item--1 {
+  background: linear-gradient(90deg, #fff4c4 0%, var(--f7-color-card) 72%);
+  box-shadow: var(--f7-shadow-accent-glow);
+}
+
+.f7-ranking-item--1::before {
+  width: calc(8 * var(--f7-rpx));
+  background: var(--f7-color-accent);
+}
+
+.f7-ranking-item--1 .f7-ranking-score {
+  font-size: var(--f7-text-h1);
+  color: var(--f7-color-accent-dark);
+}
+
+.f7-ranking-item--2 {
+  background: linear-gradient(90deg, #f3f4f6 0%, var(--f7-color-card) 72%);
+}
+
+.f7-ranking-item--2::before {
+  width: calc(8 * var(--f7-rpx));
+  background: linear-gradient(180deg, #f4f4f4, #9aa0a6);
+}
+
+.f7-ranking-item--2 .f7-ranking-score {
+  font-size: var(--f7-text-h1);
+}
+
+.f7-ranking-item--3 {
+  background: linear-gradient(90deg, #ffe4dc 0%, var(--f7-color-card) 72%);
+}
+
+.f7-ranking-item--3::before {
+  width: calc(8 * var(--f7-rpx));
+  background: var(--f7-color-coral);
+}
+
+.f7-ranking-item--3 .f7-ranking-score {
+  color: var(--f7-color-coral);
+}
+
+.f7-ranking-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.f7-ranking-name {
+  font-size: var(--f7-text-body);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-ranking-place {
+  font-size: var(--f7-text-xs);
+  color: var(--f7-color-primary);
+}
+
+.f7-ranking-medal {
+  font-size: var(--f7-text-h2);
+}
+
+.f7-ranking-score {
+  font-size: var(--f7-text-h2);
+  font-weight: var(--f7-weight-extra);
+  color: var(--f7-color-primary-dark);
+}

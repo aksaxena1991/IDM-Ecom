@@ -1,0 +1,79 @@
+/**
+ * Flip7 Design System — tokens
+ * Spec units are rpx. Storybook maps 1rpx = 1px via --f7-rpx.
+ */
+
+:root,
+.flip7-root {
+  --f7-rpx: 1px;
+
+  /* Brand */
+  --f7-color-primary: #2BA8A2;
+  --f7-color-primary-light: #3CC4BD;
+  --f7-color-primary-dark: #1E8C86;
+  --f7-color-primary-bg: #E8F6F5;
+  --f7-color-accent: #FFD23F;
+  --f7-color-accent-light: #FFE47A;
+  --f7-color-accent-dark: #E6B800;
+  --f7-color-coral: #EF6C4A;
+  --f7-color-coral-light: #FF8A6A;
+  --f7-color-coral-dark: #D45233;
+  --f7-color-cream: #FFF8E7;
+  --f7-color-sky: #5DADE2;
+
+  /* Surfaces */
+  --f7-color-surface: #EFF8F7;
+  --f7-color-card: #FFFFFF;
+
+  /* Semantic */
+  --f7-color-success: #27AE60;
+  --f7-color-error: #E74C3C;
+
+  /* Type */
+  --f7-font-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --f7-weight-medium: 500;
+  --f7-weight-bold: 700;
+  --f7-weight-extra: 800;
+
+  --f7-text-display: calc(72 * var(--f7-rpx));
+  --f7-text-h1: calc(48 * var(--f7-rpx));
+  --f7-text-h2: calc(36 * var(--f7-rpx));
+  --f7-text-h3: calc(32 * var(--f7-rpx));
+  --f7-text-body: calc(28 * var(--f7-rpx));
+  --f7-text-sm: calc(24 * var(--f7-rpx));
+  --f7-text-xs: calc(20 * var(--f7-rpx));
+
+  --f7-tracking-headline: calc(5 * var(--f7-rpx));
+  --f7-tracking-h2: calc(4 * var(--f7-rpx));
+  --f7-tracking-ribbon: calc(8 * var(--f7-rpx));
+
+  /* Spacing — 8rpx base */
+  --f7-space-xs: calc(8 * var(--f7-rpx));
+  --f7-space-sm: calc(16 * var(--f7-rpx));
+  --f7-space-md: calc(24 * var(--f7-rpx));
+  --f7-space-lg: calc(32 * var(--f7-rpx));
+  --f7-space-xl: calc(48 * var(--f7-rpx));
+
+  /* Radius */
+  --f7-radius-sm: calc(8 * var(--f7-rpx));
+  --f7-radius-md: calc(16 * var(--f7-rpx));
+  --f7-radius-lg: calc(24 * var(--f7-rpx));
+  --f7-radius-xl: calc(32 * var(--f7-rpx));
+  --f7-radius-round: calc(999 * var(--f7-rpx));
+
+  /* Elevation — colored glow system */
+  --f7-shadow-sm: 0 calc(2 * var(--f7-rpx)) calc(8 * var(--f7-rpx)) rgba(0, 0, 0, 0.08);
+  --f7-shadow-md: 0 calc(4 * var(--f7-rpx)) calc(16 * var(--f7-rpx)) rgba(0, 0, 0, 0.12);
+  --f7-shadow-lg: 0 calc(8 * var(--f7-rpx)) calc(32 * var(--f7-rpx)) rgba(0, 0, 0, 0.16);
+  --f7-shadow-card: 0 calc(4 * var(--f7-rpx)) calc(20 * var(--f7-rpx)) rgba(43, 168, 162, 0.10);
+  --f7-shadow-coral-glow: 0 calc(4 * var(--f7-rpx)) calc(20 * var(--f7-rpx)) rgba(239, 108, 74, 0.35);
+  --f7-shadow-teal-glow: 0 calc(4 * var(--f7-rpx)) calc(20 * var(--f7-rpx)) rgba(43, 168, 162, 0.30);
+  --f7-shadow-accent-glow: 0 calc(4 * var(--f7-rpx)) calc(20 * var(--f7-rpx)) rgba(255, 210, 63, 0.40);
+  --f7-shadow-sky-glow: 0 calc(4 * var(--f7-rpx)) calc(16 * var(--f7-rpx)) rgba(93, 173, 226, 0.30);
+  --f7-shadow-focus: 0 0 0 calc(4 * var(--f7-rpx)) rgba(43, 168, 162, 0.15);
+
+  /* Motion */
+  --f7-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --f7-duration-micro: 240ms;
+  --f7-touch-min: calc(72 * var(--f7-rpx));
+}

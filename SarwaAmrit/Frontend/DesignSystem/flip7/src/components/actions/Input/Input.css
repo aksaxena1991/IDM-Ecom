@@ -1,0 +1,53 @@
+.f7-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--f7-space-xs);
+  width: 100%;
+}
+
+.f7-field-label {
+  font-size: var(--f7-text-sm);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-input {
+  min-height: var(--f7-touch-min);
+  width: 100%;
+  padding: 0 var(--f7-space-md);
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary-light);
+  border-radius: var(--f7-radius-md);
+  background: var(--f7-color-cream);
+  color: var(--f7-color-primary-dark);
+  font-family: var(--f7-font-body);
+  font-size: var(--f7-text-body);
+  font-weight: var(--f7-weight-medium);
+  transition:
+    box-shadow var(--f7-duration-micro) ease,
+    border-color var(--f7-duration-micro) ease;
+}
+
+.f7-input::placeholder {
+  color: var(--f7-color-primary);
+  opacity: 0.55;
+}
+
+.f7-input:focus {
+  outline: none;
+  border-color: var(--f7-color-primary);
+  box-shadow: var(--f7-shadow-focus);
+}
+
+.f7-input--error {
+  border-color: var(--f7-color-error);
+}
+
+.f7-field-hint {
+  font-size: var(--f7-text-xs);
+  color: var(--f7-color-primary);
+}
+
+.f7-field-hint--error {
+  color: var(--f7-color-error);
+}

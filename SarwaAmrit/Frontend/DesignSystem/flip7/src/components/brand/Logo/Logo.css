@@ -1,0 +1,145 @@
+.f7-logo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(320 * var(--f7-rpx));
+  padding-top: calc(28 * var(--f7-rpx));
+}
+
+.f7-logo--compact {
+  width: calc(240 * var(--f7-rpx));
+  padding-top: calc(16 * var(--f7-rpx));
+}
+
+.f7-logo-fan {
+  position: relative;
+  width: calc(168 * var(--f7-rpx));
+  height: calc(88 * var(--f7-rpx));
+  z-index: 0;
+}
+
+.f7-logo--compact .f7-logo-fan {
+  width: calc(120 * var(--f7-rpx));
+  height: calc(64 * var(--f7-rpx));
+}
+
+.f7-logo-fan-card {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: calc(64 * var(--f7-rpx));
+  height: calc(92 * var(--f7-rpx));
+  border-radius: var(--f7-radius-sm);
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary-dark);
+  box-shadow: var(--f7-shadow-sm);
+  transform-origin: center bottom;
+}
+
+.f7-logo--compact .f7-logo-fan-card {
+  width: calc(46 * var(--f7-rpx));
+  height: calc(66 * var(--f7-rpx));
+}
+
+.f7-logo-mark {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(-36 * var(--f7-rpx));
+  transform: rotate(-3deg);
+}
+
+.f7-logo--compact .f7-logo-mark {
+  margin-top: calc(-24 * var(--f7-rpx));
+}
+
+.f7-logo-plate {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: calc(4 * var(--f7-rpx));
+  padding: calc(8 * var(--f7-rpx)) calc(20 * var(--f7-rpx)) calc(4 * var(--f7-rpx));
+  background: var(--f7-color-cream);
+  border: calc(4 * var(--f7-rpx)) solid var(--f7-color-primary-dark);
+  transform: skewX(-6deg);
+  box-shadow: var(--f7-shadow-md);
+}
+
+.f7-logo-flip,
+.f7-logo-seven {
+  display: block;
+  transform: skewX(6deg);
+  font-weight: var(--f7-weight-extra);
+  line-height: 0.85;
+}
+
+.f7-logo-flip {
+  font-size: calc(88 * var(--f7-rpx));
+  color: var(--f7-color-primary-dark);
+  letter-spacing: var(--f7-tracking-headline);
+  text-shadow: calc(2 * var(--f7-rpx)) calc(2 * var(--f7-rpx)) 0 rgba(255, 255, 255, 0.7);
+}
+
+.f7-logo--compact .f7-logo-flip {
+  font-size: calc(56 * var(--f7-rpx));
+}
+
+.f7-logo-seven {
+  font-size: calc(152 * var(--f7-rpx));
+  color: var(--f7-color-accent);
+  transform: skewX(6deg) rotate(5deg);
+  -webkit-text-stroke: calc(4 * var(--f7-rpx)) var(--f7-color-primary-dark);
+  paint-order: stroke fill;
+  text-shadow:
+    calc(3 * var(--f7-rpx)) calc(4 * var(--f7-rpx)) 0 var(--f7-color-primary-dark),
+    calc(-3 * var(--f7-rpx)) 0 0 var(--f7-color-primary-dark),
+    calc(3 * var(--f7-rpx)) 0 0 var(--f7-color-primary-dark),
+    0 calc(-3 * var(--f7-rpx)) 0 var(--f7-color-primary-dark),
+    0 calc(3 * var(--f7-rpx)) 0 var(--f7-color-primary-dark);
+}
+
+.f7-logo--compact .f7-logo-seven {
+  font-size: calc(96 * var(--f7-rpx));
+}
+
+.f7-logo-ribbon {
+  position: relative;
+  z-index: 2;
+  margin-top: calc(-8 * var(--f7-rpx));
+  min-height: calc(44 * var(--f7-rpx));
+  padding: calc(8 * var(--f7-rpx)) calc(28 * var(--f7-rpx));
+  background: var(--f7-color-cream);
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.f7-logo-ribbon::before,
+.f7-logo-ribbon::after {
+  content: '';
+  position: absolute;
+  top: calc(8 * var(--f7-rpx));
+  width: calc(28 * var(--f7-rpx));
+  height: calc(36 * var(--f7-rpx));
+  background: #f3e6c4;
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary-dark);
+  z-index: -1;
+}
+
+.f7-logo-ribbon::before {
+  left: calc(-22 * var(--f7-rpx));
+  clip-path: polygon(0 50%, 28% 0, 100% 0, 100% 100%, 28% 100%);
+}
+
+.f7-logo-ribbon::after {
+  right: calc(-22 * var(--f7-rpx));
+  clip-path: polygon(0 0, 72% 0, 100% 50%, 72% 100%, 0 100%);
+}
+
+.f7-logo-ribbon-text {
+  font-size: var(--f7-text-sm);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-ribbon);
+  color: var(--f7-color-primary-dark);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
