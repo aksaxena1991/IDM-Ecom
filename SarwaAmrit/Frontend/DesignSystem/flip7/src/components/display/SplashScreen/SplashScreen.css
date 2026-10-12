@@ -1,0 +1,12 @@
+.f7-splash {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: linear-gradient(180deg, #2BA8A2, #1E8C86);
+  border-radius: var(--f7-radius-xl);
+  padding: 32px;
+}
+.f7-splash .f7-loader-label { color: var(--f7-color-cream); }

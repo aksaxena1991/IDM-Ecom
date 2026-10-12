@@ -1,0 +1,22 @@
+.f7-ms { position: relative; display: flex; flex-direction: column; gap: var(--f7-space-xs); width: 100%; }
+.f7-ms-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.f7-ms-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.f7-ms-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--f7-radius-round);
+  background: var(--f7-color-accent);
+  color: var(--f7-color-primary-dark);
+  font-size: var(--f7-text-xs);
+  font-weight: var(--f7-weight-extra);
+}

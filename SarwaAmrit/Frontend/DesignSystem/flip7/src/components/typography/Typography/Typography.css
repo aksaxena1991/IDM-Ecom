@@ -1,0 +1,5 @@
+.f7-type--primary { color: var(--f7-color-primary); }
+.f7-type--dark { color: var(--f7-color-primary-dark); }
+.f7-type--accent { color: var(--f7-color-accent-dark); }
+.f7-type--coral { color: var(--f7-color-coral); }
+.f7-type--sky { color: var(--f7-color-sky); }

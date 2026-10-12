@@ -1,0 +1,11 @@
+.f7-progress { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.f7-progress-label { font-weight: 800; color: var(--f7-color-primary-dark); }
+.f7-progress-track {
+  height: 16px; border-radius: var(--f7-radius-round);
+  background: var(--f7-color-primary-bg); overflow: hidden;
+}
+.f7-progress-fill { height: 100%; border-radius: inherit; }
+.f7-progress-fill--teal { background: var(--f7-color-primary); box-shadow: var(--f7-shadow-teal-glow); }
+.f7-progress-fill--gold { background: var(--f7-color-accent); box-shadow: var(--f7-shadow-accent-glow); }
+.f7-progress-fill--coral { background: var(--f7-color-coral); box-shadow: var(--f7-shadow-coral-glow); }
+.f7-progress-fill--sky { background: var(--f7-color-sky); }

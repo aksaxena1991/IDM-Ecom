@@ -1,0 +1,42 @@
+.f7-sidebar {
+  width: 240px; min-height: 360px; padding: 16px;
+  background: var(--f7-color-primary-dark); color: var(--f7-color-cream);
+  border-radius: var(--f7-radius-xl);
+}
+.f7-sidebar-item {
+  display: block; width: 100%; text-align: left; min-height: 48px;
+  padding: 0 12px; border: 0; border-radius: var(--f7-radius-md);
+  background: transparent; color: inherit; font-weight: 800; cursor: pointer;
+}
+.f7-sidebar-item.is-on { background: var(--f7-color-accent); color: var(--f7-color-primary-dark); }
+.f7-menubar {
+  display: flex; gap: 8px; padding: 8px; background: var(--f7-color-card);
+  border-radius: var(--f7-radius-round); box-shadow: var(--f7-shadow-card);
+}
+.f7-menubar-item {
+  min-height: 48px; padding: 0 16px; border: 0; border-radius: var(--f7-radius-round);
+  background: transparent; font-weight: 800; color: var(--f7-color-primary-dark); cursor: pointer;
+}
+.f7-menubar-item.is-on { background: var(--f7-color-accent); box-shadow: var(--f7-shadow-accent-glow); }
+.f7-tabs { display: flex; flex-direction: column; gap: 12px; }
+.f7-tablist { display: flex; gap: 8px; border-bottom: 3px dashed var(--f7-color-primary-light); }
+.f7-tab {
+  min-height: 48px; padding: 0 16px; border: 0; background: transparent;
+  font-weight: 800; color: var(--f7-color-primary); cursor: pointer;
+}
+.f7-tab.is-on { color: var(--f7-color-primary-dark); box-shadow: inset 0 -4px 0 var(--f7-color-accent); }
+.f7-stepper { display: flex; gap: 12px; }
+.f7-step {
+  display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--f7-color-primary);
+}
+.f7-step-index {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--f7-color-primary-bg);
+}
+.f7-step.is-on { color: var(--f7-color-primary-dark); }
+.f7-step.is-on .f7-step-index { background: var(--f7-color-accent); }
+.f7-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; background: var(--f7-color-primary-dark); color: var(--f7-color-cream);
+  border-radius: var(--f7-radius-xl);
+}

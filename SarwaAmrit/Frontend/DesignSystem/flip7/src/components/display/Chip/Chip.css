@@ -1,0 +1,16 @@
+.f7-chip {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--f7-radius-round);
+  border: 3px solid var(--f7-color-primary-light);
+  background: var(--f7-color-cream);
+  font-weight: 800;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+.f7-chip--filter.is-on,
+.f7-chip--gold { background: var(--f7-color-accent); border-color: var(--f7-color-accent-dark); box-shadow: var(--f7-shadow-accent-glow); }
+.f7-chip--teal.is-on, .f7-chip--status.f7-chip--teal { background: var(--f7-color-primary); color: #fff; }
+.f7-chip--coral, .f7-chip--error { background: var(--f7-color-coral); color: #fff; border-color: var(--f7-color-coral-dark); }
+.f7-chip--sky { background: var(--f7-color-sky); color: #fff; border-color: #3d8fc4; }
+.f7-chip--success { background: var(--f7-color-success); color: #fff; border-color: #1e8449; }

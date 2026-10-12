@@ -1,0 +1,54 @@
+.f7-field-label,
+.f7-select-label,
+.f7-ms-label,
+.f7-picker-label {
+  font-size: var(--f7-text-sm);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-h2);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-field-hint,
+.f7-select-helper,
+.f7-ms-helper,
+.f7-picker-helper {
+  font-size: var(--f7-text-xs);
+  color: var(--f7-color-primary);
+}
+
+.f7-field-hint--error,
+.f7-select-helper--error,
+.f7-ms-helper--error,
+.f7-picker-helper--error {
+  color: var(--f7-color-error);
+}
+
+.f7-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.f7-surface-control {
+  min-height: var(--f7-touch-min);
+  background: var(--f7-color-cream);
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary-light);
+  border-radius: var(--f7-radius-md);
+  color: var(--f7-color-primary-dark);
+  font-family: var(--f7-font-body);
+  font-size: var(--f7-text-body);
+  font-weight: var(--f7-weight-medium);
+}
+
+.f7-surface-control:focus,
+.f7-surface-control:focus-visible {
+  outline: none;
+  border-color: var(--f7-color-primary);
+  box-shadow: var(--f7-shadow-focus);
+}

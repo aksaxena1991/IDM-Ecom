@@ -1,0 +1,20 @@
+.f7-quote {
+  margin: 0;
+  padding: var(--f7-space-md) var(--f7-space-lg);
+  background: var(--f7-color-cream);
+  border-left: calc(6 * var(--f7-rpx)) solid var(--f7-color-accent);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+}
+
+.f7-quote-body {
+  font-size: var(--f7-text-h3);
+  font-weight: var(--f7-weight-bold);
+  color: var(--f7-color-primary-dark);
+}
+
+.f7-quote-attr {
+  margin-top: var(--f7-space-xs);
+  font-size: var(--f7-text-sm);
+  color: var(--f7-color-primary);
+}

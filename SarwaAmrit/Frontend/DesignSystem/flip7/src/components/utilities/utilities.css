@@ -1,0 +1,36 @@
+.f7-tree, .f7-dd, .f7-editor, .f7-calc, .f7-map {
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  padding: 12px;
+}
+.f7-tree-node { display: flex; align-items: center; gap: 8px; min-height: 40px; cursor: pointer; }
+.f7-tree-node.is-on { background: var(--f7-color-primary-bg); border-radius: 8px; }
+.f7-dd-item {
+  min-height: 56px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; margin-bottom: 8px; background: var(--f7-color-cream);
+  border-radius: var(--f7-radius-md); cursor: grab; font-weight: 800;
+}
+.f7-editor-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+.f7-editor-toolbar button {
+  min-height: 36px; padding: 0 10px; border-radius: 8px; border: 2px solid var(--f7-color-primary-light);
+  background: var(--f7-color-cream); font-weight: 800; cursor: pointer;
+}
+.f7-editor-area {
+  width: 100%; min-height: 140px; border-radius: var(--f7-radius-md);
+  border: 3px solid var(--f7-color-primary-light); background: var(--f7-color-cream);
+  padding: 12px; font: inherit;
+}
+.f7-calc-display {
+  min-height: 56px; background: var(--f7-color-cream); border-radius: 12px;
+  display: flex; align-items: center; justify-content: flex-end; padding: 0 16px;
+  font-size: 28px; font-weight: 800; margin-bottom: 8px;
+}
+.f7-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.f7-calc-key {
+  min-height: 56px; border: 0; border-radius: 12px; font-weight: 800; cursor: pointer;
+  background: var(--f7-color-primary-bg);
+}
+.f7-calc-key--gold { background: var(--f7-color-accent); }
+.f7-calc-key--coral { background: var(--f7-color-coral); color: #fff; }
+.f7-map-svg { width: 100%; height: 240px; background: var(--f7-color-primary-bg); border-radius: 16px; }

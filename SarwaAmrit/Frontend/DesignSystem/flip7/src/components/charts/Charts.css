@@ -1,0 +1,19 @@
+.f7-chart {
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  padding: 16px;
+}
+.f7-chart-title { margin: 0; font-size: var(--f7-text-h3); font-weight: 800; }
+.f7-chart-sub { margin: 4px 0 12px; color: var(--f7-color-primary); font-size: var(--f7-text-sm); }
+.f7-chart-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 8px; padding: 0; list-style: none; font-size: 12px; font-weight: 800; }
+.f7-chart-swatch { width: 10px; height: 10px; border-radius: 99px; display: inline-block; margin-right: 6px; }
+.f7-chart-svg { width: 100%; height: auto; }
+.f7-chart-tip {
+  position: absolute; pointer-events: none; background: var(--f7-color-primary-dark);
+  color: #fff8e7; padding: 6px 10px; border-radius: 12px; font-size: 12px; font-weight: 800;
+}
+.f7-chart-canvas { position: relative; }
+.f7-table { width: 100%; border-collapse: collapse; }
+.f7-table th, .f7-table td { padding: 8px; border-bottom: 2px dashed var(--f7-color-primary-bg); text-align: left; }
+.f7-table th { font-size: 12px; letter-spacing: 1px; color: var(--f7-color-primary); }

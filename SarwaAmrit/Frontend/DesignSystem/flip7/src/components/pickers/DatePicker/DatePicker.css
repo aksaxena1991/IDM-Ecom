@@ -1,0 +1,21 @@
+.f7-datepicker { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.f7-cal {
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  padding: 12px;
+  border: 3px solid var(--f7-color-primary-light);
+}
+.f7-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.f7-cal-nav {
+  width: 36px; height: 36px; border: 0; background: var(--f7-color-primary-bg);
+  border-radius: var(--f7-radius-round); color: var(--f7-color-primary-dark); cursor: pointer;
+}
+.f7-cal-week, .f7-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.f7-cal-week { font-size: var(--f7-text-xs); font-weight: 800; color: var(--f7-color-primary); margin-bottom: 4px; }
+.f7-cal-day {
+  min-height: 36px; border: 0; background: transparent; border-radius: var(--f7-radius-sm);
+  font-weight: 800; color: var(--f7-color-primary-dark); cursor: pointer;
+}
+.f7-cal-day:disabled { cursor: default; opacity: 0; }
+.f7-cal-day.is-on { background: var(--f7-color-accent); box-shadow: var(--f7-shadow-accent-glow); }

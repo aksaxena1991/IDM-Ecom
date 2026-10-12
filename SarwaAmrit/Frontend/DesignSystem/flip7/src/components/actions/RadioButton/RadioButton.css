@@ -1,0 +1,27 @@
+.f7-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-sm);
+  min-height: var(--f7-touch-min);
+  cursor: pointer;
+}
+.f7-radio--disabled { opacity: 0.45; cursor: not-allowed; }
+.f7-radio-dot {
+  width: calc(32 * var(--f7-rpx));
+  height: calc(32 * var(--f7-rpx));
+  border-radius: var(--f7-radius-round);
+  border: calc(3 * var(--f7-rpx)) solid var(--f7-color-primary);
+  background: var(--f7-color-cream);
+  position: relative;
+}
+.f7-radio-dot.is-on {
+  border-color: var(--f7-color-accent-dark);
+  box-shadow: var(--f7-shadow-accent-glow);
+}
+.f7-radio-dot.is-on::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  background: var(--f7-color-accent);
+}

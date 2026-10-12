@@ -1,0 +1,13 @@
+.f7-loader { display: inline-flex; align-items: center; gap: 8px; }
+.f7-loader-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  animation: f7-loader-bounce 0.48s infinite alternate;
+}
+.f7-loader-dot--gold { animation-delay: 0.12s; background: var(--f7-color-accent); }
+.f7-loader-dot--teal { background: var(--f7-color-primary); }
+.f7-loader-dot--coral { animation-delay: 0.24s; background: var(--f7-color-coral); }
+.f7-loader-label { font-weight: 800; color: var(--f7-color-primary-dark); }
+@keyframes f7-loader-bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}

@@ -1,0 +1,15 @@
+.f7-toast-viewport {
+  position: fixed; right: 16px; top: 16px; z-index: 80;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.f7-toast {
+  min-width: 240px; display: flex; justify-content: space-between; gap: 12px;
+  padding: 14px 16px; border-radius: var(--f7-radius-lg);
+  background: var(--f7-color-card); box-shadow: var(--f7-shadow-teal-glow);
+  border-left: 6px solid var(--f7-color-primary);
+}
+.f7-toast--success { border-left-color: var(--f7-color-success); }
+.f7-toast--error, .f7-toast--warning { border-left-color: var(--f7-color-coral); box-shadow: var(--f7-shadow-coral-glow); }
+.f7-toast--info { border-left-color: var(--f7-color-sky); }
+.f7-toast-title { font-weight: 800; }
+.f7-toast-close { border: 0; background: transparent; cursor: pointer; color: var(--f7-color-primary-dark); }

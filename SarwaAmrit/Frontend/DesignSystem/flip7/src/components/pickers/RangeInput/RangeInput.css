@@ -1,0 +1,26 @@
+.f7-range { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.f7-range-head { display: flex; justify-content: space-between; align-items: center; }
+.f7-range-value {
+  min-width: 40px;
+  text-align: center;
+  padding: 2px 10px;
+  border-radius: var(--f7-radius-round);
+  background: var(--f7-color-accent);
+  font-weight: var(--f7-weight-extra);
+}
+.f7-range-input {
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  border-radius: var(--f7-radius-round);
+  background: linear-gradient(90deg, var(--f7-color-primary) var(--f7-range-pct), var(--f7-color-primary-bg) var(--f7-range-pct));
+}
+.f7-range-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--f7-color-accent);
+  border: 3px solid var(--f7-color-primary-dark);
+  box-shadow: var(--f7-shadow-accent-glow);
+}

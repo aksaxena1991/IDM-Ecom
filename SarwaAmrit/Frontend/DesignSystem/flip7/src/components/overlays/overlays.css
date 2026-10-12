@@ -1,0 +1,46 @@
+.f7-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(30, 140, 134, 0.35);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.f7-modal, .f7-panel, .f7-drawer {
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-xl);
+  box-shadow: var(--f7-shadow-lg);
+  border: 3px solid var(--f7-color-primary-dark);
+  max-width: 100%;
+}
+.f7-modal--sm { width: 320px; }
+.f7-modal--md { width: 440px; }
+.f7-modal--lg { width: 640px; }
+.f7-modal-head, .f7-drawer-head, .f7-panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 3px dashed var(--f7-color-primary-light);
+}
+.f7-modal-title, .f7-drawer-title, .f7-panel-title {
+  margin: 0; font-size: var(--f7-text-h3); font-weight: 800;
+}
+.f7-modal-body, .f7-drawer-body, .f7-panel-body { padding: 20px; }
+.f7-modal-footer { padding: 16px 20px; display: flex; gap: 8px; justify-content: flex-end; }
+.f7-icon-btn {
+  width: 36px; height: 36px; border: 0; border-radius: 999px;
+  background: var(--f7-color-primary-bg); cursor: pointer; color: var(--f7-color-primary-dark);
+}
+.f7-drawer {
+  position: fixed; z-index: 70; border-radius: var(--f7-radius-xl) 0 0 var(--f7-radius-xl);
+}
+.f7-drawer--right { right: 0; top: 0; bottom: 0; width: min(360px, 100%); }
+.f7-drawer--left { left: 0; top: 0; bottom: 0; width: min(360px, 100%); border-radius: 0 var(--f7-radius-xl) var(--f7-radius-xl) 0; }
+.f7-drawer--bottom { left: 0; right: 0; bottom: 0; height: 50%; border-radius: var(--f7-radius-xl) var(--f7-radius-xl) 0 0; }
+.f7-popover, .f7-dropdown-menu {
+  position: absolute; z-index: 40; min-width: 200px;
+  background: var(--f7-color-card); border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-teal-glow);
+  border: 3px solid var(--f7-color-primary-light); padding: 8px;
+}
+.f7-split { display: grid; grid-template-columns: 1fr 1fr; min-height: 240px; gap: 12px; }
+.f7-split-pane {
+  background: var(--f7-color-card); border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card); padding: 16px;
+}

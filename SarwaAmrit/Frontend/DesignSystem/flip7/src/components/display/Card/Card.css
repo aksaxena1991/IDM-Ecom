@@ -1,0 +1,26 @@
+.f7-card {
+  position: relative;
+  background: var(--f7-color-card);
+  border-radius: var(--f7-radius-lg);
+  box-shadow: var(--f7-shadow-card);
+  overflow: hidden;
+}
+.f7-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: var(--f7-color-primary-light);
+}
+.f7-card--gold::before { background: var(--f7-color-accent); }
+.f7-card--coral::before { background: var(--f7-color-coral); }
+.f7-card--sky::before { background: var(--f7-color-sky); }
+.f7-card--gold { box-shadow: var(--f7-shadow-accent-glow); }
+.f7-card--coral { box-shadow: var(--f7-shadow-coral-glow); }
+.f7-card--sky { box-shadow: var(--f7-shadow-sky-glow); }
+.f7-card--pad-sm { padding: 16px 16px 16px 22px; }
+.f7-card--pad-md { padding: 24px 24px 24px 30px; }
+.f7-card--pad-lg { padding: 32px 32px 32px 38px; }
+.f7-card--interactive { cursor: pointer; }
+.f7-card--interactive:hover { transform: translateY(-2px); }
+.f7-card-title { margin: 0; font-size: var(--f7-text-h3); font-weight: 800; }
+.f7-card-subtitle { margin: 4px 0 0; color: var(--f7-color-primary); }
+.f7-card-footer { margin-top: 16px; display: flex; gap: 8px; }

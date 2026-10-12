@@ -1,0 +1,25 @@
+.f7-divider {
+  border: 0;
+  border-bottom: calc(3 * var(--f7-rpx)) dashed var(--f7-color-primary-light);
+  margin: var(--f7-space-md) 0;
+}
+
+.f7-divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--f7-space-sm);
+  border: 0;
+}
+
+.f7-divider-line {
+  flex: 1;
+  border-bottom: calc(3 * var(--f7-rpx)) dashed var(--f7-color-primary-light);
+}
+
+.f7-divider-label {
+  font-size: var(--f7-text-xs);
+  font-weight: var(--f7-weight-extra);
+  letter-spacing: var(--f7-tracking-ribbon);
+  color: var(--f7-color-primary);
+  text-transform: uppercase;
+}

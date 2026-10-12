@@ -1,0 +1,9 @@
+.f7-tooltip { position: relative; display: inline-flex; }
+.f7-tooltip-bubble {
+  position: absolute; z-index: 30; left: 50%; transform: translateX(-50%);
+  padding: 6px 12px; border-radius: var(--f7-radius-round);
+  background: var(--f7-color-primary-dark); color: var(--f7-color-cream);
+  font-size: var(--f7-text-xs); font-weight: 800; white-space: nowrap;
+}
+.f7-tooltip-bubble--top { bottom: calc(100% + 8px); }
+.f7-tooltip-bubble--bottom { top: calc(100% + 8px); }
