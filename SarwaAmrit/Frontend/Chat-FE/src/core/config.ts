@@ -6,6 +6,21 @@ export const CHAT_API_BASE_URL = import.meta.env.DEV
   ? '/chat-api'
   : (import.meta.env.VITE_CHAT_API_BASE_URL ?? 'http://localhost:8100')
 
+/** `new URL()` requires an absolute href; dev proxy bases are path-only (`/sso`). */
+export function resolveServiceUrl(baseUrl: string, path: string): URL {
+  const base = baseUrl.replace(/\/$/, '')
+  const suffix = path.startsWith('/') ? path : `/${path}`
+  const href = `${base}${suffix}`
+  if (/^https?:\/\//i.test(href)) {
+    return new URL(href)
+  }
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : 'http://127.0.0.1:3003'
+  return new URL(href, origin)
+}
+
 export const OIDC_CLIENT_ID = import.meta.env.VITE_OIDC_CLIENT_ID ?? 'ai-chat-oidc-app'
 
 /** Must match the browser URL used during login (127.0.0.1 vs localhost are different origins). */

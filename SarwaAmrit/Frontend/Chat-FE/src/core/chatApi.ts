@@ -1,4 +1,4 @@
-import { CHAT_API_BASE_URL } from './config'
+import { CHAT_API_BASE_URL, resolveServiceUrl } from './config'
 import { parseProblemDetails } from './problemDetails'
 
 export type ChatMessageResponse = {
@@ -69,7 +69,10 @@ export async function fetchConversationHistory(
   conversationId: string,
   applicationId: string,
 ): Promise<HistoryMessage[]> {
-  const url = new URL(`${CHAT_API_BASE_URL}/api/v1/conversations/${conversationId}/messages`)
+  const url = resolveServiceUrl(
+    CHAT_API_BASE_URL,
+    `/api/v1/conversations/${conversationId}/messages`,
+  )
   url.searchParams.set('application_id', applicationId)
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
   if (!res.ok) throw await parseProblemDetails(res)

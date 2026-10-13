@@ -8,6 +8,7 @@ import {
   SSO_BASE_URL,
   TOKEN_STORAGE_KEY,
   getOidcRedirectUri,
+  resolveServiceUrl,
 } from './config'
 import { createCodeChallenge, createCodeVerifier } from '../features/auth/utils/pkce'
 import { ApiError, parseProblemDetails } from './problemDetails'
@@ -73,7 +74,7 @@ export async function beginSsoLogin(): Promise<void> {
   sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier)
   sessionStorage.setItem(OAUTH_STATE_KEY, state)
 
-  const url = new URL(`${SSO_BASE_URL}/oauth2/authorize`)
+  const url = resolveServiceUrl(SSO_BASE_URL, '/oauth2/authorize')
   url.searchParams.set('client_id', OIDC_CLIENT_ID)
   url.searchParams.set('redirect_uri', getOidcRedirectUri())
   url.searchParams.set('response_type', 'code')
