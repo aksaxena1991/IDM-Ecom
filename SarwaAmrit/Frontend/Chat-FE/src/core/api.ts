@@ -1,14 +1,18 @@
 import {
   DEFAULT_TENANT_SLUG,
   OAUTH_STATE_KEY,
-  OIDC_REDIRECT_URI,
+  OIDC_CLIENT_ID,
   OIDC_SCOPE,
   PKCE_VERIFIER_KEY,
+  REFRESH_STORAGE_KEY,
   SSO_BASE_URL,
+  TOKEN_STORAGE_KEY,
+  getOidcRedirectUri,
 } from './config'
-import { getActiveOidcClientId } from './chatProfile'
 import { createCodeChallenge, createCodeVerifier } from '../features/auth/utils/pkce'
 import { ApiError, parseProblemDetails } from './problemDetails'
+
+export { ApiError } from './problemDetails'
 
 export type TokenSet = {
   access_token: string
@@ -27,7 +31,6 @@ export type UserInfo = {
   groups?: string[]
   roles?: string[]
   permissions?: string[]
-  attributes?: Record<string, unknown>
   tenant_id?: string
 }
 
@@ -64,7 +67,6 @@ export async function loginWithPassword(
 }
 
 export async function beginSsoLogin(): Promise<void> {
-  const clientId = getActiveOidcClientId()
   const verifier = createCodeVerifier()
   const challenge = await createCodeChallenge(verifier)
   const state = crypto.randomUUID()
@@ -72,8 +74,8 @@ export async function beginSsoLogin(): Promise<void> {
   sessionStorage.setItem(OAUTH_STATE_KEY, state)
 
   const url = new URL(`${SSO_BASE_URL}/oauth2/authorize`)
-  url.searchParams.set('client_id', clientId)
-  url.searchParams.set('redirect_uri', OIDC_REDIRECT_URI)
+  url.searchParams.set('client_id', OIDC_CLIENT_ID)
+  url.searchParams.set('redirect_uri', getOidcRedirectUri())
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('scope', OIDC_SCOPE)
   url.searchParams.set('state', state)
@@ -106,8 +108,8 @@ export async function exchangeCodeForTokens(code: string, state: string): Promis
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: OIDC_REDIRECT_URI,
-      client_id: getActiveOidcClientId(),
+      redirect_uri: getOidcRedirectUri(),
+      client_id: OIDC_CLIENT_ID,
       code_verifier: verifier,
     })
 
@@ -132,22 +134,6 @@ export async function exchangeCodeForTokens(code: string, state: string): Promis
   }
 }
 
-export async function refreshTokens(refreshToken: string): Promise<TokenSet> {
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: getActiveOidcClientId(),
-  })
-  const res = await fetch(`${SSO_BASE_URL}/oauth2/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  if (!res.ok) throw await parseProblemDetails(res)
-  const tokens = await res.json()
-  return { ...tokens, obtained_at: Date.now() }
-}
-
 export async function fetchUserInfo(accessToken: string): Promise<UserInfo> {
   const res = await fetch(`${SSO_BASE_URL}/oauth2/userinfo`, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -163,6 +149,38 @@ export async function logoutRemote(): Promise<void> {
       credentials: 'include',
     })
   } catch {
-    /* ignore */
+    // ignore network failures; local session is still cleared by the caller
   }
+}
+
+export function persistOidcSession(tokens: TokenSet): void {
+  try {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens))
+    if (tokens.refresh_token) {
+      sessionStorage.setItem(REFRESH_STORAGE_KEY, tokens.refresh_token)
+    }
+  } catch {
+    // ignore quota
+  }
+}
+
+export function clearOidcSession(): void {
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+  sessionStorage.removeItem(REFRESH_STORAGE_KEY)
+  sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+  sessionStorage.removeItem(OAUTH_STATE_KEY)
+}
+
+export function loadStoredTokens(): TokenSet | null {
+  try {
+    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as TokenSet
+  } catch {
+    return null
+  }
+}
+
+export function getAccessToken(): string | null {
+  return loadStoredTokens()?.access_token ?? null
 }

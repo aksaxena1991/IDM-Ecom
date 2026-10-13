@@ -21,6 +21,18 @@ export default defineConfig({
     strictPort: true,
     host: '127.0.0.1',
     fs: { allow: [path.resolve(__dirname, '..')] },
+    proxy: {
+      '/sso': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/sso/, ''),
+      },
+      '/chat-api': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/chat-api/, ''),
+      },
+    },
   },
   preview: {
     port: 3003,

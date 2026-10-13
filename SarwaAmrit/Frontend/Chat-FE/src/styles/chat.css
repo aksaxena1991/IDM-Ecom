@@ -1,55 +1,5 @@
-@import './gate.css';
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  min-height: 100%;
-  margin: 0;
-}
-
-body {
-  font-family: var(--ts-font-body, 'Inter', sans-serif);
-  background: var(--ts-color-bg, #1c1917);
-  color: var(--ts-color-text-primary);
-  -webkit-font-smoothing: antialiased;
-}
-
 .mono {
   font-family: var(--ts-font-mono, 'Source Code Pro', monospace);
-}
-
-.chat-auth-card {
-  width: min(440px, 100%);
-  margin: 0 auto;
-}
-
-.chat-login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  margin-top: 8px;
-}
-
-.chat-login-divider {
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.chat-icon-btn {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  display: inline-flex;
-  padding: 0;
 }
 
 .chat-shell {
@@ -165,4 +115,10 @@ body {
   min-height: 60vh;
   display: grid;
   place-items: center;
+}
+
+.form-error {
+  color: var(--ts-color-error, #dc2626);
+  margin: 12px 0;
+  text-align: center;
 }

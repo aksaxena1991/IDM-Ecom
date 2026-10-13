@@ -21,4 +21,8 @@ describe('application isolation', () => {
   it('denies cross-app token audience', () => {
     expect(() => assertTokenMatchesApplication('ims-oidc-app', app)).toThrow(ApplicationAccessDenied)
   })
+
+  it('allows chat portal client for any registered app', () => {
+    expect(() => assertTokenMatchesApplication('ai-chat-oidc-app', app)).not.toThrow()
+  })
 })

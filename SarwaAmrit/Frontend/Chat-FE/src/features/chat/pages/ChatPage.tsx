@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Button, Card, Chip, Input, Loader, NotificationBar, Typography } from '@thoughtstream/ui'
 import { Send } from 'lucide-react'
+import { getAccessToken } from '../../../core/api'
 import {
   fetchCapabilities,
   fetchConversationHistory,
   sendChatMessage,
   type CapabilitiesResponse,
 } from '../../../core/chatApi'
-import { resolveChatProfile } from '../../../core/chatProfile'
-import { useAuth } from '../../auth/context/AuthContext'
+import { getActiveApplicationSlug, getApplicationLabel } from '../../../core/chatProfile'
+import { readSession, SESSION_KEY } from '../../../core/session'
 
 type UiMessage = {
   id: string
@@ -17,8 +19,14 @@ type UiMessage = {
 }
 
 export function ChatPage() {
-  const { accessToken, applicationSlug, user } = useAuth()
-  const profile = resolveChatProfile(applicationSlug)
+  const session = readSession()
+  if (!session || !sessionStorage.getItem(SESSION_KEY)) {
+    return <Navigate to="/login" replace />
+  }
+
+  const applicationSlug = getActiveApplicationSlug()
+  const applicationLabel = getApplicationLabel()
+  const accessToken = getAccessToken()
 
   const [capabilities, setCapabilities] = useState<CapabilitiesResponse | null>(null)
   const [conversationId, setConversationId] = useState<string | null>(null)
@@ -36,11 +44,15 @@ export function ChatPage() {
   }, [])
 
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken) {
+      setError('Session expired. Please sign in again.')
+      setBooting(false)
+      return
+    }
     let cancelled = false
     ;(async () => {
       try {
-        const caps = await fetchCapabilities(accessToken, profile.slug)
+        const caps = await fetchCapabilities(accessToken, applicationSlug)
         if (!cancelled) setCapabilities(caps)
       } catch (err) {
         if (!cancelled) {
@@ -53,7 +65,7 @@ export function ChatPage() {
     return () => {
       cancelled = true
     }
-  }, [accessToken, profile.slug])
+  }, [accessToken, applicationSlug])
 
   useEffect(() => {
     scrollToBottom()
@@ -72,7 +84,7 @@ export function ChatPage() {
 
     try {
       const result = await sendChatMessage(accessToken, {
-        applicationId: profile.slug,
+        applicationId: applicationSlug,
         message: text,
         conversationId,
       })
@@ -86,7 +98,7 @@ export function ChatPage() {
         const history = await fetchConversationHistory(
           accessToken,
           result.conversation_id,
-          profile.slug,
+          applicationSlug,
         )
         setMessages(
           history
@@ -129,11 +141,11 @@ export function ChatPage() {
 
       <Card className="chat-intro" padding="medium">
         <Typography variant="subhead" as="h2">
-          {capabilities?.name ?? profile.label}
+          {capabilities?.name ?? applicationLabel}
         </Typography>
         <Typography variant="bodySmall" color="secondary">
-          Signed in as {user?.name || user?.email}. Questions stay scoped to{' '}
-          <span className="mono">{profile.slug}</span> via your SSO access token.
+          Signed in as {session.name || session.email}. Questions stay scoped to{' '}
+          <span className="mono">{applicationSlug}</span>.
         </Typography>
         {capabilities?.features.tools.length ? (
           <div className="chat-chips">
@@ -149,7 +161,7 @@ export function ChatPage() {
       <div className="chat-thread" ref={listRef} role="log" aria-live="polite">
         {messages.length === 0 ? (
           <Typography variant="body" color="secondary" className="chat-empty">
-            Ask about policies, access, or workflows for {profile.label}.
+            Ask about policies, access, or workflows for {applicationLabel}.
           </Typography>
         ) : (
           messages.map((m) => (
@@ -176,7 +188,7 @@ export function ChatPage() {
           placeholder="Type your question…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          disabled={sending}
+          disabled={sending || !accessToken}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
@@ -184,7 +196,12 @@ export function ChatPage() {
             }
           }}
         />
-        <Button type="submit" variant="primary" disabled={sending || !draft.trim()} aria-label="Send message">
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={sending || !draft.trim() || !accessToken}
+          aria-label="Send message"
+        >
           <Send size={18} aria-hidden />
           Send
         </Button>

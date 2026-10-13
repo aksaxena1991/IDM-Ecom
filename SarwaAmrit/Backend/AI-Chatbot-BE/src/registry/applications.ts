@@ -1,5 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm'
 
+import { env } from '../config/env.js'
 import { ApplicationAccessDenied } from '../core/errors.js'
 import type { RequestContext } from '../core/requestContext.js'
 import { db } from '../persistence/db.js'
@@ -46,15 +47,20 @@ export async function getEnabledApplicationBySlug(
   }
 }
 
+export function isPortalChatToken(tokenAudience: string): boolean {
+  return env.portalSsoClientIds.includes(tokenAudience)
+}
+
+/** Domain-app token (aud = idm-oidc-app) or shared chat portal token (aud = ai-chat-oidc-app). */
 export function assertTokenMatchesApplication(
   tokenAudience: string,
   app: RegisteredApplication,
 ): void {
-  if (tokenAudience !== app.ssoClientId) {
-    throw new ApplicationAccessDenied(
-      'Access token audience does not match the requested application',
-    )
-  }
+  if (tokenAudience === app.ssoClientId) return
+  if (isPortalChatToken(tokenAudience)) return
+  throw new ApplicationAccessDenied(
+    'Access token audience does not match the requested application',
+  )
 }
 
 export async function resolveApplicationForChat(

@@ -1,19 +1,51 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Button, Input, Select, Typography, useToast } from '@thoughtstream/ui'
+import { Button, Input, Typography, useToast } from '@thoughtstream/ui'
 import { Eye, EyeOff } from 'lucide-react'
-import { beginSsoLogin, continueOidcAfterSession, loginWithPassword } from '../../../core/api'
-import { ApiError } from '../../../core/problemDetails'
-import { CHAT_PROFILES, DEFAULT_TENANT_SLUG } from '../../../core/config'
-import { persistProfileSlug } from '../../../core/chatProfile'
-import { useAuth } from '../context/AuthContext'
-import { AuthGate } from '../../../components/AuthGate'
+import { ForgotPasswordModal } from '../../../components/ForgotPasswordModal'
+import {
+  ApiError,
+  beginSsoLogin,
+  continueOidcAfterSession,
+  loginWithPassword,
+} from '../../../core/api'
+import { DEFAULT_TENANT_SLUG } from '../../../core/config'
+import { SESSION_KEY } from '../../../core/session'
 
-export function LoginPage() {
+export interface LoginPageProps {
+  onNavigateToSignup?: () => void
+}
+
+const NestMark: React.FC = () => (
+  <div className="nn-gate-mark" aria-hidden="true">
+    <span className="nn-gate-particle nn-gate-particle--a" />
+    <span className="nn-gate-particle nn-gate-particle--b" />
+    <span className="nn-gate-particle nn-gate-particle--c" />
+    <span className="nn-gate-particle nn-gate-particle--d" />
+    <svg viewBox="0 0 64 48" className="nn-gate-mark-svg">
+      <rect x="22" y="6" width="8" height="8" fill="currentColor" />
+      <rect x="30" y="6" width="8" height="8" fill="currentColor" />
+      <rect x="14" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="14" width="8" height="8" fill="var(--ts-color-success)" />
+      <rect x="30" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="38" y="14" width="8" height="8" fill="currentColor" />
+      <rect x="14" y="22" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="22" width="8" height="8" />
+      <rect x="30" y="22" width="8" height="8" />
+      <rect x="38" y="22" width="8" height="8" fill="currentColor" />
+      <rect x="22" y="30" width="8" height="8" fill="currentColor" />
+      <rect x="30" y="30" width="8" height="8" fill="currentColor" />
+    </svg>
+  </div>
+)
+
+export const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
   const { toast } = useToast()
-  const { isAuthenticated, loading } = useAuth()
 
-  const [profileSlug, setProfileSlug] = useState(CHAT_PROFILES[0]!.slug)
+  if (sessionStorage.getItem(SESSION_KEY)) {
+    return <Navigate to="/chat" replace />
+  }
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mfaCode, setMfaCode] = useState('')
@@ -21,134 +53,202 @@ export function LoginPage() {
   const [showMfa, setShowMfa] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false)
 
-  if (!loading && isAuthenticated) {
-    return <Navigate to="/chat" replace />
-  }
+  const handleValidate = () => {
+    let isValid = true
 
-  const validate = () => {
-    let ok = true
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setEmailError('Enter a valid email')
-      ok = false
-    } else setEmailError(null)
-    if (!password || password.length < 6) {
+    if (!email.trim()) {
+      setEmailError('Email is required')
+      isValid = false
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setEmailError('Enter a valid email address')
+      isValid = false
+    } else {
+      setEmailError(null)
+    }
+
+    if (!password) {
       setPasswordError('Password is required')
-      ok = false
-    } else setPasswordError(null)
-    return ok
+      isValid = false
+    } else if (password.length < 6) {
+      setPasswordError('Password must contain at least 6 characters')
+      isValid = false
+    } else {
+      setPasswordError(null)
+    }
+
+    return isValid
   }
 
-  const startAuth = () => {
-    persistProfileSlug(profileSlug)
-  }
-
-  const handlePasswordLogin = async (event: React.FormEvent) => {
+  const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!validate()) return
-    startAuth()
-    setBusy(true)
+    if (!handleValidate()) return
+
+    setIsLoading(true)
     try {
       await loginWithPassword(email.trim(), password, DEFAULT_TENANT_SLUG, mfaCode || undefined)
-      toast.success('Signed in', 'Completing OIDC token exchange…')
+      toast.success('Signed in', `Welcome back, ${email.trim()}`)
       await continueOidcAfterSession()
     } catch (err) {
       const detail = err instanceof ApiError ? `${err.message} ${err.detail || ''}` : ''
-      if (err instanceof ApiError && err.status === 401 && /mfa/i.test(detail)) {
-        setShowMfa(true)
-        toast.error('MFA required', 'Enter your authenticator code')
+      if (err instanceof ApiError && err.status === 429) {
+        toast.error('Sign in failed', 'Account temporarily locked')
         return
       }
-      const message = err instanceof ApiError ? err.detail || err.message : 'Sign-in failed'
+      if (
+        err instanceof ApiError &&
+        (err.body?.mfa_required || (err.status === 401 && /mfa/i.test(detail)))
+      ) {
+        setShowMfa(true)
+        toast.error('Sign in failed', 'MFA code required')
+        return
+      }
+      const message = err instanceof ApiError ? err.detail || err.message : 'Invalid credentials'
       setPasswordError(message)
-      toast.error('Sign-in failed', message)
+      toast.error('Sign in failed', message)
     } finally {
-      setBusy(false)
+      setIsLoading(false)
     }
   }
 
   const handleSso = async () => {
-    startAuth()
-    setBusy(true)
+    setIsLoading(true)
     try {
       await beginSsoLogin()
     } catch (err) {
-      toast.error('SSO failed', err instanceof Error ? err.message : 'Could not start login')
-      setBusy(false)
+      toast.error('Sign in failed', err instanceof Error ? err.message : 'Could not start SSO login')
+      setIsLoading(false)
     }
   }
 
   return (
-    <AuthGate
-      title="AI Assistant"
-      subtitle="Sign in with Sarwa Amrit SSO. Your token is scoped to the assistant you select."
-    >
-      <form className="chat-login-form" onSubmit={handlePasswordLogin} noValidate>
-        <Select
-          label="Assistant"
-          options={CHAT_PROFILES.map((p) => ({ value: p.slug, label: p.label }))}
-          value={profileSlug}
-          onChange={setProfileSlug}
-          helperText="OIDC client must match this application (IDM or IMS token)."
-        />
+    <div className="nn-gate" data-theme="dark">
+      <div className="nn-gate-scrim">
+        <div
+          className="nn-gate-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="nn-gate-title"
+        >
+          <section className="nn-gate-steps" />
+          <form className="nn-gate-auth" onSubmit={handleLogin} noValidate>
+            <div className="nn-gate-auth-tools">
+              <Button type="button" variant="secondary" size="small">
+                Contact
+              </Button>
+            </div>
 
-        <Input
-          label="Email"
-          type="email"
-          autoComplete="username"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value)
-            if (emailError) setEmailError(null)
-          }}
-          error={emailError || undefined}
-        />
+            <NestMark />
 
-        <Input
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value)
-            if (passwordError) setPasswordError(null)
-          }}
-          error={passwordError || undefined}
-          trailingIcon={
-            <button
+            <Typography id="nn-gate-title" variant="headline" as="h1" className="nn-gate-title">
+              Sarwa Amrit — AI Assistant
+            </Typography>
+            <Typography variant="bodySmall" color="secondary" className="nn-gate-subtitle">
+              Sign in with Sarwa Amrit SSO to use the AI assistant.
+            </Typography>
+
+            <div className="nn-gate-fields">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="Your Email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  if (emailError) setEmailError(null)
+                }}
+                error={emailError || undefined}
+                autoComplete="email"
+                required
+                containerClassName="nn-gate-field"
+              />
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value)
+                  if (passwordError) setPasswordError(null)
+                }}
+                error={passwordError || undefined}
+                autoComplete="current-password"
+                required
+                containerClassName="nn-gate-field"
+                trailingIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="nn-input-eye-btn"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                }
+              />
+              {showMfa && (
+                <Input
+                  label="MFA One-Time Passcode"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="6-digit code"
+                  value={mfaCode}
+                  onChange={(event) => setMfaCode(event.target.value)}
+                  containerClassName="nn-gate-field"
+                />
+              )}
+            </div>
+
+            <div className="nn-gate-forgot">
+              <button
+                type="button"
+                className="nn-link-button"
+                onClick={() => setIsForgotModalOpen(true)}
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            <Button type="submit" variant="primary" size="large" fullWidth isLoading={isLoading}>
+              Login with Email
+            </Button>
+            <span>or</span>
+            <Button
               type="button"
-              className="chat-icon-btn"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              onClick={() => setShowPassword((v) => !v)}
+              variant="secondary"
+              size="large"
+              fullWidth
+              onClick={handleSso}
+              disabled={isLoading}
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          }
-        />
+              Login with SSO
+            </Button>
 
-        {showMfa ? (
-          <Input
-            label="MFA code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            value={mfaCode}
-            onChange={(e) => setMfaCode(e.target.value)}
-          />
-        ) : null}
-
-        <Button type="submit" variant="primary" size="large" fullWidth disabled={busy}>
-          Sign in with password
-        </Button>
-
-        <Typography variant="caption" color="secondary" className="chat-login-divider">
-          or
-        </Typography>
-
-        <Button type="button" variant="secondary" size="large" fullWidth disabled={busy} onClick={handleSso}>
-          Continue with SSO (PKCE)
-        </Button>
-      </form>
-    </AuthGate>
+            <Typography variant="caption" color="secondary" className="nn-gate-legal">
+              By continuing, you agree to our Terms and Privacy Policy.
+              {onNavigateToSignup ? (
+                <>
+                  {' '}
+                  <button type="button" className="nn-link-button" onClick={onNavigateToSignup}>
+                    Create an account
+                  </button>
+                </>
+              ) : null}
+            </Typography>
+          </form>
+        </div>
+      </div>
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+        initialEmail={email}
+        onSuccess={(submittedEmail) => {
+          toast.success('Recovery sent', `Reset instructions delivered to ${submittedEmail}`)
+        }}
+      />
+    </div>
   )
 }

@@ -25,6 +25,9 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().optional(),
   CHAT_ADMIN_PERMISSIONS: z.string().default('admin:*,platform-super-admin:access'),
   CHAT_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(60),
+  CHAT_PORTAL_SSO_CLIENT_IDS: z
+    .string()
+    .default('ai-chat-oidc-app'),
 })
 
 const parsed = envSchema.safeParse(process.env)
@@ -39,6 +42,9 @@ export const env = {
   ...data,
   corsOrigins: parseCorsOrigins(data.CORS_ORIGINS),
   adminPermissions: data.CHAT_ADMIN_PERMISSIONS.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+  portalSsoClientIds: data.CHAT_PORTAL_SSO_CLIENT_IDS.split(',')
     .map((s) => s.trim())
     .filter(Boolean),
 }

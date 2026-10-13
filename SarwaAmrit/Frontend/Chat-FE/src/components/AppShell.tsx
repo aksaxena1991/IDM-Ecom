@@ -1,12 +1,27 @@
-import { Outlet } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button, Typography } from '@thoughtstream/ui'
 import { LogOut, MessageCircle } from 'lucide-react'
-import { useAuth } from '../features/auth/context/AuthContext'
-import { resolveChatProfile } from '../core/chatProfile'
+import { clearOidcSession, logoutRemote } from '../core/api'
+import { getApplicationLabel } from '../core/chatProfile'
+import { clearSession, readSession, SESSION_KEY } from '../core/session'
 
-export function AppShell() {
-  const { user, logout, applicationSlug } = useAuth()
-  const profile = resolveChatProfile(applicationSlug)
+type Props = {
+  children: ReactNode
+}
+
+export function AppShell({ children }: Props) {
+  const navigate = useNavigate()
+  const session = readSession()
+  const applicationLabel = getApplicationLabel()
+
+  const handleLogout = () => {
+    void logoutRemote()
+    clearOidcSession()
+    clearSession()
+    sessionStorage.removeItem(SESSION_KEY)
+    navigate('/login')
+  }
 
   return (
     <div className="chat-shell" data-theme="dark">
@@ -18,23 +33,21 @@ export function AppShell() {
               Sarwa Amrit Assistant
             </Typography>
             <Typography variant="caption" color="secondary" className="mono">
-              {profile.label}
+              {applicationLabel}
             </Typography>
           </div>
         </div>
         <div className="chat-header-actions">
           <Typography variant="caption" color="secondary">
-            {user?.email}
+            {session?.email}
           </Typography>
-          <Button variant="secondary" size="small" onClick={() => void logout()}>
+          <Button variant="secondary" size="small" onClick={handleLogout}>
             <LogOut size={14} aria-hidden />
             Sign out
           </Button>
         </div>
       </header>
-      <main className="chat-main">
-        <Outlet />
-      </main>
+      <main className="chat-main">{children}</main>
     </div>
   )
 }

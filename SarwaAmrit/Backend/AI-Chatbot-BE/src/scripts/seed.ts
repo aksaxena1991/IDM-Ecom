@@ -2,7 +2,7 @@
  * Seeds demo tenant + IDM/IMS chat applications aligned with SSO seed client IDs.
  * Run after SSO seed so tenant UUID matches demo tenant (override via SEED_TENANT_ID).
  */
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 import { env } from '../config/env.js'
 import { closeDb, db } from '../persistence/db.js'
@@ -62,11 +62,11 @@ async function main() {
     const found = await db
       .select()
       .from(applications)
-      .where(eq(applications.slug, spec.slug))
+      .where(and(eq(applications.tenantId, tenantId!), eq(applications.slug, spec.slug)))
       .limit(1)
 
     if (found[0]) {
-      console.log(`Application ${spec.slug} already exists (${found[0].id})`)
+      console.log(`Application ${spec.slug} already exists for tenant (${found[0].id})`)
       continue
     }
 

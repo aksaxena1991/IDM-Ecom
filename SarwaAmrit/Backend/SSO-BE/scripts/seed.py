@@ -110,8 +110,7 @@ async def seed() -> None:
             redirect_uris=[
                 "http://localhost:3000/callback",
                 "http://127.0.0.1:3000/callback",
-                "http://localhost:3003/callback",
-                "http://127.0.0.1:3003/callback",
+                
             ],
         )
         await _ensure_oidc_app(
@@ -122,6 +121,15 @@ async def seed() -> None:
             redirect_uris=[
                 "http://localhost:3001/callback",
                 "http://127.0.0.1:3001/callback",
+                
+            ],
+        )
+        await _ensure_oidc_app(
+            db,
+            tenant_id=tenant.id,
+            name="AI Chat Portal",
+            client_id="ai-chat-oidc-app",
+            redirect_uris=[
                 "http://localhost:3003/callback",
                 "http://127.0.0.1:3003/callback",
             ],
@@ -254,6 +262,7 @@ async def seed() -> None:
             print("Admin password / SCIM token: set via SEED_* env (use SEED_PRINT_SECRETS=1 to print)")
         print("OIDC client_id: idm-oidc-app")
         print("OIDC client_id: ims-oidc-app")
+        print("OIDC client_id: ai-chat-oidc-app")
         print("SAML client_id: idm-saml-app")
         print(f"RBAC roles: {PLATFORM_SUPER_ADMIN_ROLE}, {PLATFORM_ADMIN_ROLE}")
 

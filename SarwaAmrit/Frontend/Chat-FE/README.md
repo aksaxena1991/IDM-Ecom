@@ -35,9 +35,10 @@ SEED_TENANT_ID=<tenant_id_from_token> npm run db:seed
 
 ## Sign-in flow
 
-1. Choose assistant (**IDM** or **IMS**) on the login screen — this selects the OIDC `client_id` (`idm-oidc-app` / `ims-oidc-app`).
-2. Password + session cookie, then authorization code exchange (same as IDM portal), or **Continue with SSO (PKCE)**.
-3. Access token audience must match the assistant; chat API enforces isolation.
+1. Set `VITE_OIDC_CLIENT_ID=ai-chat-oidc-app` (default). Re-run SSO seed so this client exists.
+2. Choose assistant (**IDM** or **IMS**) — sets chat `application_id` only, not the OIDC client.
+3. Password + session cookie, then PKCE token exchange, or **Continue with SSO (PKCE)**.
+4. Redirect URI is `${window.location.origin}/callback` (both `localhost` and `127.0.0.1` are seeded).
 
 ## Stack
 

@@ -1,7 +1,10 @@
 import { Router } from 'express'
 
 import { UnauthorizedError } from '../../core/errors.js'
-import { getEnabledApplicationBySlug } from '../../registry/applications.js'
+import {
+  assertTokenMatchesApplication,
+  getEnabledApplicationBySlug,
+} from '../../registry/applications.js'
 import { authenticate } from '../middleware/authenticate.js'
 
 export const applicationsRouter = Router()
@@ -14,7 +17,17 @@ applicationsRouter.get('/:slug/capabilities', authenticate, async (req, res, nex
     if (!tenantId) throw new UnauthorizedError('Access token missing tenant_id')
 
     const app = await getEnabledApplicationBySlug(tenantId, req.params.slug!)
-    if (!app || app.ssoClientId !== req.tokenAudience) {
+    if (!app) {
+      res.status(403).json({
+        error: 'application_access_denied',
+        detail: 'Application not found or disabled',
+        request_id: req.requestId,
+      })
+      return
+    }
+    try {
+      assertTokenMatchesApplication(req.tokenAudience, app)
+    } catch {
       res.status(403).json({
         error: 'application_access_denied',
         detail: 'Application not available for this token',
