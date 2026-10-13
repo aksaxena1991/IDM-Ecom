@@ -1,7 +1,7 @@
 import type { RequestContext } from '../core/requestContext.js'
 import { env } from '../config/env.js'
 import type { ModelGateway, ModelRoute } from '../llm/gateway.js'
-import { isModelRoute } from '../llm/gateway.js'
+import { getModelGateway, isModelRoute } from '../llm/gateway.js'
 import { recordAuditEvent } from '../observability/audit.js'
 import {
   appendMessage,
@@ -15,6 +15,7 @@ export type ChatResult = {
   answer: string
   sources: Record<string, unknown>[]
   requestId: string
+  modelRoute: ModelRoute
 }
 
 function systemPrompt(app: RegisteredApplication): string {
@@ -49,7 +50,7 @@ function resolveFallbackRoute(app: RegisteredApplication, primary: ModelRoute): 
 }
 
 export class ChatService {
-  constructor(private readonly gateway: ModelGateway) {}
+  constructor(private readonly gateway: () => ModelGateway = getModelGateway) {}
 
   async handle(input: {
     ctx: RequestContext
@@ -82,12 +83,16 @@ export class ChatService {
     let generated
     let modelRouteUsed = route
     try {
-      generated = await this.gateway.generate(route, generateInput)
+      generated = await this.gateway().generate(route, generateInput)
     } catch (err) {
       if (!fallback) {
         throw err
       }
-      generated = await this.gateway.generate(fallback, generateInput)
+      const reason = err instanceof Error ? err.message : String(err)
+      console.warn(
+        `[chat] Primary model route "${route}" failed; falling back to "${fallback}": ${reason}`,
+      )
+      generated = await this.gateway().generate(fallback, generateInput)
       modelRouteUsed = fallback
     }
 
@@ -118,6 +123,7 @@ export class ChatService {
       answer: generated.answer,
       sources: generated.sources,
       requestId: input.ctx.correlationId,
+      modelRoute: modelRouteUsed,
     }
   }
 }

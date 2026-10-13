@@ -3,7 +3,6 @@ import { z } from 'zod'
 
 import { AppError, UnauthorizedError } from '../../core/errors.js'
 import { createRequestContext } from '../../core/requestContext.js'
-import { createDefaultModelGateway } from '../../llm/gateway.js'
 import { ChatService } from '../../orchestration/chatService.js'
 import { resolveApplicationForChat } from '../../registry/applications.js'
 import { authenticate } from '../middleware/authenticate.js'
@@ -14,8 +13,7 @@ const chatRequestSchema = z.object({
   message: z.string().min(1).max(12_000),
 })
 
-const gateway = createDefaultModelGateway()
-const chatService = new ChatService(gateway)
+const chatService = new ChatService()
 
 export const chatRouter = Router()
 
@@ -61,6 +59,7 @@ chatRouter.post('/messages', authenticate, async (req, res, next) => {
       sources: result.sources,
       actions: [],
       request_id: result.requestId,
+      model_route: result.modelRoute,
     })
   } catch (err) {
     if (err instanceof z.ZodError) {

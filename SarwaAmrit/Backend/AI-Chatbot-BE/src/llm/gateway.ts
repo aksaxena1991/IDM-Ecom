@@ -19,6 +19,8 @@ export class ModelGateway {
   }
 }
 
+let gatewaySingleton: ModelGateway | null = null
+
 export function createDefaultModelGateway(): ModelGateway {
   const providers: Record<string, LLMProvider> = {
     mock: new MockLLMProvider(),
@@ -28,9 +30,23 @@ export function createDefaultModelGateway(): ModelGateway {
     const gemini = new GeminiLLMProvider(env.GEMINI_API_KEY, env.GEMINI_MODEL)
     providers.cloud = gemini
     providers.self_hosted = gemini
+  } else {
+    console.warn('[llm] GEMINI_API_KEY not set — route "cloud" will fall back to mock')
   }
 
   return new ModelGateway(providers)
+}
+
+/** Shared gateway (recreate in dev when env changes via resetModelGateway). */
+export function getModelGateway(): ModelGateway {
+  if (!gatewaySingleton) {
+    gatewaySingleton = createDefaultModelGateway()
+  }
+  return gatewaySingleton
+}
+
+export function resetModelGateway(): void {
+  gatewaySingleton = null
 }
 
 export function isModelRoute(value: string): value is ModelRoute {
