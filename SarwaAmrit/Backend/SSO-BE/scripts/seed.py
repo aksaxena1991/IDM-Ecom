@@ -107,14 +107,24 @@ async def seed() -> None:
             tenant_id=tenant.id,
             name="IDM OIDC App",
             client_id="idm-oidc-app",
-            redirect_uris=["http://localhost:3000/callback", "http://127.0.0.1:3000/callback"],
+            redirect_uris=[
+                "http://localhost:3000/callback",
+                "http://127.0.0.1:3000/callback",
+                "http://localhost:3003/callback",
+                "http://127.0.0.1:3003/callback",
+            ],
         )
         await _ensure_oidc_app(
             db,
             tenant_id=tenant.id,
             name="IMS OIDC App",
             client_id="ims-oidc-app",
-            redirect_uris=["http://localhost:3001/callback", "http://127.0.0.1:3001/callback"],
+            redirect_uris=[
+                "http://localhost:3001/callback",
+                "http://127.0.0.1:3001/callback",
+                "http://localhost:3003/callback",
+                "http://127.0.0.1:3003/callback",
+            ],
         )
 
         saml_result = await db.execute(

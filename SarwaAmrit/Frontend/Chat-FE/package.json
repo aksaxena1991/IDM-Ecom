@@ -1,0 +1,27 @@
+{
+  "name": "chat-fe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 3003 --strictPort",
+    "lint": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@thoughtstream/ui": "file:../DesignSystem/thoughtstream-ui",
+    "lucide-react": "^0.475.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@types/node": "^22.13.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.3",
+    "vite": "^5.4.14"
+  }
+}

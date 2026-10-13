@@ -1,0 +1,117 @@
+/**
+ * Thought-Stream layout chrome for the IDM frontend:
+ * dark auth gate, compact sidebar shell, and icon buttons.
+ */
+
+html:has(.nn-gate),
+body:has(.nn-gate) {
+  margin: 0;
+  overflow: auto;
+}
+
+.nn-gate {
+  --nn-gate-canvas: #0c0a09;
+  --nn-gate-panel: #141210;
+  --nn-gate-panel-raised: #292524;
+  min-height: 100vh;
+  position: relative;
+  overflow: auto;
+  background: var(--nn-gate-canvas);
+  color: var(--ts-color-text-primary);
+  font-family: var(--ts-font-body);
+}
+
+.nn-gate-scrim {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 24px 20px;
+}
+
+.nn-gate-modal {
+  width: min(920px, 100%);
+  display: grid;
+  grid-template-columns: minmax(320px, 1.08fr) minmax(320px, 1.08fr);
+  background: var(--nn-gate-panel-raised);
+  border: 1px solid var(--ts-border-medium);
+  box-shadow: var(--ts-glass-shadow-lg);
+}
+
+.nn-gate-modal--signup {
+  max-width: 540px;
+  grid-template-columns: 1fr;
+}
+
+.nn-gate-auth {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 48px 36px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%),
+    var(--nn-gate-panel-raised);
+}
+
+.nn-gate-auth--signup {
+  padding: 20px 32px 24px;
+  align-items: stretch;
+}
+
+.nn-gate-mark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
+  color: var(--ts-color-text-primary);
+}
+
+.nn-gate-mark-svg {
+  width: 72px;
+  height: 58px;
+  display: block;
+  margin: 10px auto 0;
+}
+
+.nn-gate-mark-svg rect:not([fill]) {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.nn-gate-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: var(--ts-color-success);
+  opacity: 0;
+  animation: nnGateFall 1.8s infinite linear;
+}
+
+.nn-gate-particle--a { left: 30px; animation-delay: 0s; }
+.nn-gate-particle--b { left: 42px; animation-delay: 0.35s; }
+.nn-gate-particle--c { left: 54px; animation-delay: 0.7s; }
+.nn-gate-particle--d { left: 36px; animation-delay: 1.05s; }
+
+@keyframes nnGateFall {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(28px); opacity: 0; }
+}
+
+.nn-gate-title {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.nn-gate-subtitle {
+  margin: 0 auto 18px;
+  max-width: 360px;
+  text-align: center;
+  line-height: 1.5;
+}
