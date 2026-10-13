@@ -40,6 +40,18 @@ SEED_TENANT_ID=<tenant_id_from_token> npm run db:seed
 3. Password + session cookie, then PKCE token exchange, or **Continue with SSO (PKCE)**.
 4. Redirect URI is `${window.location.origin}/callback` (both `localhost` and `127.0.0.1` are seeded).
 
+## Chat API integration
+
+Dev traffic goes through the Vite proxy: browser → `/chat-api/*` → `http://127.0.0.1:8100/*` (see `vite.config.ts`).
+
+| Frontend (`src/core/chatApi.ts`) | Backend (`AI-Chatbot-BE`) |
+|----------------------------------|---------------------------|
+| `fetchCapabilities(slug)` | `GET /api/v1/applications/:slug/capabilities` |
+| `sendChatMessage({...})` | `POST /api/v1/chat/messages` |
+| `fetchConversationHistory(id, app)` | `GET /api/v1/conversations/:id/messages?application_id=` |
+
+All chat calls use `chatClient.ts`: SSO **Bearer** access token (with refresh via `getValidAccessToken()` in `api.ts`). Application scope comes from `VITE_CHAT_APPLICATION_ID` (default `idm`).
+
 ## Stack
 
 - Vite + React 19 + React Router 7

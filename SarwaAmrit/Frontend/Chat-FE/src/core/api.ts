@@ -11,6 +11,7 @@ import {
   resolveServiceUrl,
 } from './config'
 import { createCodeChallenge, createCodeVerifier } from '../features/auth/utils/pkce'
+import { decodeJwtPayload } from './jwt'
 import { ApiError, parseProblemDetails } from './problemDetails'
 
 export { ApiError } from './problemDetails'
@@ -132,6 +133,50 @@ export async function exchangeCodeForTokens(code: string, state: string): Promis
   } catch (err) {
     inflightCodeExchanges.delete(key)
     throw err
+  }
+}
+
+export async function refreshTokens(refreshToken: string): Promise<TokenSet> {
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: OIDC_CLIENT_ID,
+  })
+  const res = await fetch(`${SSO_BASE_URL}/oauth2/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  if (!res.ok) throw await parseProblemDetails(res)
+  const tokens = await res.json()
+  return { ...tokens, obtained_at: Date.now() } as TokenSet
+}
+
+/** Returns a non-expired access token, refreshing via SSO when needed. */
+export async function getValidAccessToken(): Promise<string | null> {
+  const tokens = loadStoredTokens()
+  if (!tokens?.access_token) return null
+
+  const payload = decodeJwtPayload(tokens.access_token)
+  const exp = typeof payload?.exp === 'number' ? payload.exp : null
+  const nowSec = Math.floor(Date.now() / 1000)
+  if (exp && exp > nowSec + 60) {
+    return tokens.access_token
+  }
+
+  const refresh =
+    sessionStorage.getItem(REFRESH_STORAGE_KEY) ?? tokens.refresh_token ?? null
+  if (!refresh) {
+    return tokens.access_token
+  }
+
+  try {
+    const next = await refreshTokens(refresh)
+    persistOidcSession(next)
+    return next.access_token
+  } catch {
+    clearOidcSession()
+    return null
   }
 }
 

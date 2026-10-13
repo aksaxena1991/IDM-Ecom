@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Button, Card, Chip, Input, Loader, NotificationBar, Typography } from '@thoughtstream/ui'
 import { Send } from 'lucide-react'
-import { getAccessToken } from '../../../core/api'
+import { ApiError } from '../../../core/api'
 import {
   fetchCapabilities,
   fetchConversationHistory,
@@ -10,7 +10,12 @@ import {
   type CapabilitiesResponse,
 } from '../../../core/chatApi'
 import { getActiveApplicationSlug, getApplicationLabel } from '../../../core/chatProfile'
-import { readSession, SESSION_KEY } from '../../../core/session'
+import {
+  readSession,
+  readStoredConversationId,
+  SESSION_KEY,
+  writeStoredConversationId,
+} from '../../../core/session'
 
 type UiMessage = {
   id: string
@@ -26,10 +31,11 @@ export function ChatPage() {
 
   const applicationSlug = getActiveApplicationSlug()
   const applicationLabel = getApplicationLabel()
-  const accessToken = getAccessToken()
 
   const [capabilities, setCapabilities] = useState<CapabilitiesResponse | null>(null)
-  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(() =>
+    readStoredConversationId(applicationSlug),
+  )
   const [messages, setMessages] = useState<UiMessage[]>([])
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -44,19 +50,35 @@ export function ChatPage() {
   }, [])
 
   useEffect(() => {
-    if (!accessToken) {
-      setError('Session expired. Please sign in again.')
-      setBooting(false)
-      return
-    }
     let cancelled = false
     ;(async () => {
       try {
-        const caps = await fetchCapabilities(accessToken, applicationSlug)
+        const caps = await fetchCapabilities(applicationSlug)
         if (!cancelled) setCapabilities(caps)
+
+        const storedConversationId = readStoredConversationId(applicationSlug)
+        if (storedConversationId && !cancelled) {
+          const history = await fetchConversationHistory(storedConversationId, applicationSlug)
+          if (!cancelled) {
+            setConversationId(storedConversationId)
+            setMessages(
+              history
+                .filter((m) => m.role === 'user' || m.role === 'assistant')
+                .map((m) => ({
+                  id: m.id,
+                  role: m.role as 'user' | 'assistant',
+                  content: m.content,
+                })),
+            )
+          }
+        }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Could not load assistant capabilities')
+          if (err instanceof ApiError && err.status === 401) {
+            setError('Session expired. Please sign in again.')
+          } else {
+            setError(err instanceof Error ? err.message : 'Could not load assistant capabilities')
+          }
         }
       } finally {
         if (!cancelled) setBooting(false)
@@ -65,7 +87,7 @@ export function ChatPage() {
     return () => {
       cancelled = true
     }
-  }, [accessToken, applicationSlug])
+  }, [applicationSlug])
 
   useEffect(() => {
     scrollToBottom()
@@ -74,7 +96,7 @@ export function ChatPage() {
   const handleSend = async (event?: React.FormEvent) => {
     event?.preventDefault()
     const text = draft.trim()
-    if (!text || !accessToken || sending) return
+    if (!text || sending) return
 
     setSending(true)
     setError(null)
@@ -83,23 +105,20 @@ export function ChatPage() {
     setDraft('')
 
     try {
-      const result = await sendChatMessage(accessToken, {
+      const result = await sendChatMessage({
         applicationId: applicationSlug,
         message: text,
         conversationId,
       })
       setConversationId(result.conversation_id)
+      writeStoredConversationId(applicationSlug, result.conversation_id)
       setMessages((prev) => [
         ...prev,
         { id: result.request_id, role: 'assistant', content: result.answer },
       ])
 
       if (conversationId !== result.conversation_id) {
-        const history = await fetchConversationHistory(
-          accessToken,
-          result.conversation_id,
-          applicationSlug,
-        )
+        const history = await fetchConversationHistory(result.conversation_id, applicationSlug)
         setMessages(
           history
             .filter((m) => m.role === 'user' || m.role === 'assistant')
@@ -188,7 +207,7 @@ export function ChatPage() {
           placeholder="Type your question…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          disabled={sending || !accessToken}
+          disabled={sending}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
@@ -199,7 +218,7 @@ export function ChatPage() {
         <Button
           type="submit"
           variant="primary"
-          disabled={sending || !draft.trim() || !accessToken}
+          disabled={sending || !draft.trim()}
           aria-label="Send message"
         >
           <Send size={18} aria-hidden />

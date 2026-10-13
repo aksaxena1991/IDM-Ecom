@@ -37,3 +37,28 @@ export function sessionFromUserInfo(user: UserInfo, applicationSlug: string): Ch
     applicationSlug,
   }
 }
+
+function conversationKey(applicationSlug: string): string {
+  return `chat_conversation_${applicationSlug}`
+}
+
+export function readStoredConversationId(applicationSlug: string): string | null {
+  try {
+    return sessionStorage.getItem(conversationKey(applicationSlug))
+  } catch {
+    return null
+  }
+}
+
+export function writeStoredConversationId(applicationSlug: string, conversationId: string | null): void {
+  try {
+    const key = conversationKey(applicationSlug)
+    if (!conversationId) {
+      sessionStorage.removeItem(key)
+      return
+    }
+    sessionStorage.setItem(key, conversationId)
+  } catch {
+    // ignore quota
+  }
+}
