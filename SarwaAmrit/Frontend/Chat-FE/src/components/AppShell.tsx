@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Typography } from '@thoughtstream/ui'
+import { Button, Typography, useTheme } from '@thoughtstream/ui'
 import { LogOut, MessageCircle } from 'lucide-react'
 import { clearOidcSession, logoutRemote } from '../core/api'
 import { getApplicationLabel } from '../core/chatProfile'
@@ -12,8 +13,13 @@ type Props = {
 
 export function AppShell({ children }: Props) {
   const navigate = useNavigate()
+  const { setTheme } = useTheme()
   const session = readSession()
   const applicationLabel = getApplicationLabel()
+
+  useEffect(() => {
+    setTheme('dark')
+  }, [setTheme])
 
   const handleLogout = () => {
     void logoutRemote()
@@ -24,7 +30,7 @@ export function AppShell({ children }: Props) {
   }
 
   return (
-    <div className="chat-shell" data-theme="dark">
+    <div className="chat-shell thoughtstream-theme-dark" data-theme="dark">
       <header className="chat-header">
         <div className="chat-header-brand">
           <MessageCircle size={20} strokeWidth={1.5} aria-hidden />

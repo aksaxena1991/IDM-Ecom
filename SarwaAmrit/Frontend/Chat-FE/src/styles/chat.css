@@ -6,6 +6,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--ts-color-bg, #1c1917);
+  color: var(--ts-color-text-primary, #fafaf9);
+}
+
+.chat-shell .chat-main {
+  background-color: inherit;
+  color: inherit;
 }
 
 .chat-header {
@@ -49,7 +56,8 @@
 }
 
 .chat-intro {
-  background: var(--ts-glass-bg-subtle, rgba(255, 255, 255, 0.03));
+  background: var(--ts-glass-bg-subtle, rgba(28, 25, 23, 0.48));
+  border-color: var(--ts-border-subtle);
 }
 
 .chat-chips {
@@ -72,18 +80,21 @@
   margin: auto;
   text-align: center;
   max-width: 420px;
+  color: var(--ts-color-text-secondary) !important;
 }
 
 .chat-bubble {
   max-width: min(680px, 92%);
   padding: 12px 14px;
-  border: 1px solid var(--ts-border-subtle);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--ts-border-medium);
+  background: var(--ts-glass-bg-raised, rgba(50, 45, 41, 0.8));
+  color: var(--ts-color-text-primary);
 }
 
 .chat-bubble--user {
   align-self: flex-end;
-  border-color: var(--ts-border-medium);
+  border-color: var(--ts-border-strong);
+  background: var(--ts-glass-bg-active, rgba(58, 52, 48, 0.88));
 }
 
 .chat-bubble--assistant {
@@ -95,11 +106,14 @@
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--ts-color-text-secondary) !important;
 }
 
-.chat-bubble-text {
+.chat-bubble-text,
+.chat-bubble .ts-typography--body {
   white-space: pre-wrap;
   margin: 0;
+  color: var(--ts-color-text-primary) !important;
 }
 
 .chat-composer {
