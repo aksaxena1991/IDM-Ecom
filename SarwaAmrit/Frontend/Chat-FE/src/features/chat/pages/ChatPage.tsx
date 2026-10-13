@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Button, Card, Chip, Input, Loader, NotificationBar, Typography } from '@thoughtstream/ui'
-import { Send } from 'lucide-react'
+import { Loader, NotificationBar } from '@thoughtstream/ui'
+import { CheckCheck, Send, Smile } from 'lucide-react'
 import { ApiError } from '../../../core/api'
 import {
   fetchCapabilities,
   fetchConversationHistory,
   sendChatMessage,
-  type CapabilitiesResponse,
 } from '../../../core/chatApi'
 import { getActiveApplicationSlug, getApplicationLabel } from '../../../core/chatProfile'
 import {
@@ -21,6 +20,11 @@ type UiMessage = {
   id: string
   role: 'user' | 'assistant'
   content: string
+  sentAt: number
+}
+
+function formatMessageTime(epochMs: number): string {
+  return new Date(epochMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 export function ChatPage() {
@@ -32,7 +36,6 @@ export function ChatPage() {
   const applicationSlug = getActiveApplicationSlug()
   const applicationLabel = getApplicationLabel()
 
-  const [capabilities, setCapabilities] = useState<CapabilitiesResponse | null>(null)
   const [conversationId, setConversationId] = useState<string | null>(() =>
     readStoredConversationId(applicationSlug),
   )
@@ -43,6 +46,7 @@ export function ChatPage() {
   const [booting, setBooting] = useState(true)
 
   const listRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = useCallback(() => {
     const el = listRef.current
@@ -53,8 +57,7 @@ export function ChatPage() {
     let cancelled = false
     ;(async () => {
       try {
-        const caps = await fetchCapabilities(applicationSlug)
-        if (!cancelled) setCapabilities(caps)
+        await fetchCapabilities(applicationSlug)
 
         const storedConversationId = readStoredConversationId(applicationSlug)
         if (storedConversationId && !cancelled) {
@@ -68,6 +71,7 @@ export function ChatPage() {
                   id: m.id,
                   role: m.role as 'user' | 'assistant',
                   content: m.content,
+                  sentAt: m.created_at ? Date.parse(m.created_at) : Date.now(),
                 })),
             )
           }
@@ -101,8 +105,12 @@ export function ChatPage() {
     setSending(true)
     setError(null)
     const optimisticId = crypto.randomUUID()
-    setMessages((prev) => [...prev, { id: optimisticId, role: 'user', content: text }])
+    const sentAt = Date.now()
+    setMessages((prev) => [...prev, { id: optimisticId, role: 'user', content: text, sentAt }])
     setDraft('')
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+    }
 
     try {
       const result = await sendChatMessage({
@@ -114,7 +122,12 @@ export function ChatPage() {
       writeStoredConversationId(applicationSlug, result.conversation_id)
       setMessages((prev) => [
         ...prev,
-        { id: result.request_id, role: 'assistant', content: result.answer },
+        {
+          id: result.request_id,
+          role: 'assistant',
+          content: result.answer,
+          sentAt: Date.now(),
+        },
       ])
 
       if (conversationId !== result.conversation_id) {
@@ -126,6 +139,7 @@ export function ChatPage() {
               id: m.id,
               role: m.role as 'user' | 'assistant',
               content: m.content,
+              sentAt: m.created_at ? Date.parse(m.created_at) : Date.now(),
             })),
         )
       }
@@ -147,84 +161,89 @@ export function ChatPage() {
   }
 
   return (
-    <div className="chat-page">
+    <div className="chat-page chat-page--messenger">
       {error ? (
-        <NotificationBar
-          variant="error"
-          title="Request failed"
-          description={error}
-          dismissible
-          onDismiss={() => setError(null)}
-        />
+        <div className="chat-alert">
+          <NotificationBar
+            variant="error"
+            title="Request failed"
+            description={error}
+            dismissible
+            onDismiss={() => setError(null)}
+          />
+        </div>
       ) : null}
 
-      <Card className="chat-intro" padding="medium">
-        <Typography variant="subhead" as="h2">
-          {capabilities?.name ?? applicationLabel}
-        </Typography>
-        <Typography variant="bodySmall" color="secondary">
-          Signed in as {session.name || session.email}. Questions stay scoped to{' '}
-          <span className="mono">{applicationSlug}</span>.
-        </Typography>
-        {capabilities?.features.tools.length ? (
-          <div className="chat-chips">
-            {capabilities.features.tools.map((tool) => (
-              <Chip key={tool} variant="status">
-                {tool}
-              </Chip>
-            ))}
-          </div>
-        ) : null}
-      </Card>
-
-      <div className="chat-thread" ref={listRef} role="log" aria-live="polite">
-        {messages.length === 0 ? (
-          <Typography variant="body" color="secondary" className="chat-empty">
-            Ask about policies, access, or workflows for {applicationLabel}.
-          </Typography>
-        ) : (
-          messages.map((m) => (
-            <div key={m.id} className={`chat-bubble chat-bubble--${m.role}`}>
-              <Typography variant="caption" color="secondary" className="chat-bubble-role">
-                {m.role === 'user' ? 'You' : 'Assistant'}
-              </Typography>
-              <Typography variant="body" as="p" className="chat-bubble-text">
-                {m.content}
-              </Typography>
+      <div className="chat-stage">
+        <div className="chat-thread" ref={listRef} role="log" aria-live="polite">
+          {messages.length === 0 ? (
+            <p className="chat-empty">
+              Send a message to {applicationLabel}. Scope:{' '}
+              <span className="mono">{applicationSlug}</span>
+            </p>
+          ) : (
+            messages.map((m) => (
+              <div
+                key={m.id}
+                className={`chat-row chat-row--${m.role === 'user' ? 'outgoing' : 'incoming'}`}
+              >
+                <div className={`chat-bubble chat-bubble--${m.role}`}>
+                  <p className="chat-bubble-body">{m.content}</p>
+                  <div className="chat-bubble-meta">
+                    <time dateTime={new Date(m.sentAt).toISOString()}>
+                      {formatMessageTime(m.sentAt)}
+                    </time>
+                    {m.role === 'user' ? (
+                      <CheckCheck size={15} className="chat-bubble-ticks" aria-hidden />
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+          {sending ? (
+            <div className="chat-row chat-row--incoming">
+              <div className="chat-bubble chat-bubble--assistant chat-bubble--typing">
+                <Loader size="sm" label="Thinking" />
+              </div>
             </div>
-          ))
-        )}
-        {sending ? (
-          <div className="chat-bubble chat-bubble--assistant">
-            <Loader size="sm" label="Thinking" />
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
 
-      <form className="chat-composer" onSubmit={handleSend}>
-        <Input
-          label="Message"
-          placeholder="Type your question…"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          disabled={sending}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              void handleSend()
-            }
-          }}
-        />
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={sending || !draft.trim()}
-          aria-label="Send message"
-        >
-          <Send size={18} aria-hidden />
-          Send
-        </Button>
-      </form>
+        <form className="chat-composer-bar" onSubmit={handleSend}>
+          <div className="chat-composer-field">
+            <Smile size={22} strokeWidth={1.5} className="chat-composer-leading" aria-hidden />
+            <textarea
+              ref={inputRef}
+              className="chat-composer-input"
+              placeholder="Type a message"
+              value={draft}
+              rows={1}
+              disabled={sending}
+              aria-label="Message"
+              onChange={(e) => {
+                setDraft(e.target.value)
+                e.target.style.height = 'auto'
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  void handleSend()
+                }
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            className="chat-send-btn"
+            disabled={sending || !draft.trim()}
+            aria-label="Send message"
+          >
+            <Send size={20} strokeWidth={2} aria-hidden />
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
