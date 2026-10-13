@@ -28,6 +28,9 @@ const envSchema = z.object({
   CHAT_PORTAL_SSO_CLIENT_IDS: z
     .string()
     .default('ai-chat-oidc-app'),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
+  DEFAULT_MODEL_ROUTE: z.enum(['mock', 'cloud', 'self_hosted']).default('cloud'),
 })
 
 const parsed = envSchema.safeParse(process.env)

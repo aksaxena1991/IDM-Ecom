@@ -51,7 +51,7 @@ adminRouter.post('/applications', async (req, res, next) => {
         system_instructions: `Answer only ${body.name}-related questions.`,
         allowed_tools: [],
       },
-      model_policy: { purpose: 'general_chat', route: 'mock', fallback_route: 'mock' },
+      model_policy: { purpose: 'general_chat', route: 'cloud', fallback_route: 'mock' },
     }
 
     await db.insert(appConfigVersions).values({

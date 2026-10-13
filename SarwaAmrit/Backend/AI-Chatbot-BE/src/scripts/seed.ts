@@ -2,7 +2,7 @@
  * Seeds demo tenant + IDM/IMS chat applications aligned with SSO seed client IDs.
  * Run after SSO seed so tenant UUID matches demo tenant (override via SEED_TENANT_ID).
  */
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 import { env } from '../config/env.js'
 import { closeDb, db } from '../persistence/db.js'
@@ -41,7 +41,7 @@ async function main() {
           system_instructions: 'Answer only IDM-related questions.',
           allowed_tools: ['get_user', 'list_user_roles', 'list_access_requests'],
         },
-        model_policy: { purpose: 'general_chat', route: 'mock', fallback_route: 'mock' },
+        model_policy: { purpose: 'general_chat', route: 'cloud', fallback_route: 'mock' },
       },
     },
     {
@@ -53,7 +53,7 @@ async function main() {
           system_instructions: 'Answer only IMS-related questions.',
           allowed_tools: [],
         },
-        model_policy: { purpose: 'general_chat', route: 'mock', fallback_route: 'mock' },
+        model_policy: { purpose: 'general_chat', route: 'cloud', fallback_route: 'mock' },
       },
     },
   ] as const
@@ -67,6 +67,35 @@ async function main() {
 
     if (found[0]) {
       console.log(`Application ${spec.slug} already exists for tenant (${found[0].id})`)
+      const publishRoute = process.env.SEED_PUBLISH_MODEL_ROUTE
+      if (publishRoute === 'cloud' || publishRoute === 'mock') {
+        const app = found[0]
+        const latest = await db
+          .select()
+          .from(appConfigVersions)
+          .where(eq(appConfigVersions.applicationId, app.id))
+          .orderBy(desc(appConfigVersions.version))
+          .limit(1)
+        const prev = (latest[0]?.configJson as Record<string, unknown>) ?? {}
+        const policy = (prev.model_policy as Record<string, unknown>) ?? {}
+        const nextConfig = {
+          ...prev,
+          model_policy: {
+            ...policy,
+            purpose: policy.purpose ?? 'general_chat',
+            route: publishRoute,
+            fallback_route: policy.fallback_route ?? 'mock',
+          },
+        }
+        const nextVersion = (latest[0]?.version ?? 0) + 1
+        await db.insert(appConfigVersions).values({
+          tenantId: app.tenantId,
+          applicationId: app.id,
+          version: nextVersion,
+          configJson: nextConfig,
+        })
+        console.log(`Published config v${nextVersion} for ${spec.slug} (model route=${publishRoute})`)
+      }
       continue
     }
 

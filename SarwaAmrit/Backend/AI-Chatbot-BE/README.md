@@ -9,7 +9,7 @@ Multi-application AI chat backend for SarwaAmrit. Uses **SSO-BE** for OIDC acces
 - SSO JWT validation (JWKS / ES256)
 - Application registry (admin) + seeded IDM / IMS apps
 - Scoped conversations and messages
-- Chat endpoint with **mock** LLM gateway (real providers in Phase 2)
+- Chat endpoint with **Google Gemini** (`model_policy.route: cloud`) and **mock** fallback
 - Audit events for chat and admin actions
 
 ## Prerequisites
@@ -51,6 +51,20 @@ curl -s -X POST http://localhost:8100/api/v1/chat/messages \
 
 The token **audience** must match the registered app's `sso_client_id` (e.g. `idm-oidc-app` for `application_id: idm`).
 
+### Gemini LLM
+
+1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).
+2. Add to `.env`:
+
+```bash
+GEMINI_API_KEY=your-key
+GEMINI_MODEL=gemini-2.0-flash   # optional
+```
+
+3. Restart `npm run dev`. Applications seeded with `route: cloud` call Gemini; on failure they fall back to `mock` if configured.
+
+If `idm` / `ims` were seeded earlier with `route: mock`, publish a new config via `PUT /api/v1/admin/applications/:id/config` with `model_policy.route` set to `cloud`, or re-register apps on a fresh tenant.
+
 ## API overview
 
 | Method | Path | Auth |
@@ -73,7 +87,7 @@ SEED_TENANT_ID=<uuid-from-sso-token-tenant_id> npm run db:seed
 
 ## Next phases
 
-- Phase 2: OpenAI / Azure / self-hosted LLM adapters, SSE streaming
+- Phase 2: SSE streaming, additional cloud providers, self-hosted adapters
 - Phase 3: Ingestion workers, embeddings, hybrid RAG
 - Phase 4: Tool executor + IDM connectors + embeddable widget
 - Phase 5: Observability dashboards, eval suites, production hardening
