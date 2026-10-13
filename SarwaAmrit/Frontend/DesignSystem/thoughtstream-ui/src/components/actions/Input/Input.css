@@ -90,15 +90,17 @@
   align-items: center;
   justify-content: center;
   color: var(--ts-color-primary);
-  pointer-events: none;
 }
 
 .ts-input-icon--leading {
   left: 14px;
+  pointer-events: none;
 }
 
 .ts-input-icon--trailing {
   right: 14px;
+  /* Trailing slot may host controls (e.g. password visibility toggle). */
+  pointer-events: auto;
 }
 
 /* Helper Text */

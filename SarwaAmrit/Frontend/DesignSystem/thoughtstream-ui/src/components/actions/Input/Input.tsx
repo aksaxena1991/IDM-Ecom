@@ -82,9 +82,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {trailingIcon && (
-            <span className="ts-input-icon ts-input-icon--trailing" aria-hidden="true">
-              {trailingIcon}
-            </span>
+            <span className="ts-input-icon ts-input-icon--trailing">{trailingIcon}</span>
           )}
         </div>
 
