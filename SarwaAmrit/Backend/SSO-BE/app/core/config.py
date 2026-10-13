@@ -114,6 +114,36 @@ class Settings(BaseSettings):
         return self
 
 
+_settings_mtime: float | None = None
+
+
+def _env_file_mtime() -> float:
+    path = Path(".env")
+    try:
+        return path.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
 @lru_cache
-def get_settings() -> Settings:
+def _load_settings() -> Settings:
     return Settings()
+
+
+def clear_settings_cache() -> None:
+    global _settings_mtime
+    _load_settings.cache_clear()
+    _settings_mtime = None
+
+
+def get_settings() -> Settings:
+    """Return settings; reload when `.env` changes (local dev without full restart)."""
+    global _settings_mtime
+    mtime = _env_file_mtime()
+    if _settings_mtime is not None and mtime != _settings_mtime:
+        clear_settings_cache()
+    _settings_mtime = mtime
+    return _load_settings()
+
+
+get_settings.cache_clear = clear_settings_cache  # type: ignore[attr-defined]

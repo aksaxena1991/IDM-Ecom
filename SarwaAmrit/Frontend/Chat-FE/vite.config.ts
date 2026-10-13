@@ -24,7 +24,8 @@ export default defineConfig({
     proxy: {
       '/sso': {
         target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
+        // Keep the browser Origin (e.g. :3003) for SSO cookie CSRF checks.
+        changeOrigin: false,
         rewrite: (path) => path.replace(/^\/sso/, ''),
       },
       '/chat-api': {

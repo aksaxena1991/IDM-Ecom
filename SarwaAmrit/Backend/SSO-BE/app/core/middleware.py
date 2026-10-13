@@ -192,10 +192,26 @@ class CookieCsrfMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+def _base_url_origin_aliases(base_url: str) -> set[str]:
+    """localhost vs 127.0.0.1 (Vite proxy may send either as Origin)."""
+    parsed = urlparse(base_url.rstrip("/"))
+    if not parsed.scheme or not parsed.hostname:
+        return set()
+    port = parsed.port
+    port_suffix = f":{port}" if port else ""
+    host = parsed.hostname
+    aliases = {f"{parsed.scheme}://{host}{port_suffix}".rstrip("/")}
+    if host == "localhost":
+        aliases.add(f"{parsed.scheme}://127.0.0.1{port_suffix}".rstrip("/"))
+    elif host == "127.0.0.1":
+        aliases.add(f"{parsed.scheme}://localhost{port_suffix}".rstrip("/"))
+    return aliases
+
+
 def _origin_allowed(request: StarletteRequest) -> bool:
     settings = get_settings()
     allowed = {o.rstrip("/") for o in settings.cors_origins}
-    allowed.add(settings.base_url.rstrip("/"))
+    allowed.update(_base_url_origin_aliases(settings.base_url))
     origin = request.headers.get("origin")
     if origin:
         return origin.rstrip("/") in allowed
