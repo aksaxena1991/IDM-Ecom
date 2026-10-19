@@ -91,12 +91,10 @@ describe('Category CRUD API', () => {
       .send({ name: 'shared name', status: 'DRAFT' })
       .expect(409);
 
-    expect(duplicate.body).toEqual({
-      detail: 'Category name must be unique, including among soft-deleted categories.',
-    });
+    expect(duplicate.body).toEqual({ detail: 'Category name must be unique.' });
   });
 
-  it('returns 409 when reusing a name from a soft-deleted category', async () => {
+  it('allows reusing a name after the previous category was soft-deleted', async () => {
     const { app } = createTestApp();
 
     const created = await request(app)
@@ -107,9 +105,11 @@ describe('Category CRUD API', () => {
     const id = (created.body as CategoryResponse).id;
     await request(app).delete(`/api/v1/categories/${id}`).expect(204);
 
-    await request(app)
+    const recreated = await request(app)
       .post('/api/v1/categories')
       .send({ name: 'retired line', status: 'DRAFT' })
-      .expect(409);
+      .expect(201);
+
+    expect((recreated.body as CategoryResponse).name).toBe('retired line');
   });
 });

@@ -60,7 +60,7 @@ describe('CategoryAggregate.create', () => {
     ).rejects.toBeInstanceOf(CategoryConflictError);
   });
 
-  it('rejects reusing a name from a soft-deleted category', async () => {
+  it('allows reusing a name after the previous category was soft-deleted', async () => {
     const repository = new InMemoryCategoryRepository();
     const entity = await CategoryAggregate.create(repository, {
       ...basePayload,
@@ -68,11 +68,12 @@ describe('CategoryAggregate.create', () => {
     });
     await repository.delete(entity.id);
 
-    await expect(
-      CategoryAggregate.create(repository, {
-        ...basePayload,
-        name: 'Legacy Rack',
-      }),
-    ).rejects.toBeInstanceOf(CategoryConflictError);
+    const recreated = await CategoryAggregate.create(repository, {
+      ...basePayload,
+      name: 'Legacy Rack',
+    });
+
+    expect(recreated.name).toBe('Legacy Rack');
+    expect(recreated.id).not.toBe(entity.id);
   });
 });
