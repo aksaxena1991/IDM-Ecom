@@ -6,6 +6,7 @@ Workspace layout for the identity and inventory platform.
 SarwaAmrit/
 ├── Backend/
 │   ├── IMS-BE/
+│   │   └── product-catalog-service/   # Django product catalog API
 │   └── SSO-BE/
 ├── Frontend/
 │   ├── DesignSystem/
@@ -22,6 +23,7 @@ SarwaAmrit/
 |------|------|
 | `Backend/SSO-BE` | SSO / identity API |
 | `Backend/IMS-BE` | Inventory management API |
+| `Backend/IMS-BE/product-catalog-service` | Product catalog API (Django, :8010) |
 | `Frontend/DesignSystem/thoughtstream-ui` | Shared design system (`@thoughtstream/ui`) |
 | `Frontend/Shell-Base-FE` | Base remote (`nn_base`) — auth + ops dashboard (:3001) |
 | `Frontend/IDM-FE` | Identity portal remote (feature-sliced React app) |
