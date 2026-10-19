@@ -5,6 +5,10 @@ import {
   CategoryConflictError,
   CategoryValidationError,
 } from '../../features/categories/aggregates/category.aggregate.js';
+import {
+  ProductConflictError,
+  ProductValidationError,
+} from '../../features/products/aggregates/product.aggregate.js';
 
 export function errorHandler(
   error: unknown,
@@ -25,6 +29,18 @@ export function errorHandler(
   }
 
   if (error instanceof CategoryConflictError) {
+    res.status(409).json({ detail: error.message });
+    return;
+  }
+
+  if (error instanceof ProductValidationError) {
+    res.status(error.message.includes('not found') ? 404 : 400).json({
+      detail: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof ProductConflictError) {
     res.status(409).json({ detail: error.message });
     return;
   }

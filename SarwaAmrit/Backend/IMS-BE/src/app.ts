@@ -5,6 +5,10 @@ import { CategoryEventBus } from './features/categories/events/category.event.js
 import { PrismaCategoryRepository } from './features/categories/models/prisma-category.repository.js';
 import { createCategoryRouter } from './features/categories/routes/category.route.js';
 import { CategoryService } from './features/categories/services/category.service.js';
+import { ProductEventBus } from './features/products/events/product.event.js';
+import { PrismaProductRepository } from './features/products/models/prisma-product.repository.js';
+import { createProductRouter } from './features/products/routes/product.route.js';
+import { ProductService } from './features/products/services/product.service.js';
 import { prisma } from './infrastructure/database/prisma.js';
 import { apiPrefix } from './shared/config/app.config.js';
 import { env } from './shared/config/env.js';
@@ -12,6 +16,7 @@ import { errorHandler } from './shared/http/error-handler.js';
 
 export type CreateAppOptions = {
   categoryService?: CategoryService;
+  productService?: ProductService;
 };
 
 export function createApp(options: CreateAppOptions = {}): Express {
@@ -46,7 +51,23 @@ export function createApp(options: CreateAppOptions = {}): Express {
         prisma.product.count({ where: { categoryId, deletedAt: null } }),
     );
 
+  const productService =
+    options.productService ??
+    new ProductService(
+      new PrismaProductRepository(),
+      new ProductEventBus(),
+      {
+        categoryExists: async (categoryId) =>
+          !!(await prisma.category.findFirst({
+            where: { id: categoryId, deletedAt: null },
+          })),
+        brandExists: async (brandId) =>
+          !!(await prisma.brand.findUnique({ where: { id: brandId } })),
+      },
+    );
+
   app.use(`${apiPrefix}/categories`, createCategoryRouter(categoryService));
+  app.use(`${apiPrefix}/products`, createProductRouter(productService));
   app.use(errorHandler);
 
   return app;

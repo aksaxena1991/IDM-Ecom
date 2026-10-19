@@ -147,6 +147,14 @@ export interface ProductListResponse {
   results: ProductResponse[];
 }
 
+export interface ProductListQuery {
+  status?: ProductStatus;
+  search?: string;
+  categoryId?: CategoryId;
+  brandId?: BrandId;
+  isFeatured?: boolean;
+}
+
 export function isProductStatus(value: string): value is ProductStatus {
   return (PRODUCT_STATUSES as readonly string[]).includes(value);
 }
