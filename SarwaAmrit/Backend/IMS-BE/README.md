@@ -24,6 +24,10 @@ prisma/
 product-catalog-service/     # legacy Django catalog (optional)
 ```
 
+## API gateway
+
+For browser and frontend traffic, use the shared gateway (`SarwaAmrit/Backend/gateway`) on port **8080**. It proxies `/api/v1` and `/api-docs` to this service (default `IMS_BE_URL=http://127.0.0.1:5001`) with token-bucket rate limiting and a circuit breaker.
+
 ## Run locally
 
 ```bash
