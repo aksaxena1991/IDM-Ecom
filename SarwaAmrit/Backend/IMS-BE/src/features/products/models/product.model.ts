@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type {
+  CategoryId,
   ProductId,
   ProductListQuery,
   ProductRecord,
@@ -9,6 +10,10 @@ import type {
 export interface ProductRepository {
   findAll(query?: ProductListQuery): Promise<ProductRecord[]>;
   findById(id: ProductId): Promise<ProductRecord | null>;
+  findByNameInCategory(
+    categoryId: CategoryId,
+    name: string,
+  ): Promise<ProductRecord | null>;
   findBySlug(slug: string): Promise<ProductRecord | null>;
   save(record: ProductRecord): Promise<ProductRecord>;
   delete(id: ProductId): Promise<boolean>;
@@ -56,6 +61,26 @@ export class InMemoryProductRepository implements ProductRepository {
       return null;
     }
     return record;
+  }
+
+  async findByNameInCategory(
+    categoryId: CategoryId,
+    name: string,
+  ): Promise<ProductRecord | null> {
+    const normalized = name.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    for (const record of this.store.values()) {
+      if (
+        record.deletedAt === null &&
+        record.categoryId === categoryId &&
+        record.name.trim().toLowerCase() === normalized
+      ) {
+        return record;
+      }
+    }
+    return null;
   }
 
   async findBySlug(slug: string): Promise<ProductRecord | null> {

@@ -46,6 +46,7 @@ export class ProductAggregate {
 
     await assertCategory(validators, payload.categoryId);
     await assertBrand(validators, payload.brandId ?? null);
+    await assertUniqueNameInCategory(repository, payload.categoryId, name);
 
     const slug = await resolveUniqueSlug(
       repository,
@@ -108,6 +109,8 @@ export class ProductAggregate {
           ? slugify(name)
           : existing.slug;
     const slug = await resolveUniqueSlug(repository, slugSource, id);
+
+    await assertUniqueNameInCategory(repository, categoryId, name, id);
 
     const updated: ProductRecord = {
       ...existing,
@@ -173,6 +176,20 @@ async function assertBrand(
   }
   if (!(await validators.brandExists(brandId))) {
     throw new ProductValidationError('Brand was not found.');
+  }
+}
+
+async function assertUniqueNameInCategory(
+  repository: ProductRepository,
+  categoryId: string,
+  name: string,
+  excludeId?: ProductId,
+): Promise<void> {
+  const existing = await repository.findByNameInCategory(categoryId, name);
+  if (existing && existing.id !== excludeId) {
+    throw new ProductConflictError(
+      'Product name must be unique within this category.',
+    );
   }
 }
 

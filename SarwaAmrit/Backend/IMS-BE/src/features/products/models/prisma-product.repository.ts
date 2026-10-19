@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../../infrastructure/database/prisma.js';
 import { ProductConflictError } from '../aggregates/product.aggregate.js';
 import type {
+  CategoryId,
   ProductId,
   ProductListQuery,
   ProductRecord,
@@ -43,6 +44,24 @@ export class PrismaProductRepository implements ProductRepository {
   async findById(id: ProductId): Promise<ProductRecord | null> {
     const row = await prisma.product.findFirst({
       where: { id, deletedAt: null },
+    });
+    return row ? toRecord(row) : null;
+  }
+
+  async findByNameInCategory(
+    categoryId: CategoryId,
+    name: string,
+  ): Promise<ProductRecord | null> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const row = await prisma.product.findFirst({
+      where: {
+        categoryId,
+        deletedAt: null,
+        name: { equals: trimmed, mode: 'insensitive' },
+      },
     });
     return row ? toRecord(row) : null;
   }
@@ -95,7 +114,9 @@ export class PrismaProductRepository implements ProductRepository {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ProductConflictError('Product slug must be unique.');
+        throw new ProductConflictError(
+          'Product name must be unique within the category, and slug must be globally unique.',
+        );
       }
       throw error;
     }

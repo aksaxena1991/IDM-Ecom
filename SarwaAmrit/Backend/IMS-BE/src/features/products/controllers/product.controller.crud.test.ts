@@ -102,6 +102,24 @@ describe('Product CRUD API', () => {
     expect(listBody.results[0]?.name).toBe('Beta Device');
   });
 
+  it('returns 409 when creating a duplicate product name in the same category', async () => {
+    const { app, categoryId } = await createTestApp();
+
+    await request(app)
+      .post('/api/v1/products')
+      .send({ name: 'Shared Widget', categoryId })
+      .expect(201);
+
+    const duplicate = await request(app)
+      .post('/api/v1/products')
+      .send({ name: 'shared widget', categoryId })
+      .expect(409);
+
+    expect(duplicate.body).toEqual({
+      detail: 'Product name must be unique within this category.',
+    });
+  });
+
   it('blocks delete when variants exist', async () => {
     const { app, categoryId, productRepository } = await createTestApp();
 
