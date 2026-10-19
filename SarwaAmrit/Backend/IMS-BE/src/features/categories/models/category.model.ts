@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
-import type { CategoryId, CategoryRecord } from '../types/category.type.js';
+import type { CategoryId, CategoryListQuery, CategoryRecord } from '../types/category.type.js';
 
 export interface CategoryRepository {
-  findAll(): Promise<CategoryRecord[]>;
+  findAll(query?: CategoryListQuery): Promise<CategoryRecord[]>;
   findById(id: CategoryId): Promise<CategoryRecord | null>;
   findBySlug(slug: string): Promise<CategoryRecord | null>;
   save(record: CategoryRecord): Promise<CategoryRecord>;
@@ -14,9 +14,25 @@ export interface CategoryRepository {
 export class InMemoryCategoryRepository implements CategoryRepository {
   private readonly store = new Map<CategoryId, CategoryRecord>();
 
-  async findAll(): Promise<CategoryRecord[]> {
+  async findAll(query: CategoryListQuery = {}): Promise<CategoryRecord[]> {
+    const search = query.search?.trim().toLowerCase();
+
     return [...this.store.values()]
       .filter((record) => record.deletedAt === null)
+      .filter((record) => (query.status ? record.status === query.status : true))
+      .filter((record) =>
+        query.parentId !== undefined ? record.parentId === query.parentId : true,
+      )
+      .filter((record) => {
+        if (!search) {
+          return true;
+        }
+        return (
+          record.name.toLowerCase().includes(search) ||
+          record.slug.includes(search) ||
+          record.description.toLowerCase().includes(search)
+        );
+      })
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 

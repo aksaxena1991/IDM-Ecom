@@ -25,11 +25,17 @@ export interface CreateCategoryPayload {
 }
 
 export interface UpdateCategoryPayload {
-  name: string;
-  slug: string;
-  description: string;
-  status: CategoryStatus;
-  parentId: CategoryId | null;
+  name?: string;
+  slug?: string;
+  description?: string;
+  status?: CategoryStatus;
+  parentId?: CategoryId | null;
+}
+
+export interface CategoryListQuery {
+  status?: CategoryStatus;
+  search?: string;
+  parentId?: CategoryId | null;
 }
 
 export interface CategoryResponse {

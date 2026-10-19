@@ -73,14 +73,17 @@ export class CategoryAggregate {
       throw new CategoryValidationError('Category was not found.');
     }
 
-    const name = payload.name.trim();
+    const name = payload.name !== undefined ? payload.name.trim() : existing.name;
     if (!name) {
       throw new CategoryValidationError('Name is required.');
     }
 
-    assertStatus(payload.status);
+    const status = payload.status ?? existing.status;
+    assertStatus(status);
 
-    const parentId = payload.parentId ?? null;
+    const parentId =
+      payload.parentId !== undefined ? payload.parentId : existing.parentId;
+
     if (parentId === id) {
       throw new CategoryValidationError('A category cannot be its own parent.');
     }
@@ -93,18 +96,24 @@ export class CategoryAggregate {
       await assertNoParentCycle(repository, id, parentId);
     }
 
-    const slug = await resolveUniqueSlug(
-      repository,
-      payload.slug.trim() || slugify(name),
-      id,
-    );
+    const slugSource =
+      payload.slug !== undefined
+        ? payload.slug.trim() || slugify(name)
+        : payload.name !== undefined
+          ? slugify(name)
+          : existing.slug;
+
+    const slug = await resolveUniqueSlug(repository, slugSource, id);
 
     const updated: CategoryRecord = {
       ...existing,
       name,
       slug,
-      description: payload.description.trim(),
-      status: payload.status,
+      description:
+        payload.description !== undefined
+          ? payload.description.trim()
+          : existing.description,
+      status,
       parentId,
       updatedAt: new Date(),
     };

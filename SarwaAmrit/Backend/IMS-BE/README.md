@@ -49,6 +49,17 @@ docker exec ims-be-postgres-1 psql -U product_catalog -d product_catalog \
 npm run db:migrate
 ```
 
+### Categories API (`/api/v1/categories`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | List (query: `status`, `search`, `parentId` or `parent_id`, use `null` for root) |
+| `POST` | `/` | Create |
+| `GET` | `/:id` | Get by UUID |
+| `PUT` | `/:id` | Full replace |
+| `PATCH` | `/:id` | Partial update |
+| `DELETE` | `/:id` | Soft delete |
+
 - API: http://127.0.0.1:8010/api/v1/categories
 - Health: http://127.0.0.1:8010/healthz
 - Readiness: http://127.0.0.1:8010/readyz

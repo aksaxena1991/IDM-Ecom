@@ -6,21 +6,24 @@ import {
 import { CategoryEntity } from '../entities/category.entity.js';
 import type { CategoryEventBus } from '../events/category.event.js';
 import type { CategoryRepository } from '../models/category.model.js';
-import { prisma } from '../../../infrastructure/database/prisma.js';
 import type {
   CategoryId,
+  CategoryListQuery,
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../types/category.type.js';
+
+export type ProductCountByCategory = (categoryId: CategoryId) => Promise<number>;
 
 export class CategoryService {
   constructor(
     private readonly repository: CategoryRepository,
     private readonly events: CategoryEventBus,
+    private readonly countProductsInCategory: ProductCountByCategory,
   ) {}
 
-  async list(): Promise<CategoryEntity[]> {
-    const records = await this.repository.findAll();
+  async list(query: CategoryListQuery = {}): Promise<CategoryEntity[]> {
+    const records = await this.repository.findAll(query);
     return records.map((record) => new CategoryEntity(record));
   }
 
@@ -41,6 +44,16 @@ export class CategoryService {
     return entity;
   }
 
+  async replace(id: CategoryId, payload: CreateCategoryPayload): Promise<CategoryEntity> {
+    return this.update(id, {
+      name: payload.name,
+      slug: payload.slug,
+      description: payload.description,
+      status: payload.status,
+      parentId: payload.parentId,
+    });
+  }
+
   async delete(id: CategoryId): Promise<void> {
     const existing = await this.repository.findById(id);
     if (!existing) {
@@ -54,12 +67,16 @@ export class CategoryService {
       );
     }
 
-    const productCount = await prisma.product.count({ where: { categoryId: id } });
+    const productCount = await this.countProductsInCategory(id);
     if (productCount > 0) {
       throw new CategoryConflictError('Category is still referenced by products.');
     }
 
-    await this.repository.delete(id);
+    const deleted = await this.repository.delete(id);
+    if (!deleted) {
+      throw new CategoryValidationError('Category was not found.');
+    }
+
     this.events.publish({ type: 'category.deleted', categoryId: id });
   }
 }

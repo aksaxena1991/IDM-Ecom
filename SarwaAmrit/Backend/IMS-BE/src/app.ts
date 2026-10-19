@@ -8,8 +8,13 @@ import { CategoryService } from './features/categories/services/category.service
 import { prisma } from './infrastructure/database/prisma.js';
 import { apiPrefix } from './shared/config/app.config.js';
 import { env } from './shared/config/env.js';
+import { errorHandler } from './shared/http/error-handler.js';
 
-export function createApp(): Express {
+export type CreateAppOptions = {
+  categoryService?: CategoryService;
+};
+
+export function createApp(options: CreateAppOptions = {}): Express {
   const app = express();
 
   app.use(
@@ -32,11 +37,16 @@ export function createApp(): Express {
     }
   });
 
-  const categoryRepository = new PrismaCategoryRepository();
-  const categoryEvents = new CategoryEventBus();
-  const categoryService = new CategoryService(categoryRepository, categoryEvents);
+  const categoryService =
+    options.categoryService ??
+    new CategoryService(
+      new PrismaCategoryRepository(),
+      new CategoryEventBus(),
+      (categoryId) => prisma.product.count({ where: { categoryId } }),
+    );
 
   app.use(`${apiPrefix}/categories`, createCategoryRouter(categoryService));
+  app.use(errorHandler);
 
   return app;
 }

@@ -1,14 +1,36 @@
 import type { Category as CategoryRow, CategoryStatus as PrismaCategoryStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { prisma } from '../../../infrastructure/database/prisma.js';
-import type { CategoryId, CategoryRecord, CategoryStatus } from '../types/category.type.js';
+import { CategoryConflictError } from '../aggregates/category.aggregate.js';
+import type {
+  CategoryId,
+  CategoryListQuery,
+  CategoryRecord,
+  CategoryStatus,
+} from '../types/category.type.js';
 import { isCategoryStatus } from '../types/category.type.js';
 import type { CategoryRepository } from './category.model.js';
 
 export class PrismaCategoryRepository implements CategoryRepository {
-  async findAll(): Promise<CategoryRecord[]> {
+  async findAll(query: CategoryListQuery = {}): Promise<CategoryRecord[]> {
+    const search = query.search?.trim();
+
     const rows = await prisma.category.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.parentId !== undefined ? { parentId: query.parentId } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { slug: { contains: search.toLowerCase(), mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
       orderBy: { name: 'asc' },
     });
     return rows.map(toRecord);
@@ -29,41 +51,57 @@ export class PrismaCategoryRepository implements CategoryRepository {
   }
 
   async save(record: CategoryRecord): Promise<CategoryRecord> {
-    const row = await prisma.category.upsert({
-      where: { id: record.id },
-      create: {
-        id: record.id,
-        name: record.name,
-        slug: record.slug,
-        description: record.description,
-        status: toPrismaStatus(record.status),
-        parentId: record.parentId,
-        createdAt: record.createdAt,
-        updatedAt: record.updatedAt,
-        deletedAt: record.deletedAt,
-      },
-      update: {
-        name: record.name,
-        slug: record.slug,
-        description: record.description,
-        status: toPrismaStatus(record.status),
-        parentId: record.parentId,
-        updatedAt: record.updatedAt,
-        deletedAt: record.deletedAt,
-      },
-    });
-    return toRecord(row);
+    try {
+      const row = await prisma.category.upsert({
+        where: { id: record.id },
+        create: {
+          id: record.id,
+          name: record.name,
+          slug: record.slug,
+          description: record.description,
+          status: toPrismaStatus(record.status),
+          parentId: record.parentId,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+          deletedAt: record.deletedAt,
+        },
+        update: {
+          name: record.name,
+          slug: record.slug,
+          description: record.description,
+          status: toPrismaStatus(record.status),
+          parentId: record.parentId,
+          updatedAt: record.updatedAt,
+          deletedAt: record.deletedAt,
+        },
+      });
+      return toRecord(row);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new CategoryConflictError('Category slug must be unique.');
+      }
+      throw error;
+    }
   }
 
   async delete(id: CategoryId): Promise<boolean> {
     try {
       await prisma.category.update({
-        where: { id },
+        where: { id, deletedAt: null },
         data: { deletedAt: new Date(), updatedAt: new Date() },
       });
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        return false;
+      }
+      throw error;
     }
   }
 
