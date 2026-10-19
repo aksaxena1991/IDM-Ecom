@@ -1,6 +1,6 @@
 {
-      "watch": ["src"],
-      "ext": "ts,json",
-      "exec": "tsx src/index.ts",
-      "delay": "500"
-    }
+  "watch": ["src"],
+  "ext": "ts,json",
+  "exec": "tsx src/index.ts",
+  "delay": "500"
+}

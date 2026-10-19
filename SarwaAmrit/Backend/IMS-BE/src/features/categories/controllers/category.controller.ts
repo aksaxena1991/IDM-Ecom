@@ -27,18 +27,16 @@ export class CategoryController {
       res.status(404).json({ detail: 'Category was not found.' });
       return;
     }
-    res.json(
-      toCategoryResponse(category, await this.service.productCount(category.id)),
-    );
+    res.json(toCategoryResponse(category, await this.service.productCount(category.id)));
   };
 
   create = async (req: Request, res: Response): Promise<void> => {
     try {
       const payload = normalizeCreatePayload(req.body);
       const category = await this.service.create(payload);
-      res.status(201).json(
-        toCategoryResponse(category, await this.service.productCount(category.id)),
-      );
+      res
+        .status(201)
+        .json(toCategoryResponse(category, await this.service.productCount(category.id)));
     } catch (error) {
       this.handleError(res, error);
     }
@@ -86,10 +84,9 @@ function normalizeCreatePayload(body: unknown): CreateCategoryPayload {
   }
   const record = body as Record<string, unknown>;
   return {
-    name: String(record.name ?? ''),
-    slug: record.slug !== undefined ? String(record.slug) : undefined,
-    description:
-      record.description !== undefined ? String(record.description) : undefined,
+    name: readString(record.name) ?? '',
+    slug: readOptionalString(record.slug),
+    description: readOptionalString(record.description),
     parentId: readNullableId(record.parent_id ?? record.parentId),
     isActive: readOptionalBoolean(record.is_active ?? record.isActive),
   };
@@ -101,16 +98,35 @@ function normalizeUpdatePayload(body: unknown): UpdateCategoryPayload {
   }
   const record = body as Record<string, unknown>;
   return {
-    name: record.name !== undefined ? String(record.name) : undefined,
-    slug: record.slug !== undefined ? String(record.slug) : undefined,
-    description:
-      record.description !== undefined ? String(record.description) : undefined,
+    name: readOptionalString(record.name),
+    slug: readOptionalString(record.slug),
+    description: readOptionalString(record.description),
     parentId:
       record.parent_id !== undefined || record.parentId !== undefined
         ? readNullableId(record.parent_id ?? record.parentId)
         : undefined,
     isActive: readOptionalBoolean(record.is_active ?? record.isActive),
   };
+}
+
+function readString(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  throw new CategoryValidationError('Request body contains invalid field types.');
+}
+
+function readOptionalString(value: unknown): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return readString(value);
 }
 
 function readNullableId(value: unknown): string | null | undefined {
@@ -120,7 +136,11 @@ function readNullableId(value: unknown): string | null | undefined {
   if (value === null || value === '') {
     return null;
   }
-  return String(value);
+  const id = readString(value);
+  if (id === undefined) {
+    throw new CategoryValidationError('Request body contains invalid field types.');
+  }
+  return id;
 }
 
 function readOptionalBoolean(value: unknown): boolean | undefined {

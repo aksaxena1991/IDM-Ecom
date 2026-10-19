@@ -47,3 +47,15 @@ npm start
 ```
 
 Copy `.env.example` to `.env` if you need a fresh environment file.
+
+## Quality tooling
+
+TypeScript linting uses **ESLint** (`typescript-eslint`) — the maintained replacement for deprecated TSLint.
+
+```bash
+npm run lint          # ESLint
+npm run lint:fix      # ESLint with auto-fix
+npm run format        # Prettier write
+npm run format:check  # Prettier check (CI)
+npm test              # Jest (ESM + ts-jest)
+```

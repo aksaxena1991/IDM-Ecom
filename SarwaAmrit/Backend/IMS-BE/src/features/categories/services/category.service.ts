@@ -41,10 +41,7 @@ export class CategoryService {
     return entity;
   }
 
-  async update(
-    id: CategoryId,
-    payload: UpdateCategoryPayload,
-  ): Promise<CategoryEntity> {
+  async update(id: CategoryId, payload: UpdateCategoryPayload): Promise<CategoryEntity> {
     const entity = await CategoryAggregate.update(this.repository, id, payload);
     this.events.publish({ type: 'category.updated', categoryId: entity.id });
     return entity;
@@ -65,9 +62,7 @@ export class CategoryService {
 
     const productCount = await this.productCountLookup(id);
     if (productCount > 0) {
-      throw new CategoryConflictError(
-        'Category is still referenced by products.',
-      );
+      throw new CategoryConflictError('Category is still referenced by products.');
     }
 
     await this.repository.delete(id);
