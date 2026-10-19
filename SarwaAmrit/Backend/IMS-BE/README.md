@@ -49,6 +49,17 @@ docker exec ims-be-postgres-1 psql -U product_catalog -d product_catalog \
 npm run db:migrate
 ```
 
+### Brands API (`/api/v1/brands`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | List (query: `status`, `search`, `isVerified`) |
+| `POST` | `/` | Create |
+| `GET` | `/:id` | Get by UUID |
+| `PUT` | `/:id` | Full replace |
+| `PATCH` | `/:id` | Partial update |
+| `DELETE` | `/:id` | Soft delete (blocked if products reference the brand) |
+
 ### Products API (`/api/v1/products`)
 
 | Method | Path | Description |

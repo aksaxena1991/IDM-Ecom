@@ -1,6 +1,10 @@
 import cors from 'cors';
 import express, { type Express } from 'express';
 
+import { BrandEventBus } from './features/brands/events/brand.event.js';
+import { PrismaBrandRepository } from './features/brands/models/prisma-brand.repository.js';
+import { createBrandRouter } from './features/brands/routes/brand.route.js';
+import { BrandService } from './features/brands/services/brand.service.js';
 import { CategoryEventBus } from './features/categories/events/category.event.js';
 import { PrismaCategoryRepository } from './features/categories/models/prisma-category.repository.js';
 import { createCategoryRouter } from './features/categories/routes/category.route.js';
@@ -16,6 +20,7 @@ import { errorHandler } from './shared/http/error-handler.js';
 
 export type CreateAppOptions = {
   categoryService?: CategoryService;
+  brandService?: BrandService;
   productService?: ProductService;
 };
 
@@ -51,6 +56,15 @@ export function createApp(options: CreateAppOptions = {}): Express {
         prisma.product.count({ where: { categoryId, deletedAt: null } }),
     );
 
+  const brandService =
+    options.brandService ??
+    new BrandService(
+      new PrismaBrandRepository(),
+      new BrandEventBus(),
+      (brandId) =>
+        prisma.product.count({ where: { brandId, deletedAt: null } }),
+    );
+
   const productService =
     options.productService ??
     new ProductService(
@@ -62,11 +76,14 @@ export function createApp(options: CreateAppOptions = {}): Express {
             where: { id: categoryId, deletedAt: null },
           })),
         brandExists: async (brandId) =>
-          !!(await prisma.brand.findUnique({ where: { id: brandId } })),
+          !!(await prisma.brand.findFirst({
+            where: { id: brandId, deletedAt: null },
+          })),
       },
     );
 
   app.use(`${apiPrefix}/categories`, createCategoryRouter(categoryService));
+  app.use(`${apiPrefix}/brands`, createBrandRouter(brandService));
   app.use(`${apiPrefix}/products`, createProductRouter(productService));
   app.use(errorHandler);
 

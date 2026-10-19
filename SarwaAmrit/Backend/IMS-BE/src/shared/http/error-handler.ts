@@ -2,6 +2,10 @@ import type { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
 
 import {
+  BrandConflictError,
+  BrandValidationError,
+} from '../../features/brands/aggregates/brand.aggregate.js';
+import {
   CategoryConflictError,
   CategoryValidationError,
 } from '../../features/categories/aggregates/category.aggregate.js';
@@ -29,6 +33,18 @@ export function errorHandler(
   }
 
   if (error instanceof CategoryConflictError) {
+    res.status(409).json({ detail: error.message });
+    return;
+  }
+
+  if (error instanceof BrandValidationError) {
+    res.status(error.message.includes('not found') ? 404 : 400).json({
+      detail: error.message,
+    });
+    return;
+  }
+
+  if (error instanceof BrandConflictError) {
     res.status(409).json({ detail: error.message });
     return;
   }

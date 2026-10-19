@@ -71,7 +71,10 @@ export interface BrandRecord {
   id: BrandId;
   name: string;
   slug: string;
+  code: string;
   logoUrl: string | null;
+  status: string;
+  isVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
