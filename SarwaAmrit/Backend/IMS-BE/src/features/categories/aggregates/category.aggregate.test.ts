@@ -1,5 +1,6 @@
 import {
   CategoryAggregate,
+  CategoryConflictError,
   CategoryValidationError,
   slugify,
 } from './category.aggregate.js';
@@ -42,5 +43,20 @@ describe('CategoryAggregate.create', () => {
     expect(entity.slug).toBe('power-systems');
     expect(entity.status).toBe('DRAFT');
     expect(entity.deletedAt).toBeNull();
+  });
+
+  it('rejects duplicate names (case-insensitive)', async () => {
+    const repository = new InMemoryCategoryRepository();
+    await CategoryAggregate.create(repository, {
+      ...basePayload,
+      name: 'Power Systems',
+    });
+
+    await expect(
+      CategoryAggregate.create(repository, {
+        ...basePayload,
+        name: 'power systems',
+      }),
+    ).rejects.toBeInstanceOf(CategoryConflictError);
   });
 });

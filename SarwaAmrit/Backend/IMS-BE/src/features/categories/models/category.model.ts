@@ -5,6 +5,7 @@ import type { CategoryId, CategoryListQuery, CategoryRecord } from '../types/cat
 export interface CategoryRepository {
   findAll(query?: CategoryListQuery): Promise<CategoryRecord[]>;
   findById(id: CategoryId): Promise<CategoryRecord | null>;
+  findByName(name: string): Promise<CategoryRecord | null>;
   findBySlug(slug: string): Promise<CategoryRecord | null>;
   save(record: CategoryRecord): Promise<CategoryRecord>;
   delete(id: CategoryId): Promise<boolean>;
@@ -42,6 +43,19 @@ export class InMemoryCategoryRepository implements CategoryRepository {
       return null;
     }
     return record;
+  }
+
+  async findByName(name: string): Promise<CategoryRecord | null> {
+    const normalized = name.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    for (const record of this.store.values()) {
+      if (record.deletedAt === null && record.name.trim().toLowerCase() === normalized) {
+        return record;
+      }
+    }
+    return null;
   }
 
   async findBySlug(slug: string): Promise<CategoryRecord | null> {

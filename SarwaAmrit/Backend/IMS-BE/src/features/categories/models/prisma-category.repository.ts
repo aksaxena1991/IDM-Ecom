@@ -43,6 +43,20 @@ export class PrismaCategoryRepository implements CategoryRepository {
     return row ? toRecord(row) : null;
   }
 
+  async findByName(name: string): Promise<CategoryRecord | null> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const row = await prisma.category.findFirst({
+      where: {
+        deletedAt: null,
+        name: { equals: trimmed, mode: 'insensitive' },
+      },
+    });
+    return row ? toRecord(row) : null;
+  }
+
   async findBySlug(slug: string): Promise<CategoryRecord | null> {
     const row = await prisma.category.findFirst({
       where: { slug: slug.trim().toLowerCase(), deletedAt: null },
@@ -81,7 +95,9 @@ export class PrismaCategoryRepository implements CategoryRepository {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new CategoryConflictError('Category slug must be unique.');
+        throw new CategoryConflictError(
+          'Category name or slug must be unique among active categories.',
+        );
       }
       throw error;
     }

@@ -77,4 +77,20 @@ describe('Category CRUD API', () => {
     const { app } = createTestApp();
     await request(app).get('/api/v1/categories/not-a-uuid').expect(400);
   });
+
+  it('returns 409 when creating a duplicate category name', async () => {
+    const { app } = createTestApp();
+
+    await request(app)
+      .post('/api/v1/categories')
+      .send({ name: 'Shared Name', status: 'DRAFT' })
+      .expect(201);
+
+    const duplicate = await request(app)
+      .post('/api/v1/categories')
+      .send({ name: 'shared name', status: 'DRAFT' })
+      .expect(409);
+
+    expect(duplicate.body).toEqual({ detail: 'Category name must be unique.' });
+  });
 });

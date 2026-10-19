@@ -44,6 +44,8 @@ export class CategoryAggregate {
       }
     }
 
+    await assertUniqueName(repository, name);
+
     const slugInput = payload.slug.trim() || slugify(name);
     const slug = await resolveUniqueSlug(repository, slugInput);
     const now = new Date();
@@ -105,6 +107,8 @@ export class CategoryAggregate {
 
     const slug = await resolveUniqueSlug(repository, slugSource, id);
 
+    await assertUniqueName(repository, name, id);
+
     const updated: CategoryRecord = {
       ...existing,
       name,
@@ -144,6 +148,17 @@ async function assertNoParentCycle(
     seen.add(cursor);
     const node = await repository.findById(cursor);
     cursor = node?.parentId ?? null;
+  }
+}
+
+async function assertUniqueName(
+  repository: CategoryRepository,
+  name: string,
+  excludeId?: CategoryId,
+): Promise<void> {
+  const existing = await repository.findByName(name);
+  if (existing && existing.id !== excludeId) {
+    throw new CategoryConflictError('Category name must be unique.');
   }
 }
 
