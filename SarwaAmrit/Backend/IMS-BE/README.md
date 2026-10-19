@@ -4,7 +4,7 @@ Inventory management API — product catalog (categories and products schema via
 
 ## Stack
 
-- Node.js 20+
+- Node.js **22.12+** or **24+** (Prisma 7; Node 23 is not supported — use `.nvmrc` / `fnm use`)
 - Express 5
 - PostgreSQL 16
 - Prisma 7
@@ -29,6 +29,7 @@ product-catalog-service/     # legacy Django catalog (optional)
 ```bash
 cd SarwaAmrit/Backend/IMS-BE
 npm install
+# If install fails on unsupported Node (e.g. v23): npm install --ignore-scripts && npm run build
 docker compose up -d postgres
 npm run db:migrate
 npm run dev

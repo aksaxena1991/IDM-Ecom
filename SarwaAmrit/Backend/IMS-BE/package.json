@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=22.12.0 || >=24.0.0"
+  },
   "scripts": {
     "dev": "nodemon",
     "build": "prisma generate && tsc",
@@ -17,18 +20,21 @@
   "license": "ISC",
   "description": "Inventory management API (product catalog)",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-pg": "^7.4.2",
+    "@prisma/client": "^7.4.2",
     "cors": "^2.8.6",
     "dotenv": "^16.4.7",
     "express": "^5.3.0",
+    "pg": "^8.20.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
+    "@types/pg": "^8.18.0",
     "nodemon": "^3.1.14",
-    "prisma": "^5.22.0",
+    "prisma": "^7.4.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
