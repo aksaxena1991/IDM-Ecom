@@ -35,6 +35,20 @@ npm run db:migrate
 npm run dev
 ```
 
+If `db:migrate` reports **drift** (often a leftover `ProductStatus` enum without tables), reset local dev data:
+
+```bash
+npm run db:reset   # drops and reapplies migrations — dev only
+```
+
+Or remove the orphan object manually:
+
+```bash
+docker exec ims-be-postgres-1 psql -U product_catalog -d product_catalog \
+  -c 'DROP TYPE IF EXISTS "ProductStatus" CASCADE;'
+npm run db:migrate
+```
+
 - API: http://127.0.0.1:8010/api/v1/categories
 - Health: http://127.0.0.1:8010/healthz
 - Readiness: http://127.0.0.1:8010/readyz
