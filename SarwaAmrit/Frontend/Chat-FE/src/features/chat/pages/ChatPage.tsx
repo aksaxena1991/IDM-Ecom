@@ -174,7 +174,7 @@ export function ChatPage() {
         </div>
       ) : null}
 
-      <div className="chat-stage">
+      <div className="chat-thread-scroll">
         <div className="chat-thread" ref={listRef} role="log" aria-live="polite">
           {messages.length === 0 ? (
             <p className="chat-empty">
@@ -209,41 +209,41 @@ export function ChatPage() {
             </div>
           ) : null}
         </div>
-
-        <form className="chat-composer-bar" onSubmit={handleSend}>
-          <div className="chat-composer-field">
-            <Smile size={22} strokeWidth={1.5} className="chat-composer-leading" aria-hidden />
-            <textarea
-              ref={inputRef}
-              className="chat-composer-input"
-              placeholder="Type a message"
-              value={draft}
-              rows={1}
-              disabled={sending}
-              aria-label="Message"
-              onChange={(e) => {
-                setDraft(e.target.value)
-                e.target.style.height = 'auto'
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  void handleSend()
-                }
-              }}
-            />
-          </div>
-          <button
-            type="submit"
-            className="chat-send-btn"
-            disabled={sending || !draft.trim()}
-            aria-label="Send message"
-          >
-            <Send size={20} strokeWidth={2} aria-hidden />
-          </button>
-        </form>
       </div>
+
+      <form className="chat-composer-bar" onSubmit={handleSend}>
+        <div className="chat-composer-field">
+          <Smile size={22} strokeWidth={1.5} className="chat-composer-leading" aria-hidden />
+          <textarea
+            ref={inputRef}
+            className="chat-composer-input"
+            placeholder="Type a message"
+            value={draft}
+            rows={1}
+            disabled={sending}
+            aria-label="Message"
+            onChange={(e) => {
+              setDraft(e.target.value)
+              e.target.style.height = 'auto'
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void handleSend()
+              }
+            }}
+          />
+        </div>
+        <button
+          type="submit"
+          className="chat-send-btn"
+          disabled={sending || !draft.trim()}
+          aria-label="Send message"
+        >
+          <Send size={20} strokeWidth={2} aria-hidden />
+        </button>
+      </form>
     </div>
   )
 }

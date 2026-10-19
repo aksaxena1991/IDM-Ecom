@@ -35,9 +35,7 @@ export function AppShell({ children }: Props) {
         <div className="chat-header-brand">
           <MessageCircle size={20} strokeWidth={1.5} aria-hidden />
           <div>
-            <Typography variant="overline" as="span">
-              Sarwa Amrit Assistant
-            </Typography>
+            
             <Typography variant="caption" color="secondary" className="mono">
               {applicationLabel}
             </Typography>

@@ -1,9 +1,19 @@
+#root {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .mono {
   font-family: var(--ts-font-mono, 'Source Code Pro', monospace);
 }
 
 .chat-shell {
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background-color: var(--ts-color-bg, #1c1917);
@@ -47,30 +57,34 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
   padding: 0;
+  border-left: 1px solid var(--ts-border-subtle);
+  border-right: 1px solid var(--ts-border-subtle);
 }
 
 .chat-alert {
+  flex-shrink: 0;
   padding: 8px 12px 0;
   z-index: 2;
 }
 
-.chat-stage {
+.chat-thread-scroll {
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  border-left: 1px solid var(--ts-border-subtle);
-  border-right: 1px solid var(--ts-border-subtle);
   background: var(--ts-color-bg);
 }
 
 .chat-thread {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -207,12 +221,17 @@
 /* Composer bar */
 
 .chat-composer-bar {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  padding: 10px 12px 12px;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom, 0px));
   background: var(--ts-glass-bg-sunken);
   border-top: 1px solid var(--ts-border-subtle);
+  backdrop-filter: var(--ts-glass-blur-sm, blur(12px));
 }
 
 .chat-composer-field {
@@ -302,7 +321,7 @@
 }
 
 @media (max-width: 640px) {
-  .chat-stage {
+  .chat-page--messenger {
     border-left: none;
     border-right: none;
   }

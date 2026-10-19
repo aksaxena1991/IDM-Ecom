@@ -36,7 +36,7 @@ export const DEFAULT_TENANT_SLUG = import.meta.env.VITE_DEFAULT_TENANT_SLUG ?? '
 
 export const CHAT_APPLICATION_ID = import.meta.env.VITE_CHAT_APPLICATION_ID ?? 'idm'
 export const CHAT_APPLICATION_LABEL =
-  import.meta.env.VITE_CHAT_APPLICATION_LABEL ?? 'Sarwa Amrit Assistant'
+  import.meta.env.VITE_CHAT_APPLICATION_LABEL ?? 'Sarwa Amrit AI Assistant'
 
 export const REFRESH_STORAGE_KEY = 'chat_sso_refresh'
 export const TOKEN_STORAGE_KEY = 'chat_sso_tokens'
