@@ -17,7 +17,7 @@ export class CategoryController {
   list = async (_req: Request, res: Response): Promise<void> => {
     const categories = await this.service.list();
     res.json(
-      toCategoryListResponse(categories, (id) => this.service.productCount(id)),
+      await toCategoryListResponse(categories, (id) => this.service.productCount(id)),
     );
   };
 
@@ -28,7 +28,7 @@ export class CategoryController {
       return;
     }
     res.json(
-      toCategoryResponse(category, this.service.productCount(category.id)),
+      toCategoryResponse(category, await this.service.productCount(category.id)),
     );
   };
 
@@ -36,9 +36,9 @@ export class CategoryController {
     try {
       const payload = normalizeCreatePayload(req.body);
       const category = await this.service.create(payload);
-      res
-        .status(201)
-        .json(toCategoryResponse(category, this.service.productCount(category.id)));
+      res.status(201).json(
+        toCategoryResponse(category, await this.service.productCount(category.id)),
+      );
     } catch (error) {
       this.handleError(res, error);
     }
@@ -49,7 +49,7 @@ export class CategoryController {
       const payload = normalizeUpdatePayload(req.body);
       const category = await this.service.update(String(req.params.id), payload);
       res.json(
-        toCategoryResponse(category, this.service.productCount(category.id)),
+        toCategoryResponse(category, await this.service.productCount(category.id)),
       );
     } catch (error) {
       this.handleError(res, error);

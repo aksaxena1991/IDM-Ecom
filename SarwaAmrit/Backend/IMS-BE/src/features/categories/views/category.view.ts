@@ -18,12 +18,14 @@ export function toCategoryResponse(
   };
 }
 
-export function toCategoryListResponse(
+export async function toCategoryListResponse(
   entities: CategoryEntity[],
-  productCountByCategoryId: (categoryId: string) => number,
-): CategoryListResponse {
-  const results = entities.map((entity) =>
-    toCategoryResponse(entity, productCountByCategoryId(entity.id)),
+  productCountByCategoryId: (categoryId: string) => Promise<number>,
+): Promise<CategoryListResponse> {
+  const results = await Promise.all(
+    entities.map(async (entity) =>
+      toCategoryResponse(entity, await productCountByCategoryId(entity.id)),
+    ),
   );
   return {
     count: results.length,

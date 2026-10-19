@@ -1,8 +1,48 @@
 generator client {
-  provider = "prisma-client"
-  output   = "./src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductStatus {
+  draft
+  active
+  discontinued
+}
+
+model Category {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @db.VarChar(120)
+  slug        String     @unique @db.VarChar(140)
+  description String     @default("")
+  parentId    String?    @map("parent_id") @db.Uuid
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[] @relation("CategoryHierarchy")
+  isActive    Boolean    @default(true) @map("is_active")
+  products    Product[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Product {
+  id          String        @id @default(uuid()) @db.Uuid
+  sku         String        @unique @db.VarChar(64)
+  name        String        @db.VarChar(200)
+  slug        String        @unique @db.VarChar(220)
+  description String        @default("")
+  categoryId  String?       @map("category_id") @db.Uuid
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  status      ProductStatus @default(draft)
+  unitCost    Decimal       @default(0) @map("unit_cost") @db.Decimal(12, 2)
+  currency    String        @default("USD") @db.VarChar(3)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  @@map("products")
 }

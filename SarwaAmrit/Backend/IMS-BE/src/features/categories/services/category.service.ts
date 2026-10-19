@@ -12,13 +12,13 @@ import type {
   UpdateCategoryPayload,
 } from '../types/category.type.js';
 
-export type ProductCountLookup = (categoryId: CategoryId) => number;
+export type ProductCountLookup = (categoryId: CategoryId) => Promise<number>;
 
 export class CategoryService {
   constructor(
     private readonly repository: CategoryRepository,
     private readonly events: CategoryEventBus,
-    private readonly productCountLookup: ProductCountLookup = () => 0,
+    private readonly productCountLookup: ProductCountLookup = async () => 0,
   ) {}
 
   async list(): Promise<CategoryEntity[]> {
@@ -31,7 +31,7 @@ export class CategoryService {
     return record ? new CategoryEntity(record) : null;
   }
 
-  productCount(categoryId: CategoryId): number {
+  async productCount(categoryId: CategoryId): Promise<number> {
     return this.productCountLookup(categoryId);
   }
 
@@ -63,7 +63,7 @@ export class CategoryService {
       );
     }
 
-    const productCount = this.productCountLookup(id);
+    const productCount = await this.productCountLookup(id);
     if (productCount > 0) {
       throw new CategoryConflictError(
         'Category is still referenced by products.',
