@@ -83,6 +83,8 @@ npm run db:migrate
 | `DELETE` | `/:id` | Soft delete |
 
 - API: http://127.0.0.1:8010/api/v1/categories
+- **Swagger UI:** http://127.0.0.1:8010/api-docs
+- **OpenAPI JSON:** http://127.0.0.1:8010/api-docs/openapi.json
 - Health: http://127.0.0.1:8010/healthz
 - Readiness: http://127.0.0.1:8010/readyz
 

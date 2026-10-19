@@ -16,6 +16,7 @@ import { ProductService } from './features/products/services/product.service.js'
 import { prisma } from './infrastructure/database/prisma.js';
 import { apiPrefix } from './shared/config/app.config.js';
 import { env } from './shared/config/env.js';
+import { setupSwagger } from './openapi/setup-swagger.js';
 import { errorHandler } from './shared/http/error-handler.js';
 
 export type CreateAppOptions = {
@@ -85,6 +86,9 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use(`${apiPrefix}/categories`, createCategoryRouter(categoryService));
   app.use(`${apiPrefix}/brands`, createBrandRouter(brandService));
   app.use(`${apiPrefix}/products`, createProductRouter(productService));
+
+  setupSwagger(app);
+
   app.use(errorHandler);
 
   return app;
