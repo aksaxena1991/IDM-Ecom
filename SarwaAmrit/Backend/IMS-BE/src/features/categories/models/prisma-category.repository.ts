@@ -1,22 +1,29 @@
-import type { Category as CategoryRow } from '@prisma/client';
+import type { Category as CategoryRow, CategoryStatus as PrismaCategoryStatus } from '@prisma/client';
+
 import { prisma } from '../../../infrastructure/database/prisma.js';
-import type { CategoryId, CategoryRecord } from '../types/category.type.js';
+import type { CategoryId, CategoryRecord, CategoryStatus } from '../types/category.type.js';
+import { isCategoryStatus } from '../types/category.type.js';
 import type { CategoryRepository } from './category.model.js';
 
 export class PrismaCategoryRepository implements CategoryRepository {
   async findAll(): Promise<CategoryRecord[]> {
-    const rows = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+    const rows = await prisma.category.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: 'asc' },
+    });
     return rows.map(toRecord);
   }
 
   async findById(id: CategoryId): Promise<CategoryRecord | null> {
-    const row = await prisma.category.findUnique({ where: { id } });
+    const row = await prisma.category.findFirst({
+      where: { id, deletedAt: null },
+    });
     return row ? toRecord(row) : null;
   }
 
   async findBySlug(slug: string): Promise<CategoryRecord | null> {
-    const row = await prisma.category.findUnique({
-      where: { slug: slug.trim().toLowerCase() },
+    const row = await prisma.category.findFirst({
+      where: { slug: slug.trim().toLowerCase(), deletedAt: null },
     });
     return row ? toRecord(row) : null;
   }
@@ -29,18 +36,20 @@ export class PrismaCategoryRepository implements CategoryRepository {
         name: record.name,
         slug: record.slug,
         description: record.description,
+        status: toPrismaStatus(record.status),
         parentId: record.parentId,
-        isActive: record.isActive,
         createdAt: record.createdAt,
         updatedAt: record.updatedAt,
+        deletedAt: record.deletedAt,
       },
       update: {
         name: record.name,
         slug: record.slug,
         description: record.description,
+        status: toPrismaStatus(record.status),
         parentId: record.parentId,
-        isActive: record.isActive,
         updatedAt: record.updatedAt,
+        deletedAt: record.deletedAt,
       },
     });
     return toRecord(row);
@@ -48,7 +57,10 @@ export class PrismaCategoryRepository implements CategoryRepository {
 
   async delete(id: CategoryId): Promise<boolean> {
     try {
-      await prisma.category.delete({ where: { id } });
+      await prisma.category.update({
+        where: { id },
+        data: { deletedAt: new Date(), updatedAt: new Date() },
+      });
       return true;
     } catch {
       return false;
@@ -56,19 +68,31 @@ export class PrismaCategoryRepository implements CategoryRepository {
   }
 
   async countChildren(parentId: CategoryId): Promise<number> {
-    return prisma.category.count({ where: { parentId } });
+    return prisma.category.count({
+      where: { parentId, deletedAt: null },
+    });
   }
 }
 
 function toRecord(row: CategoryRow): CategoryRecord {
+  const status = row.status;
+  if (!isCategoryStatus(status)) {
+    throw new Error(`Unexpected category status: ${String(status)}`);
+  }
+
   return {
     id: row.id,
     name: row.name,
     slug: row.slug,
     description: row.description,
+    status,
     parentId: row.parentId,
-    isActive: row.isActive,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
   };
+}
+
+function toPrismaStatus(status: CategoryStatus): PrismaCategoryStatus {
+  return status;
 }

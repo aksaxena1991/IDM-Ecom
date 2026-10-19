@@ -1,5 +1,6 @@
 -- CreateEnum
-CREATE TYPE "ProductStatus" AS ENUM ('draft', 'active', 'discontinued');
+CREATE TYPE "CategoryStatus" AS ENUM ('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
+CREATE TYPE "ProductStatus" AS ENUM ('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
 
 -- CreateTable
 CREATE TABLE "categories" (
@@ -7,10 +8,11 @@ CREATE TABLE "categories" (
     "name" VARCHAR(120) NOT NULL,
     "slug" VARCHAR(140) NOT NULL,
     "description" TEXT NOT NULL DEFAULT '',
+    "status" "CategoryStatus" NOT NULL DEFAULT 'DRAFT',
     "parent_id" UUID,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
 );

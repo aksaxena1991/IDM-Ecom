@@ -1,10 +1,8 @@
 export type CategoryId = string;
 
-export type CategoryStatus =
-  | "DRAFT"
-  | "ACTIVE"
-  | "INACTIVE"
-  | "ARCHIVED";
+export const CATEGORY_STATUSES = ['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'] as const;
+
+export type CategoryStatus = (typeof CATEGORY_STATUSES)[number];
 
 export interface CategoryRecord {
   id: CategoryId;
@@ -41,12 +39,16 @@ export interface CategoryResponse {
   description: string;
   status: CategoryStatus;
   parentId: CategoryId | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 export interface CategoryListResponse {
   count: number;
   results: CategoryResponse[];
+}
+
+export function isCategoryStatus(value: string): value is CategoryStatus {
+  return (CATEGORY_STATUSES as readonly string[]).includes(value);
 }

@@ -15,17 +15,23 @@ export class InMemoryCategoryRepository implements CategoryRepository {
   private readonly store = new Map<CategoryId, CategoryRecord>();
 
   async findAll(): Promise<CategoryRecord[]> {
-    return [...this.store.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return [...this.store.values()]
+      .filter((record) => record.deletedAt === null)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async findById(id: CategoryId): Promise<CategoryRecord | null> {
-    return this.store.get(id) ?? null;
+    const record = this.store.get(id);
+    if (!record || record.deletedAt !== null) {
+      return null;
+    }
+    return record;
   }
 
   async findBySlug(slug: string): Promise<CategoryRecord | null> {
     const normalized = slug.trim().toLowerCase();
     for (const record of this.store.values()) {
-      if (record.slug === normalized) {
+      if (record.deletedAt === null && record.slug === normalized) {
         return record;
       }
     }
@@ -37,18 +43,27 @@ export class InMemoryCategoryRepository implements CategoryRepository {
     return record;
   }
 
-  async delete(id: CategoryId): Promise<boolean> {
-    return this.store.delete(id);
-  }
-
   async countChildren(parentId: CategoryId): Promise<number> {
     let count = 0;
     for (const record of this.store.values()) {
-      if (record.parentId === parentId) {
+      if (record.deletedAt === null && record.parentId === parentId) {
         count += 1;
       }
     }
     return count;
+  }
+
+  async delete(id: CategoryId): Promise<boolean> {
+    const record = this.store.get(id);
+    if (!record) {
+      return false;
+    }
+    this.store.set(id, {
+      ...record,
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    });
+    return true;
   }
 }
 

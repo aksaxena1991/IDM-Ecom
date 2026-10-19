@@ -6,19 +6,17 @@ import {
 import { CategoryEntity } from '../entities/category.entity.js';
 import type { CategoryEventBus } from '../events/category.event.js';
 import type { CategoryRepository } from '../models/category.model.js';
+import { prisma } from '../../../infrastructure/database/prisma.js';
 import type {
   CategoryId,
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../types/category.type.js';
 
-export type ProductCountLookup = (categoryId: CategoryId) => Promise<number>;
-
 export class CategoryService {
   constructor(
     private readonly repository: CategoryRepository,
     private readonly events: CategoryEventBus,
-    private readonly productCountLookup: ProductCountLookup = async () => 0,
   ) {}
 
   async list(): Promise<CategoryEntity[]> {
@@ -29,10 +27,6 @@ export class CategoryService {
   async getById(id: CategoryId): Promise<CategoryEntity | null> {
     const record = await this.repository.findById(id);
     return record ? new CategoryEntity(record) : null;
-  }
-
-  async productCount(categoryId: CategoryId): Promise<number> {
-    return this.productCountLookup(categoryId);
   }
 
   async create(payload: CreateCategoryPayload): Promise<CategoryEntity> {
@@ -60,7 +54,7 @@ export class CategoryService {
       );
     }
 
-    const productCount = await this.productCountLookup(id);
+    const productCount = await prisma.product.count({ where: { categoryId: id } });
     if (productCount > 0) {
       throw new CategoryConflictError('Category is still referenced by products.');
     }

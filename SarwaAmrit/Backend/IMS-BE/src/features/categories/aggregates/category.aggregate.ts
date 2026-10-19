@@ -4,9 +4,11 @@ import { newCategoryId } from '../models/category.model.js';
 import type {
   CategoryId,
   CategoryRecord,
+  CategoryStatus,
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../types/category.type.js';
+import { isCategoryStatus } from '../types/category.type.js';
 
 export class CategoryValidationError extends Error {
   constructor(message: string) {
@@ -32,6 +34,8 @@ export class CategoryAggregate {
       throw new CategoryValidationError('Name is required.');
     }
 
+    assertStatus(payload.status);
+
     const parentId = payload.parentId ?? null;
     if (parentId !== null) {
       const parent = await repository.findById(parentId);
@@ -40,17 +44,19 @@ export class CategoryAggregate {
       }
     }
 
-    const slug = await resolveUniqueSlug(repository, payload.slug ?? slugify(name));
+    const slugInput = payload.slug.trim() || slugify(name);
+    const slug = await resolveUniqueSlug(repository, slugInput);
     const now = new Date();
     const record: CategoryRecord = {
       id: newCategoryId(),
       name,
       slug,
-      description: (payload.description ?? '').trim(),
+      description: payload.description.trim(),
+      status: payload.status,
       parentId,
-      isActive: payload.isActive ?? true,
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,
     };
 
     const saved = await repository.save(record);
@@ -67,14 +73,14 @@ export class CategoryAggregate {
       throw new CategoryValidationError('Category was not found.');
     }
 
-    const name = payload.name !== undefined ? payload.name.trim() : existing.name;
+    const name = payload.name.trim();
     if (!name) {
       throw new CategoryValidationError('Name is required.');
     }
 
-    const parentId =
-      payload.parentId !== undefined ? payload.parentId : existing.parentId;
+    assertStatus(payload.status);
 
+    const parentId = payload.parentId ?? null;
     if (parentId === id) {
       throw new CategoryValidationError('A category cannot be its own parent.');
     }
@@ -87,32 +93,30 @@ export class CategoryAggregate {
       await assertNoParentCycle(repository, id, parentId);
     }
 
-    let slug = existing.slug;
-    if (payload.slug !== undefined) {
-      slug = await resolveUniqueSlug(
-        repository,
-        payload.slug.trim() || slugify(name),
-        id,
-      );
-    } else if (payload.name !== undefined && payload.name !== existing.name) {
-      slug = await resolveUniqueSlug(repository, slugify(name), id);
-    }
+    const slug = await resolveUniqueSlug(
+      repository,
+      payload.slug.trim() || slugify(name),
+      id,
+    );
 
     const updated: CategoryRecord = {
       ...existing,
       name,
       slug,
-      description:
-        payload.description !== undefined
-          ? payload.description.trim()
-          : existing.description,
+      description: payload.description.trim(),
+      status: payload.status,
       parentId,
-      isActive: payload.isActive ?? existing.isActive,
       updatedAt: new Date(),
     };
 
     const saved = await repository.save(updated);
     return new CategoryEntity(saved);
+  }
+}
+
+function assertStatus(status: CategoryStatus): void {
+  if (!isCategoryStatus(status)) {
+    throw new CategoryValidationError('Invalid category status.');
   }
 }
 

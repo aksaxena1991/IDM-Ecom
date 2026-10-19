@@ -5,6 +5,13 @@ import {
 } from './category.aggregate.js';
 import { InMemoryCategoryRepository } from '../models/category.model.js';
 
+const basePayload = {
+  slug: '',
+  description: '',
+  status: 'DRAFT' as const,
+  parentId: null,
+};
+
 describe('slugify', () => {
   it('normalizes names into URL slugs', () => {
     expect(slugify('Optics & Fiber')).toBe('optics-fiber');
@@ -20,17 +27,20 @@ describe('CategoryAggregate.create', () => {
     const repository = new InMemoryCategoryRepository();
 
     await expect(
-      CategoryAggregate.create(repository, { name: '   ' }),
+      CategoryAggregate.create(repository, { ...basePayload, name: '   ' }),
     ).rejects.toBeInstanceOf(CategoryValidationError);
   });
 
   it('creates a category with a generated slug', async () => {
     const repository = new InMemoryCategoryRepository();
     const entity = await CategoryAggregate.create(repository, {
+      ...basePayload,
       name: 'Power Systems',
     });
 
     expect(entity.name).toBe('Power Systems');
     expect(entity.slug).toBe('power-systems');
+    expect(entity.status).toBe('DRAFT');
+    expect(entity.deletedAt).toBeNull();
   });
 });

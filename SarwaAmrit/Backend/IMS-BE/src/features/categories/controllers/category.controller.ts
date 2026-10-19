@@ -6,9 +6,11 @@ import {
   CategoryValidationError,
 } from '../services/category.service.js';
 import type {
+  CategoryStatus,
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../types/category.type.js';
+import { isCategoryStatus } from '../types/category.type.js';
 import { toCategoryListResponse, toCategoryResponse } from '../views/category.view.js';
 
 export class CategoryController {
@@ -16,9 +18,7 @@ export class CategoryController {
 
   list = async (_req: Request, res: Response): Promise<void> => {
     const categories = await this.service.list();
-    res.json(
-      await toCategoryListResponse(categories, (id) => this.service.productCount(id)),
-    );
+    res.json(toCategoryListResponse(categories));
   };
 
   getById = async (req: Request, res: Response): Promise<void> => {
@@ -27,16 +27,14 @@ export class CategoryController {
       res.status(404).json({ detail: 'Category was not found.' });
       return;
     }
-    res.json(toCategoryResponse(category, await this.service.productCount(category.id)));
+    res.json(toCategoryResponse(category));
   };
 
   create = async (req: Request, res: Response): Promise<void> => {
     try {
       const payload = normalizeCreatePayload(req.body);
       const category = await this.service.create(payload);
-      res
-        .status(201)
-        .json(toCategoryResponse(category, await this.service.productCount(category.id)));
+      res.status(201).json(toCategoryResponse(category));
     } catch (error) {
       this.handleError(res, error);
     }
@@ -46,9 +44,7 @@ export class CategoryController {
     try {
       const payload = normalizeUpdatePayload(req.body);
       const category = await this.service.update(String(req.params.id), payload);
-      res.json(
-        toCategoryResponse(category, await this.service.productCount(category.id)),
-      );
+      res.json(toCategoryResponse(category));
     } catch (error) {
       this.handleError(res, error);
     }
@@ -85,10 +81,10 @@ function normalizeCreatePayload(body: unknown): CreateCategoryPayload {
   const record = body as Record<string, unknown>;
   return {
     name: readString(record.name) ?? '',
-    slug: readOptionalString(record.slug),
-    description: readOptionalString(record.description),
-    parentId: readNullableId(record.parent_id ?? record.parentId),
-    isActive: readOptionalBoolean(record.is_active ?? record.isActive),
+    slug: readString(record.slug) ?? '',
+    description: readString(record.description) ?? '',
+    status: readStatus(record.status) ?? 'DRAFT',
+    parentId: readNullableId(record.parentId ?? record.parent_id) ?? null,
   };
 }
 
@@ -97,15 +93,17 @@ function normalizeUpdatePayload(body: unknown): UpdateCategoryPayload {
     throw new CategoryValidationError('Request body is required.');
   }
   const record = body as Record<string, unknown>;
+  const status = readStatus(record.status);
+  if (!status) {
+    throw new CategoryValidationError('status is required.');
+  }
+
   return {
-    name: readOptionalString(record.name),
-    slug: readOptionalString(record.slug),
-    description: readOptionalString(record.description),
-    parentId:
-      record.parent_id !== undefined || record.parentId !== undefined
-        ? readNullableId(record.parent_id ?? record.parentId)
-        : undefined,
-    isActive: readOptionalBoolean(record.is_active ?? record.isActive),
+    name: readString(record.name) ?? '',
+    slug: readString(record.slug) ?? '',
+    description: readString(record.description) ?? '',
+    status,
+    parentId: readNullableId(record.parentId ?? record.parent_id) ?? null,
   };
 }
 
@@ -122,13 +120,6 @@ function readString(value: unknown): string | undefined {
   throw new CategoryValidationError('Request body contains invalid field types.');
 }
 
-function readOptionalString(value: unknown): string | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  return readString(value);
-}
-
 function readNullableId(value: unknown): string | null | undefined {
   if (value === undefined) {
     return undefined;
@@ -143,9 +134,13 @@ function readNullableId(value: unknown): string | null | undefined {
   return id;
 }
 
-function readOptionalBoolean(value: unknown): boolean | undefined {
-  if (value === undefined) {
+function readStatus(value: unknown): CategoryStatus | undefined {
+  if (value === undefined || value === null) {
     return undefined;
   }
-  return Boolean(value);
+  const status = readString(value);
+  if (!status || !isCategoryStatus(status)) {
+    throw new CategoryValidationError('Invalid category status.');
+  }
+  return status;
 }

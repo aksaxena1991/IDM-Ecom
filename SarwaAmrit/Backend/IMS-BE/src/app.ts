@@ -34,11 +34,7 @@ export function createApp(): Express {
 
   const categoryRepository = new PrismaCategoryRepository();
   const categoryEvents = new CategoryEventBus();
-  const categoryService = new CategoryService(
-    categoryRepository,
-    categoryEvents,
-    (categoryId) => prisma.product.count({ where: { categoryId } }),
-  );
+  const categoryService = new CategoryService(categoryRepository, categoryEvents);
 
   app.use(`${apiPrefix}/categories`, createCategoryRouter(categoryService));
 
