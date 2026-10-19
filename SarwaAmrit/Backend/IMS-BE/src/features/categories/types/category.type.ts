@@ -1,42 +1,49 @@
 export type CategoryId = string;
 
+export type CategoryStatus =
+  | "DRAFT"
+  | "ACTIVE"
+  | "INACTIVE"
+  | "ARCHIVED";
+
 export interface CategoryRecord {
   id: CategoryId;
   name: string;
   slug: string;
   description: string;
+  status: CategoryStatus;
   parentId: CategoryId | null;
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface CreateCategoryPayload {
   name: string;
-  slug?: string;
-  description?: string;
-  parentId?: CategoryId | null;
-  isActive?: boolean;
+  slug: string;
+  description: string;
+  status: CategoryStatus;
+  parentId: CategoryId | null;
 }
 
 export interface UpdateCategoryPayload {
-  name?: string;
-  slug?: string;
-  description?: string;
-  parentId?: CategoryId | null;
-  isActive?: boolean;
-}
-
-export interface CategoryResponse {
-  id: string;
   name: string;
   slug: string;
   description: string;
-  parent_id: string | null;
-  is_active: boolean;
-  product_count: number;
-  created_at: string;
-  updated_at: string;
+  status: CategoryStatus;
+  parentId: CategoryId | null;
+}
+
+export interface CategoryResponse {
+  id: CategoryId;
+  name: string;
+  slug: string;
+  description: string;
+  status: CategoryStatus;
+  parentId: CategoryId | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface CategoryListResponse {
