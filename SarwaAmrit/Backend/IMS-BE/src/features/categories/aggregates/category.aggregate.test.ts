@@ -59,4 +59,20 @@ describe('CategoryAggregate.create', () => {
       }),
     ).rejects.toBeInstanceOf(CategoryConflictError);
   });
+
+  it('rejects reusing a name from a soft-deleted category', async () => {
+    const repository = new InMemoryCategoryRepository();
+    const entity = await CategoryAggregate.create(repository, {
+      ...basePayload,
+      name: 'Legacy Rack',
+    });
+    await repository.delete(entity.id);
+
+    await expect(
+      CategoryAggregate.create(repository, {
+        ...basePayload,
+        name: 'Legacy Rack',
+      }),
+    ).rejects.toBeInstanceOf(CategoryConflictError);
+  });
 });

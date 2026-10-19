@@ -158,7 +158,9 @@ async function assertUniqueName(
 ): Promise<void> {
   const existing = await repository.findByName(name);
   if (existing && existing.id !== excludeId) {
-    throw new CategoryConflictError('Category name must be unique.');
+    throw new CategoryConflictError(
+      'Category name must be unique, including among soft-deleted categories.',
+    );
   }
 }
 

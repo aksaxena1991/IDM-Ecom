@@ -51,7 +51,7 @@ export class InMemoryCategoryRepository implements CategoryRepository {
       return null;
     }
     for (const record of this.store.values()) {
-      if (record.deletedAt === null && record.name.trim().toLowerCase() === normalized) {
+      if (record.name.trim().toLowerCase() === normalized) {
         return record;
       }
     }

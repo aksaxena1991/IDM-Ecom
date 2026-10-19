@@ -50,7 +50,6 @@ export class PrismaCategoryRepository implements CategoryRepository {
     }
     const row = await prisma.category.findFirst({
       where: {
-        deletedAt: null,
         name: { equals: trimmed, mode: 'insensitive' },
       },
     });
@@ -96,7 +95,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
         error.code === 'P2002'
       ) {
         throw new CategoryConflictError(
-          'Category name or slug must be unique among active categories.',
+          'Category name or slug must be unique.',
         );
       }
       throw error;
