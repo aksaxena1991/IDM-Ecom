@@ -1,4 +1,4 @@
-import type { Category as CategoryRow } from '../../../generated/prisma/index.js';
+import type { Category as CategoryRow } from '@prisma/client';
 import { prisma } from '../../../infrastructure/database/prisma.js';
 import type { CategoryId, CategoryRecord } from '../types/category.type.js';
 import type { CategoryRepository } from './category.model.js';
