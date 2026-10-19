@@ -95,7 +95,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
         error.code === 'P2002'
       ) {
         throw new CategoryConflictError(
-          'Category name or slug must be unique.',
+          'Category name or slug must be unique, including among soft-deleted categories.',
         );
       }
       throw error;
