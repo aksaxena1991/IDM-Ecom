@@ -1,0 +1,412 @@
+/* SkyLearn Charts Suite Styles */
+
+.sl-chart-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--sl-color-surface-elevated);
+  border: 1px solid var(--sl-color-outline);
+  border-radius: var(--sl-radius-card);
+  padding: 20px 24px;
+  position: relative;
+  font-family: var(--sl-font-body);
+}
+
+.sl-chart-container--borderless {
+  border: none;
+  padding: 0;
+}
+
+/* Header & Title */
+.sl-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.sl-chart-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sl-chart-title {
+  font-family: var(--sl-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sl-color-ink);
+  margin: 0;
+}
+
+.sl-chart-subtitle {
+  font-family: var(--sl-font-body);
+  font-size: 12px;
+  color: var(--sl-color-ink-subtle);
+  margin: 0;
+}
+
+/* Legend */
+.sl-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--sl-font-mono);
+  font-size: 11px;
+  color: var(--sl-color-ink-muted);
+}
+
+.sl-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 240ms;
+}
+
+.sl-chart-legend-item:hover {
+  color: var(--sl-color-ink);
+}
+
+.sl-chart-legend--footer {
+  justify-content: center;
+  margin-top: 4px;
+  font-family: var(--sl-font-body);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sl-chart-legend--footer .sl-chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.sl-chart-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--sl-radius-card);
+  flex-shrink: 0;
+}
+
+/* Chart SVG Canvas wrapper */
+.sl-chart-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
+.sl-chart-svg {
+  display: block;
+  overflow: visible;
+  width: 100%;
+}
+
+/* Gridlines & Axes */
+.sl-chart-gridline {
+  stroke: var(--sl-color-outline);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.sl-chart-axis-line {
+  stroke: var(--sl-color-outline-strong);
+  stroke-width: 1;
+}
+
+.sl-chart-axis-tick {
+  font-family: var(--sl-font-mono);
+  font-size: 11px;
+  fill: var(--sl-color-ink-subtle);
+  user-select: none;
+}
+
+/* Tracking Crosshair Line */
+.sl-chart-crosshair {
+  stroke: var(--sl-color-sky);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+/* Point nodes */
+.sl-chart-point {
+  fill: var(--sl-color-surface-elevated);
+  stroke-width: 2;
+  transition: r 240ms;
+}
+
+.sl-chart-point--active {
+  r: 5;
+  stroke-width: 2.5;
+}
+
+/* Bar Elements */
+.sl-chart-bar {
+  transition: opacity 240ms;
+  cursor: pointer;
+}
+
+.sl-chart-bar:hover {
+  opacity: 0.85;
+}
+
+/* Floating Chart Tooltip */
+.sl-chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  background-color: var(--sl-color-surface-elevated);
+  border: 1px solid var(--sl-color-outline);
+  border-radius: var(--sl-radius-card);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  padding: 10px 14px;
+  font-family: var(--sl-font-body);
+  font-size: 12px;
+  color: var(--sl-color-ink);
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  white-space: nowrap;
+  animation: sl-chart-tooltip-fade 0.1s ease-out;
+}
+
+[data-theme="dark"] .sl-chart-tooltip {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  border-color: var(--sl-color-outline-strong);
+}
+
+@keyframes sl-chart-tooltip-fade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -95%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+.sl-chart-tooltip-title {
+  font-family: var(--sl-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sl-color-ink-muted);
+  border-bottom: 1px solid var(--sl-color-outline);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.sl-chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0;
+}
+
+.sl-chart-tooltip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sl-color-ink-muted);
+}
+
+.sl-chart-tooltip-color {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--sl-radius-card);
+}
+
+.sl-chart-tooltip-value {
+  font-family: var(--sl-font-mono);
+  font-weight: 600;
+  color: var(--sl-color-ink);
+}
+
+/* Pie & Donut Charts */
+.sl-chart-slice {
+  cursor: pointer;
+  transition: opacity 240ms, transform 240ms;
+}
+
+.sl-chart-slice:hover {
+  opacity: 0.88;
+}
+
+/* Gantt Chart */
+.sl-chart-gantt-row {
+  transition: background-color 240ms;
+}
+
+.sl-chart-gantt-bar {
+  cursor: pointer;
+  transition: opacity 240ms;
+}
+
+.sl-chart-gantt-bar:hover {
+  opacity: 0.85;
+}
+
+.sl-chart-gantt-today {
+  stroke: var(--sl-color-sky);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+/* Funnel Chart */
+.sl-chart-funnel-step {
+  cursor: pointer;
+  transition: opacity 240ms;
+}
+
+.sl-chart-funnel-step:hover {
+  opacity: 0.85;
+}
+
+/* Gauge Chart */
+.sl-chart-gauge-needle {
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Heatmap Chart */
+.sl-chart-heatmap-cell {
+  cursor: pointer;
+  transition: opacity 240ms, stroke 240ms;
+}
+
+.sl-chart-heatmap-cell:hover {
+  stroke: var(--sl-color-ink);
+  stroke-width: 1.5;
+}
+
+/* Candlestick Chart */
+.sl-chart-candle-wick {
+  stroke-width: 1;
+}
+
+.sl-chart-candle-body {
+  cursor: pointer;
+  transition: opacity 240ms;
+}
+
+.sl-chart-candle-body:hover {
+  opacity: 0.85;
+}
+
+/* Scatter & Histogram */
+.sl-chart-scatter-point {
+  cursor: pointer;
+  transition: r 240ms, opacity 240ms;
+}
+
+.sl-chart-scatter-point:hover {
+  opacity: 0.85;
+}
+
+.sl-chart-trendline {
+  stroke: var(--sl-color-ink-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+/* Venn Diagram */
+.sl-chart-venn-circle {
+  cursor: pointer;
+  transition: fill-opacity 240ms;
+}
+
+.sl-chart-venn-circle:hover {
+  fill-opacity: 0.45;
+}
+
+/* Map Charts: Route, Pin, Connection, Density */
+.sl-chart-map-frame {
+  background-color: var(--sl-color-surface-sunken);
+  border: 1px solid var(--sl-color-outline);
+}
+
+.sl-chart-map-gridline {
+  stroke: var(--sl-color-outline);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 4;
+}
+
+.sl-chart-map-pin {
+  cursor: pointer;
+  transition: transform 240ms;
+}
+
+.sl-chart-map-pin:hover {
+  transform: translateY(-2px);
+}
+
+.sl-chart-map-arc {
+  fill: none;
+  stroke-linecap: square;
+  transition: stroke-width 240ms;
+}
+
+.sl-chart-map-arc:hover {
+  stroke-width: 2.5;
+}
+
+/* Table Chart */
+.sl-chart-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.sl-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: var(--sl-font-body);
+  text-align: left;
+}
+
+.sl-chart-table th {
+  padding: 10px 14px;
+  font-family: var(--sl-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sl-color-ink-subtle);
+  border-bottom: 1px solid var(--sl-color-outline-strong);
+  background-color: var(--sl-color-surface-sunken);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sl-chart-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--sl-color-outline);
+  color: var(--sl-color-ink);
+  white-space: nowrap;
+}
+
+.sl-chart-table tr:hover td {
+  background-color: var(--sl-color-surface-sunken);
+}
+
+.sl-chart-table-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: var(--sl-color-outline);
+  position: relative;
+  overflow: hidden;
+}
+
+.sl-chart-table-bar-fill {
+  height: 100%;
+  background-color: var(--sl-color-ink);
+  transition: width 0.3s ease;
+}
+

@@ -1,0 +1,41 @@
+.sl-avatar {
+  display: grid;
+  place-items: center;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-color-sky-soft);
+  box-shadow:
+    inset 0 0 0 3px #fff,
+    0 0 0 2px var(--sl-color-sky);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sl-avatar--sm {
+  width: 56px;
+  height: 56px;
+  font-size: var(--sl-text-small);
+}
+
+.sl-avatar--md {
+  width: 72px;
+  height: 72px;
+  font-size: var(--sl-text-body);
+}
+
+.sl-avatar--lg {
+  width: 96px;
+  height: 96px;
+  font-size: var(--sl-text-h3);
+}
+
+.sl-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sl-avatar__initials {
+  font-family: var(--sl-font-display);
+  font-weight: 700;
+  color: var(--sl-color-sky-deep);
+}

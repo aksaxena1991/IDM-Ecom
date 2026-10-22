@@ -1,0 +1,24 @@
+.sl-drop-zone {
+  min-height: 120px;
+  padding: var(--sl-space-8);
+  border: 2px dashed var(--sl-color-outline-strong);
+  border-radius: var(--sl-radius-card);
+  background: var(--sl-color-surface-sunken);
+  display: grid;
+  place-items: center;
+  transition:
+    border-color var(--sl-duration) ease,
+    background var(--sl-duration) ease;
+}
+
+.sl-drop-zone--active {
+  border-color: var(--sl-color-sky);
+  background: var(--sl-color-sky-soft);
+}
+
+.sl-drop-zone__hint {
+  margin: 0;
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-body);
+  color: var(--sl-color-ink-muted);
+}

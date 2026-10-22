@@ -1,0 +1,34 @@
+.sl-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sl-space-1) var(--sl-space-3);
+  border-radius: var(--sl-radius-pill);
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-caption);
+  font-weight: 600;
+}
+
+.sl-tag--subject {
+  background: var(--sl-color-sky-soft);
+  color: var(--sl-color-sky-deep);
+}
+
+.sl-tag--easy {
+  background: var(--sl-color-sun-soft);
+  color: var(--sl-color-sun-deep);
+}
+
+.sl-tag--medium {
+  background: var(--sl-color-sun);
+  color: var(--sl-color-ink);
+}
+
+.sl-tag--hard {
+  background: var(--sl-color-berry-soft);
+  color: var(--sl-color-berry);
+}
+
+.sl-tag--bonus {
+  background: var(--sl-color-berry-soft);
+  color: var(--sl-color-berry);
+}

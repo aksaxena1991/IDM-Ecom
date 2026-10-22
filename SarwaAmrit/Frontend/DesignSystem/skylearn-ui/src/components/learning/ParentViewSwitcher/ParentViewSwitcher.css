@@ -1,0 +1,26 @@
+.sl-parent-switch {
+  display: inline-flex;
+  padding: var(--sl-space-1);
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-color-surface-sunken);
+  border: 1px solid var(--sl-color-outline);
+}
+
+.sl-parent-switch__btn {
+  min-height: 40px;
+  padding: 0 var(--sl-space-4);
+  border: none;
+  border-radius: var(--sl-radius-pill);
+  background: transparent;
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-small);
+  font-weight: 600;
+  color: var(--sl-color-ink-muted);
+  cursor: pointer;
+}
+
+.sl-parent-switch__btn--active {
+  background: var(--sl-color-surface-elevated);
+  color: var(--sl-color-sky-deep);
+  box-shadow: var(--sl-shadow-card-hover);
+}

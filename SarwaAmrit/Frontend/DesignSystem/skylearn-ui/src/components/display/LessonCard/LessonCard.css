@@ -1,0 +1,67 @@
+.sl-lesson-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sl-space-4);
+  width: min(100%, 320px);
+  padding: var(--sl-space-6);
+  border: 1px solid var(--sl-color-outline);
+  border-radius: var(--sl-radius-card);
+  background: var(--sl-color-surface-elevated);
+  text-align: left;
+  cursor: default;
+  transition:
+    transform var(--sl-duration) var(--sl-ease-spring),
+    box-shadow var(--sl-duration) ease,
+    border-color var(--sl-duration) ease;
+}
+
+button.sl-lesson-card {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sl-lesson-card:not(.sl-lesson-card--locked):hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sl-shadow-card-hover);
+}
+
+.sl-lesson-card--active {
+  border-width: 3px;
+  border-color: var(--sl-color-sky);
+  box-shadow: var(--sl-shadow-lesson-active);
+}
+
+.sl-lesson-card--locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sl-lesson-card__icon {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.sl-lesson-card__lock {
+  filter: sepia(1) saturate(4) hue-rotate(5deg);
+}
+
+.sl-lesson-card__title {
+  margin: 0;
+  font-family: var(--sl-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--sl-color-ink);
+}
+
+.sl-lesson-card__desc {
+  margin: 0;
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-small);
+  line-height: var(--sl-lh-small);
+  color: var(--sl-color-ink-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

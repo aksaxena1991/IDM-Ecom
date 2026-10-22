@@ -1,0 +1,38 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="SkyLearn/Accessibility" />
+
+# Accessibility
+
+Accessibility is first-class in SkyLearn, not an afterthought.
+
+## Typography and contrast
+
+- **Atkinson Hyperlegible** for body and instructions (dyslexia-friendly letterforms).
+- Minimum **16px** type in kid-facing UI; instructions at **18px+**.
+- Contrast targets **WCAG AAA (7:1)** on body text; **AA large (4.5:1)** on display sizes.
+
+## Interaction
+
+- **56px minimum** tap targets on kid-facing controls.
+- No hover-only critical actions — touch devices need explicit affordances.
+- **No autoplay audio** — every sound requires user intent (e.g. **Read to me**).
+
+## Meaning beyond color
+
+Correct and incorrect states always pair **color + icon + copy** (checkmark / ×, border, message).
+
+## Reading support
+
+- **Read to me** on reading passages.
+- Optional **reading ruler** line highlight in `ReadingPassage`.
+
+## Modes (ThemeProvider)
+
+| Flag | Effect |
+|------|--------|
+| `data-high-contrast="true"` | White surfaces, black ink, reduced decorative chrome |
+| `data-reduced-motion="true"` | Shorter transitions; confetti → static star; no shake/sparkle flourishes |
+| `data-parent-mode="true"` | Denser parent/teacher typography; mono-friendly data slots |
+
+Storybook includes an **Accessibility toolbar** to preview these modes. The provider also honors **`prefers-reduced-motion`** on load.

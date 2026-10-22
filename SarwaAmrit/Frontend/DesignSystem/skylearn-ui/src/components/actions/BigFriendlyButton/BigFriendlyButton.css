@@ -1,0 +1,43 @@
+.sl-big-button {
+  min-height: var(--sl-tap-min);
+  padding: var(--sl-space-6) calc(var(--sl-space-6) + var(--sl-space-4));
+  border: none;
+  border-radius: var(--sl-radius-button);
+  background: var(--sl-color-sky);
+  color: #fff;
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-body-lg);
+  font-weight: 600;
+  letter-spacing: var(--sl-tracking-body);
+  cursor: pointer;
+  transition:
+    background var(--sl-duration) ease,
+    transform 120ms var(--sl-ease-spring),
+    box-shadow var(--sl-duration) ease;
+  box-shadow: 0 1px 0 var(--sl-color-sky-bright);
+}
+
+.sl-big-button:hover:not(:disabled) {
+  background: var(--sl-color-sky-deep);
+  box-shadow:
+    0 1px 0 var(--sl-color-sky-bright),
+    var(--sl-shadow-card-hover);
+}
+
+.sl-big-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.sl-big-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sl-big-button--full {
+  width: 100%;
+}
+
+.sl-big-button:focus-visible {
+  outline: 4px solid var(--sl-color-sky-soft);
+  outline-offset: 2px;
+}

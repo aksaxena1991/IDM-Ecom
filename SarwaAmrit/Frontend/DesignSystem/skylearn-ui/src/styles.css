@@ -1,0 +1,35 @@
+@import './tokens/tokens.css';
+@import './styles/layout.css';
+@import './styles/animations.css';
+@import './components/typography/Typography/Typography.css';
+@import './components/actions/BigFriendlyButton/BigFriendlyButton.css';
+@import './components/actions/Input/Input.css';
+@import './components/display/ProgressBar/ProgressBar.css';
+@import './components/display/LessonCard/LessonCard.css';
+@import './components/display/StarBadge/StarBadge.css';
+@import './components/display/StreakCounter/StreakCounter.css';
+@import './components/display/TagPill/TagPill.css';
+@import './components/display/Avatar/Avatar.css';
+@import './components/learning/AnswerTile/AnswerTile.css';
+@import './components/learning/QuizScoreCard/QuizScoreCard.css';
+@import './components/learning/DragDropZone/DragDropZone.css';
+@import './components/learning/ReadingPassage/ReadingPassage.css';
+@import './components/learning/ParentViewSwitcher/ParentViewSwitcher.css';
+@import './components/display/Icon/Icon.css';
+@import './components/overlays/Modal/Modal.css';
+@import './components/overlays/HelpBubble/HelpBubble.css';
+@import './components/feedback/EmptyState/EmptyState.css';
+@import './components/theme/AccessibilityToolbar/AccessibilityToolbar.css';
+@import './components/motion/ConfettiCelebration/ConfettiCelebration.css';
+@import './components/charts/Charts.css';
+@import './components/charts/Map.css';
+
+.sl-root {
+  min-height: 100%;
+  background: var(--sl-color-background);
+  color: var(--sl-color-ink);
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-body);
+  line-height: var(--sl-lh-body);
+  letter-spacing: var(--sl-tracking-body);
+}

@@ -1,0 +1,27 @@
+.sl-icon {
+  flex-shrink: 0;
+  color: var(--sl-color-ink-muted);
+}
+
+.sl-icon--sm {
+  width: 24px;
+  height: 24px;
+}
+
+.sl-icon--md {
+  width: 32px;
+  height: 32px;
+}
+
+.sl-icon--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.sl-icon--active {
+  color: var(--sl-color-sky);
+}
+
+.sl-icon--achievement {
+  color: var(--sl-color-sun-deep);
+}

@@ -1,0 +1,28 @@
+.sl-confetti {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.sl-confetti-piece {
+  position: absolute;
+  top: -12px;
+  border-radius: 2px;
+  animation: sl-confetti-fall var(--sl-duration-confetti) ease-in forwards;
+}
+
+.sl-root[data-reduced-motion='true'] .sl-confetti-piece {
+  display: none;
+}
+
+.sl-root[data-reduced-motion='true'] .sl-confetti::after {
+  content: '★';
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 48px;
+  color: var(--sl-color-sun);
+}

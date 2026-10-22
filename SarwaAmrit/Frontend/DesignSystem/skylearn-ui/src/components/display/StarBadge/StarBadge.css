@@ -1,0 +1,33 @@
+.sl-star-badge {
+  display: grid;
+  place-items: center;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-color-sun);
+  color: var(--sl-color-ink);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--sl-color-sun-deep);
+}
+
+.sl-star-badge--md {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+}
+
+.sl-star-badge--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 32px;
+}
+
+.sl-star-badge--silver {
+  background: linear-gradient(145deg, #e2e8f0, #94a3b8);
+}
+
+.sl-star-badge--bronze {
+  background: linear-gradient(145deg, #fcd34d, #d97706);
+}
+
+.sl-star-badge--glow {
+  animation: sl-badge-glow 2s ease-out 1;
+}

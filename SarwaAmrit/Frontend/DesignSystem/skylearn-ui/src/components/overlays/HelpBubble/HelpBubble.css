@@ -1,0 +1,39 @@
+.sl-help-bubble {
+  display: flex;
+  gap: var(--sl-space-3);
+  max-width: 360px;
+  padding: var(--sl-space-4) var(--sl-space-6);
+  border-radius: var(--sl-radius-card);
+  background: var(--sl-color-sky-soft);
+  color: var(--sl-color-sky-deep);
+  position: relative;
+}
+
+.sl-help-bubble::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  bottom: -10px;
+  border: 10px solid transparent;
+  border-top-color: var(--sl-color-sky-soft);
+}
+
+.sl-help-bubble__mascot {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.sl-help-bubble__from {
+  margin: 0;
+  font-size: var(--sl-text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sl-help-bubble__message {
+  margin: var(--sl-space-1) 0 0;
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-body);
+  line-height: var(--sl-lh-body);
+}

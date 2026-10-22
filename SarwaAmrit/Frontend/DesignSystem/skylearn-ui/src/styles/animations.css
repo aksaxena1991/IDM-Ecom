@@ -1,0 +1,163 @@
+@keyframes sl-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(calc(-1 * var(--sl-shake, 4px)));
+  }
+  75% {
+    transform: translateX(var(--sl-shake, 4px));
+  }
+}
+
+@keyframes sl-scale-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes sl-confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sl-badge-glow {
+  0%,
+  100% {
+    box-shadow: var(--sl-shadow-badge-glow);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(252, 211, 77, 0.65);
+  }
+}
+
+.sl-animate-shake {
+  animation: sl-shake var(--sl-duration) ease-in-out 2;
+}
+
+.sl-animate-scale-in {
+  animation: sl-scale-in var(--sl-duration-progress) var(--sl-ease-spring) forwards;
+}
+
+@keyframes sl-sparkle-pop {
+  0% {
+    transform: scale(0) translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translate(var(--sl-sparkle-x, 8px), var(--sl-sparkle-y, -12px));
+    opacity: 0;
+  }
+}
+
+.sl-answer-tile {
+  position: relative;
+}
+
+.sl-answer-tile__sparkles {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.sl-answer-tile__sparkles span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sl-color-sun-bright);
+}
+
+.sl-answer-tile__sparkles span:nth-child(1) {
+  top: 20%;
+  left: 18%;
+  --sl-sparkle-x: -10px;
+  --sl-sparkle-y: -14px;
+  animation: sl-sparkle-pop var(--sl-duration-answer) var(--sl-ease-spring) forwards;
+}
+
+.sl-answer-tile__sparkles span:nth-child(2) {
+  top: 30%;
+  right: 22%;
+  --sl-sparkle-x: 12px;
+  --sl-sparkle-y: -10px;
+  animation: sl-sparkle-pop var(--sl-duration-answer) var(--sl-ease-spring) 40ms forwards;
+}
+
+.sl-answer-tile__sparkles span:nth-child(3) {
+  bottom: 28%;
+  left: 40%;
+  --sl-sparkle-x: -6px;
+  --sl-sparkle-y: 10px;
+  animation: sl-sparkle-pop var(--sl-duration-answer) var(--sl-ease-spring) 80ms forwards;
+}
+
+.sl-answer-tile__sparkles span:nth-child(4) {
+  top: 45%;
+  right: 35%;
+  --sl-sparkle-x: 8px;
+  --sl-sparkle-y: 8px;
+  animation: sl-sparkle-pop var(--sl-duration-answer) var(--sl-ease-spring) 20ms forwards;
+}
+
+.sl-progress__track {
+  position: relative;
+}
+
+.sl-progress__sparkles {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+}
+
+.sl-progress__sparkles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sl-color-sun-bright);
+  animation: sl-sparkle-pop 480ms ease-out forwards;
+}
+
+.sl-progress__sparkles span:nth-child(1) {
+  --sl-sparkle-x: -8px;
+  --sl-sparkle-y: -10px;
+}
+
+.sl-progress__sparkles span:nth-child(2) {
+  --sl-sparkle-x: 10px;
+  --sl-sparkle-y: -8px;
+  animation-delay: 60ms;
+}
+
+.sl-progress__sparkles span:nth-child(3) {
+  --sl-sparkle-x: 0;
+  --sl-sparkle-y: 12px;
+  animation-delay: 30ms;
+}
+
+.sl-root[data-reduced-motion='true'] .sl-answer-tile__sparkles,
+.sl-root[data-reduced-motion='true'] .sl-progress__sparkles {
+  display: none;
+}
+
+.sl-root[data-reduced-motion='true'] .sl-animate-shake,
+.sl-root[data-reduced-motion='true'] .sl-animate-scale-in,
+.sl-root[data-reduced-motion='true'] .sl-confetti-piece {
+  animation: none !important;
+}

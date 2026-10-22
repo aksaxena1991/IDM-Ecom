@@ -1,0 +1,34 @@
+.sl-progress {
+  width: 100%;
+}
+
+.sl-progress__label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--sl-space-2);
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-small);
+  color: var(--sl-color-ink-muted);
+}
+
+.sl-progress__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.sl-progress__track {
+  height: 8px;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-color-sky-soft);
+  overflow: visible;
+}
+
+.sl-progress__fill {
+  height: 100%;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-color-leaf);
+  transition: width var(--sl-duration-progress) ease-out;
+}
+
+.sl-progress__fill--celebrate {
+  box-shadow: 0 0 12px rgba(252, 211, 77, 0.5);
+}

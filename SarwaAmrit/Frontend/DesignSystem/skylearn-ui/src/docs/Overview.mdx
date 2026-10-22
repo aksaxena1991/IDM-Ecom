@@ -1,0 +1,53 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="SkyLearn/Overview" />
+
+# SkyLearn
+
+Warm, bright design system for **K–8 edtech** — friendly sky blue, sun achievements, leaf progress. Built for **kids** (large tap targets, clear rewards) and **parents/teachers** (readable progress).
+
+## Principles
+
+- **Atkinson Hyperlegible** for body copy (dyslexia-friendly)
+- **56px minimum** tap targets on kid-facing controls
+- **Coral**, not harsh red, for “try again” states
+- **Sun yellow** for rewards only — not primary CTAs
+- **Confetti** on lesson completion only
+
+## Packages
+
+```bash
+npm install @skylearn/ui
+```
+
+```tsx
+import '@skylearn/ui/styles.css';
+import { ThemeProvider, LessonCard, BigFriendlyButton } from '@skylearn/ui';
+```
+
+## Storybook
+
+```bash
+npm run storybook
+```
+
+Opens on **http://localhost:6008**.
+
+## Documentation in this catalog
+
+- **Foundations** — colors, type scale, elevation, spacing
+- **Voice & tone** — copy guidelines for kids vs parents
+- **Accessibility** — contrast, motion, reading support, theme flags
+- **Do's and Don'ts** — quick guardrails for product teams
+
+## Components
+
+Learning UI: `LessonCard`, `BigFriendlyButton`, `AnswerTile`, `ProgressBar`, `StarBadge`, `StreakCounter`, `QuizScoreCard`, `ReadingPassage`, `DragDropZone`, `HelpBubble`, `ParentViewSwitcher`, `ConfettiCelebration`, `TagPill`, `Avatar`, `Input`, `Modal`, `EmptyState`, `Icon`.
+
+Charts: full data-viz set under **SkyLearn/Data Visualization** (parent dashboards).
+
+## Layout utilities
+
+- `.sl-container` — max-width 1280px, responsive horizontal padding
+- `.sl-section` — 48px section spacing
+- `.sl-card-grid` — 20px / 32px responsive gap
