@@ -63,6 +63,7 @@ export * from './components/overlays/Panel';
 export * from './components/overlays/Modal';
 export * from './components/overlays/Popover';
 export * from './components/overlays/Dropdown';
+export * from './components/overlays/AddWidget';
 export * from './components/overlays/Drawer';
 export * from './components/overlays/SplitScreen';
 

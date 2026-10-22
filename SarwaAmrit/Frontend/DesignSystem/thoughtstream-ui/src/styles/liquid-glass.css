@@ -246,7 +246,8 @@
    ========================================================================== */
 
 .ts-dropdown-menu,
-.ts-popover-content {
+.ts-popover-content,
+.ts-add-widget-menu {
   background: var(--ts-glass-gradient-raised) !important;
   backdrop-filter: var(--ts-glass-blur-deep) !important;
   -webkit-backdrop-filter: var(--ts-glass-blur-deep) !important;
@@ -255,7 +256,9 @@
 }
 
 .ts-dropdown-item:hover,
-.ts-dropdown-item--focused {
+.ts-dropdown-item--focused,
+.ts-add-widget-option:hover,
+.ts-add-widget-option:focus-visible {
   background: var(--ts-glass-bg-hover) !important;
 }
 
