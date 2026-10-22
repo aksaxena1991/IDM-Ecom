@@ -614,6 +614,14 @@
   box-shadow: var(--ts-glass-shadow-md) !important;
 }
 
+.ts-widget-card .ts-chart-container--borderless {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .ts-chart-tooltip {
   background: var(--ts-glass-gradient-raised) !important;
   backdrop-filter: var(--ts-glass-blur-deep) !important;

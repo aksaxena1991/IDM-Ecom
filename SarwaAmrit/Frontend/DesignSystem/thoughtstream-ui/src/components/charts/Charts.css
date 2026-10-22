@@ -75,6 +75,20 @@
   color: var(--ts-color-text-primary);
 }
 
+.ts-chart-legend--footer {
+  justify-content: center;
+  margin-top: 4px;
+  font-family: var(--ts-font-body);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ts-chart-legend--footer .ts-chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
 .ts-chart-legend-color {
   width: 10px;
   height: 10px;

@@ -49,6 +49,7 @@
 @import '../components/overlays/Popover/Popover.css';
 @import '../components/overlays/Dropdown/Dropdown.css';
 @import '../components/overlays/AddWidget/AddWidget.css';
+@import '../components/overlays/WidgetCard/WidgetCard.css';
 @import '../components/overlays/Drawer/Drawer.css';
 @import '../components/overlays/SplitScreen/SplitScreen.css';
 

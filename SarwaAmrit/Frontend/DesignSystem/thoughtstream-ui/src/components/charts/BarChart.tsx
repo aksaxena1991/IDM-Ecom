@@ -18,7 +18,19 @@ export interface BarChartProps {
   subtitle?: string;
   height?: number;
   showLegend?: boolean;
+  /** Where the legend sits. Header matches existing charts; footer centers it under the plot. */
+  legendPlacement?: 'header' | 'footer';
+  /** Paint each legend label in its series color */
+  colorLegend?: boolean;
   showGrid?: boolean;
+  /** Fixed top of the Y axis. Omit to scale from the data. */
+  yMax?: number;
+  /** Even Y-axis steps, such as 5 for 0, 5, 10, 15 */
+  yTickStep?: number;
+  /** Corner radius of each bar */
+  barRadius?: number;
+  /** Hairline stroke around each bar */
+  barStroke?: boolean;
   valueFormatter?: (value: number) => string;
   borderless?: boolean;
   className?: string;
@@ -42,7 +54,13 @@ export const BarChart: React.FC<BarChartProps> = ({
   subtitle,
   height = 260,
   showLegend = true,
+  legendPlacement = 'header',
+  colorLegend = false,
   showGrid = true,
+  yMax,
+  yTickStep,
+  barRadius = 0,
+  barStroke = true,
   valueFormatter = (v) => v.toLocaleString(),
   borderless = false,
   className = '',
@@ -76,11 +94,15 @@ export const BarChart: React.FC<BarChartProps> = ({
     });
   });
 
-  if (maxVal <= 0) maxVal = 100;
-  maxVal = Math.ceil(maxVal * 1.08);
+  let scaleMax = yMax ?? maxVal;
+  if (yMax == null) {
+    if (scaleMax <= 0) scaleMax = 100;
+    scaleMax = Math.ceil(scaleMax * 1.08);
+  }
+  if (scaleMax <= 0) scaleMax = 1;
 
   const getY = (val: number) => {
-    const ratio = Math.max(0, val) / maxVal;
+    const ratio = Math.max(0, val) / scaleMax;
     return paddingTop + innerHeight - ratio * innerHeight;
   };
 
@@ -91,15 +113,42 @@ export const BarChart: React.FC<BarChartProps> = ({
 
   const baselineY = paddingTop + innerHeight;
 
-  const yTicks = Array.from({ length: 5 }, (_, i) => {
-    const val = (maxVal / 4) * (4 - i);
-    return { val: Math.round(val), y: getY(val) };
-  });
+  const yTicks =
+    yTickStep && yTickStep > 0
+      ? Array.from(
+          { length: Math.floor(scaleMax / yTickStep) + 1 },
+          (_, i) => {
+            const val = Math.round((scaleMax - i * yTickStep) * 1000) / 1000;
+            return { val, y: getY(val) };
+          }
+        ).filter((tick) => tick.val >= 0)
+      : Array.from({ length: 5 }, (_, i) => {
+          const val = (scaleMax / 4) * (4 - i);
+          return { val: Math.round(val), y: getY(val) };
+        });
 
   const activeDataPoint = hoveredBar ? data[hoveredBar.dataIndex] : null;
   const activeSeries = hoveredBar
     ? series.find((s) => s.key === hoveredBar.seriesKey)
     : null;
+
+  const legend = showLegend ? (
+    <ul
+      className={`ts-chart-legend ${
+        legendPlacement === 'footer' ? 'ts-chart-legend--footer' : ''
+      }`.trim()}
+    >
+      {series.map((s, idx) => {
+        const color = s.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
+        return (
+          <li key={s.key} className="ts-chart-legend-item">
+            <span className="ts-chart-legend-color" style={{ backgroundColor: color }} />
+            <span style={colorLegend ? { color } : undefined}>{s.label}</span>
+          </li>
+        );
+      })}
+    </ul>
+  ) : null;
 
   const tooltipItems: ChartTooltipItem[] =
     activeDataPoint && activeSeries
@@ -125,7 +174,7 @@ export const BarChart: React.FC<BarChartProps> = ({
       className={`ts-chart-container ${borderless ? 'ts-chart-container--borderless' : ''} ${className}`.trim()}
       style={style}
     >
-      {(title || subtitle || showLegend) && (
+      {(title || subtitle || (showLegend && legendPlacement === 'header')) && (
         <div className="ts-chart-header">
           {(title || subtitle) && (
             <div className="ts-chart-title-group">
@@ -134,19 +183,7 @@ export const BarChart: React.FC<BarChartProps> = ({
             </div>
           )}
 
-          {showLegend && (
-            <ul className="ts-chart-legend">
-              {series.map((s, idx) => (
-                <li key={s.key} className="ts-chart-legend-item">
-                  <span
-                    className="ts-chart-legend-color"
-                    style={{ backgroundColor: s.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length] }}
-                  />
-                  <span>{s.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          {legendPlacement === 'header' && legend}
         </div>
       )}
 
@@ -179,8 +216,9 @@ export const BarChart: React.FC<BarChartProps> = ({
             <text
               key={`tick-${i}`}
               x={paddingLeft - 8}
-              y={tick.y + 4}
+              y={tick.y}
               textAnchor="end"
+              dominantBaseline="middle"
               className="ts-chart-axis-tick"
             >
               {valueFormatter(tick.val)}
@@ -206,6 +244,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                 {/* Bars for each series */}
                 {series.map((s, seriesIdx) => {
                   const val = Number(d[s.key] ?? 0);
+                  if (val <= 0) return null;
                   const barX = groupX + seriesIdx * singleBarWidth;
                   const barY = getY(val);
                   const barHeight = baselineY - barY;
@@ -223,9 +262,9 @@ export const BarChart: React.FC<BarChartProps> = ({
                       width={Math.max(2, singleBarWidth - 2)}
                       height={Math.max(1, barHeight)}
                       fill={color}
-                      stroke="var(--ts-border-subtle)"
-                      strokeWidth={1}
-                      rx={0}
+                      stroke={barStroke ? 'var(--ts-border-subtle)' : 'none'}
+                      strokeWidth={barStroke ? 1 : 0}
+                      rx={barRadius}
                       className="ts-chart-bar"
                       opacity={isHovered ? 0.85 : 1}
                       onClick={() => onBarClick?.(d, s.key, groupIdx)}
@@ -257,6 +296,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           visible={hoveredBar !== null}
         />
       </div>
+      {legendPlacement === 'footer' && legend}
     </div>
   );
 };
