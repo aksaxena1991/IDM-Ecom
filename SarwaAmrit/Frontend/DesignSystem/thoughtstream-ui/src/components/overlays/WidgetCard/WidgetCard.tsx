@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ChevronDown, Grip, Maximize2, MoreVertical, X } from 'lucide-react';
+import { ChevronDown, Grip, Maximize2, Minimize2, MoreVertical, X } from 'lucide-react';
 import { Dropdown, DropdownItem } from '../Dropdown';
+import type { WidgetLayout } from './widgetLayout';
 import './WidgetCard.css';
 
 export interface WidgetRangeOption {
@@ -19,12 +20,14 @@ export interface WidgetCardProps {
   children: React.ReactNode;
   /** Shows the edit frame: accent border and the drag, expand, and remove tools */
   editing?: boolean;
+  /** Current grid footprint (from WidgetBoard) */
+  layout?: WidgetLayout;
+  /** Widens the widget on the board (more columns, then more rows) */
+  onGrow?: () => void;
+  /** Narrows or shortens the widget on the board */
+  onShrink?: () => void;
   /** Removes the widget from the board */
   onRemove?: () => void;
-  /** Expands the widget across the board */
-  onExpand?: () => void;
-  /** True when this card currently spans the board */
-  expanded?: boolean;
   /** Called when the drag grip is pressed, so the board can start a reorder */
   onDragGripPointerDown?: () => void;
   /** Called when the grip is released */
@@ -42,8 +45,7 @@ export interface WidgetCardProps {
  * Dashboard widget frame.
  *
  * Matches the analytics card: title and subtitle, a range menu, an overflow
- * menu, and — while editing — a grip, expand, and remove control sitting on
- * the top edge.
+ * menu, and — while editing — a grip, resize, and remove control on the top edge.
  */
 export const WidgetCard: React.FC<WidgetCardProps> = ({
   title,
@@ -51,9 +53,10 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
   icon,
   children,
   editing = false,
+  layout,
+  onGrow,
+  onShrink,
   onRemove,
-  onExpand,
-  expanded = false,
   onDragGripPointerDown,
   onDragGripPointerUp,
   rangeOptions,
@@ -71,12 +74,17 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
     onRangeChange?.(next);
   };
 
+  const sizeHint =
+    layout &&
+    `${layout.columnSpan} col${layout.columnSpan === 1 ? '' : 's'}, ${layout.rowSpan} row${
+      layout.rowSpan === 1 ? '' : 's'
+    }`;
+
   return (
     <section
       className={[
         'ts-widget-card',
         editing ? 'ts-widget-card--editing' : '',
-        expanded ? 'ts-widget-card--expanded' : '',
         className,
       ]
         .filter(Boolean)
@@ -99,9 +107,22 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
           <button
             type="button"
             className="ts-widget-card-tool"
-            aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
-            aria-pressed={expanded}
-            onClick={onExpand}
+            aria-label={
+              sizeHint ? `Make ${title} smaller (${sizeHint})` : `Make ${title} smaller`
+            }
+            disabled={!onShrink}
+            onClick={onShrink}
+          >
+            <Minimize2 size={14} strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            className="ts-widget-card-tool"
+            aria-label={
+              sizeHint ? `Make ${title} larger (${sizeHint})` : `Make ${title} larger`
+            }
+            disabled={!onGrow}
+            onClick={onGrow}
           >
             <Maximize2 size={14} strokeWidth={1.75} />
           </button>

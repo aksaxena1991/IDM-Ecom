@@ -26,9 +26,10 @@ const RANGE_OPTIONS = [
 export type WinLossTrendWidgetProps = Pick<
   WidgetCardProps,
   | 'editing'
+  | 'layout'
+  | 'onGrow'
+  | 'onShrink'
   | 'onRemove'
-  | 'onExpand'
-  | 'expanded'
   | 'onDragGripPointerDown'
   | 'onDragGripPointerUp'
 >;
@@ -37,12 +38,17 @@ export type WinLossTrendWidgetProps = Pick<
  * Win / Loss Trend widget.
  * Grouped monthly bars for bound, in-progress, and lost opportunities.
  */
-export const WinLossTrendWidget: React.FC<WinLossTrendWidgetProps> = (props) => {
+export const WinLossTrendWidget: React.FC<WinLossTrendWidgetProps> = ({
+  layout,
+  ...props
+}) => {
   const [range, setRange] = useState('all');
   const data = range === '3' ? ALL_MONTHS.slice(-3) : ALL_MONTHS;
+  const chartHeight = Math.max(220, (layout?.rowSpan ?? 1) * 130);
 
   return (
     <WidgetCard
+      layout={layout}
       title="Win / Loss Trend"
       subtitle="Monthly bound vs lost opportunities"
       icon={<TrendingUp size={18} strokeWidth={2} />}
@@ -59,7 +65,7 @@ export const WinLossTrendWidget: React.FC<WinLossTrendWidgetProps> = (props) => 
           { key: 'inProgress', label: 'In Progress', color: IN_PROGRESS },
           { key: 'lost', label: 'Lost', color: LOST },
         ]}
-        height={300}
+        height={chartHeight}
         showGrid
         showLegend
         legendPlacement="footer"

@@ -17,9 +17,10 @@ import { WinLossTrendWidget } from './WinLossTrendWidget';
 type FrameProps = Pick<
   WidgetCardProps,
   | 'editing'
+  | 'layout'
+  | 'onGrow'
+  | 'onShrink'
   | 'onRemove'
-  | 'onExpand'
-  | 'expanded'
   | 'onDragGripPointerDown'
   | 'onDragGripPointerUp'
 >;
