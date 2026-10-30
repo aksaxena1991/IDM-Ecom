@@ -1,0 +1,55 @@
+/* Night-sky dark theme — deep navy surfaces, unchanged brand accents, softer tints for UI wells */
+
+.sl-root[data-color-scheme='dark'] {
+  --sl-color-sky: #60a5fa;
+  --sl-color-sky-bright: #93c5fd;
+  --sl-color-sky-deep: #3b82f6;
+  --sl-color-sky-soft: #1e3a8a;
+
+  --sl-color-sun: #fbbf24;
+  --sl-color-sun-bright: #fcd34d;
+  --sl-color-sun-deep: #f59e0b;
+  --sl-color-sun-soft: #422006;
+
+  --sl-color-leaf: #4ade80;
+  --sl-color-leaf-soft: #14532d;
+  --sl-color-leaf-deep: #22c55e;
+
+  --sl-color-coral: #fca5a5;
+  --sl-color-coral-soft: #450a0a;
+  --sl-color-berry: #c084fc;
+  --sl-color-berry-soft: #3b0764;
+
+  --sl-color-background: #0b1220;
+  --sl-color-surface: #141c2e;
+  --sl-color-surface-elevated: #1a2438;
+  --sl-color-surface-sunken: #0f172a;
+
+  --sl-color-ink: #f1f5f9;
+  --sl-color-ink-muted: #cbd5e1;
+  --sl-color-ink-subtle: #94a3b8;
+  --sl-color-ink-faint: #64748b;
+
+  --sl-color-outline: #334155;
+  --sl-color-outline-strong: #64748b;
+
+  --sl-color-scrim: rgba(0, 0, 0, 0.55);
+  --sl-color-on-primary: #ffffff;
+
+  --sl-shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --sl-shadow-lesson-active: 0 12px 32px rgba(59, 130, 246, 0.35);
+  --sl-shadow-badge-glow: 0 0 28px rgba(252, 211, 77, 0.45);
+  --sl-shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.sl-root[data-color-scheme='dark'][data-high-contrast='true'] {
+  --sl-color-background: #000000;
+  --sl-color-surface: #000000;
+  --sl-color-surface-elevated: #000000;
+  --sl-color-surface-sunken: #000000;
+  --sl-color-ink: #ffffff;
+  --sl-color-ink-muted: #ffffff;
+  --sl-color-ink-subtle: #e2e8f0;
+  --sl-color-outline: #ffffff;
+  --sl-color-outline-strong: #ffffff;
+}

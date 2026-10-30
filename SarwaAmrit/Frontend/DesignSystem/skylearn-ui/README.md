@@ -30,7 +30,7 @@ export function App() {
 
 ## Accessibility toggles
 
-`ThemeProvider` supports high contrast, reduced motion, and parent/teacher density via `useSkyLearnTheme()`.
+`ThemeProvider` supports **light**, **dark**, and **system** color schemes (plus high contrast, reduced motion, and parent/teacher density) via `useSkyLearnTheme()`.
 
 Storybook docs: **Overview**, **Voice & tone**, **Accessibility**, **Do's and Don'ts**, **Foundations** (elevation/spacing), **Iconography**, plus component stories for `Modal`, `EmptyState`, and the learning UI set.
 

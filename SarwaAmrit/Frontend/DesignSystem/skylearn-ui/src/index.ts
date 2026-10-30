@@ -1,6 +1,8 @@
 export {
   tokens,
   colors,
+  colorsDark,
+  colorSchemes,
   typography,
   spacing,
   radii,
@@ -10,6 +12,7 @@ export {
 export type {
   SkyLearnTokens,
   Colors,
+  ColorsDark,
   TypographyTokens,
   TypographyScaleKey,
   Spacing,

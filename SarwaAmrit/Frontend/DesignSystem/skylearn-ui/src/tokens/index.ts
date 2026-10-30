@@ -17,7 +17,8 @@ export const tokens = {
 export type SkyLearnTokens = typeof tokens;
 
 export { colors, typography, spacing, radii, shadows, motion };
-export type { Colors } from './colors.js';
+export type { Colors, ColorsDark } from './colors.js';
+export { colorsDark, colorSchemes } from './colors.js';
 export type { TypographyTokens, TypographyScaleKey } from './typography.js';
 export type { Spacing } from './spacing.js';
 export type { Radii } from './radii.js';

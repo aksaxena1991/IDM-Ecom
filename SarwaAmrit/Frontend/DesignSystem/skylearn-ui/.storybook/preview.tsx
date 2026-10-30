@@ -14,6 +14,8 @@ const preview: Preview = {
         white: { name: 'Background', value: '#FFFFFF' },
         surface: { name: 'Surface', value: '#F8FAFC' },
         skySoft: { name: 'Sky Soft', value: '#DBEAFE' },
+        darkBg: { name: 'Dark background', value: '#0B1220' },
+        darkSurface: { name: 'Dark surface', value: '#141C2E' },
       },
     },
     docs: {

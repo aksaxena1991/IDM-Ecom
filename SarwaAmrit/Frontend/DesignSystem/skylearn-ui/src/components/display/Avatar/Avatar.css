@@ -4,7 +4,7 @@
   border-radius: var(--sl-radius-pill);
   background: var(--sl-color-sky-soft);
   box-shadow:
-    inset 0 0 0 3px #fff,
+    inset 0 0 0 3px var(--sl-color-surface-elevated),
     0 0 0 2px var(--sl-color-sky);
   overflow: hidden;
   flex-shrink: 0;

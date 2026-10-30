@@ -29,10 +29,12 @@ Correct and incorrect states always pair **color + icon + copy** (checkmark / ×
 
 ## Modes (ThemeProvider)
 
-| Flag | Effect |
-|------|--------|
-| `data-high-contrast="true"` | White surfaces, black ink, reduced decorative chrome |
+| Flag / API | Effect |
+|------------|--------|
+| `data-color-scheme="dark"` | Night-sky surfaces, light ink, adjusted soft tints (see **Foundations → Dark theme**) |
+| `setColorScheme('light' \| 'dark' \| 'system')` | User or app appearance; **`system`** follows `prefers-color-scheme` |
+| `data-high-contrast="true"` | Light: white surfaces + black ink. Dark: black surfaces + white ink |
 | `data-reduced-motion="true"` | Shorter transitions; confetti → static star; no shake/sparkle flourishes |
 | `data-parent-mode="true"` | Denser parent/teacher typography; mono-friendly data slots |
 
-Storybook includes an **Accessibility toolbar** to preview these modes. The provider also honors **`prefers-reduced-motion`** on load.
+Storybook includes an **Accessibility toolbar** (appearance + a11y toggles). The provider honors **`prefers-reduced-motion`** and **`prefers-color-scheme`** when using **`system`** appearance.

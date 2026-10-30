@@ -54,12 +54,12 @@
 
 .sl-answer-tile__badge--ok {
   background: var(--sl-color-leaf);
-  color: #fff;
+  color: var(--sl-color-on-primary);
 }
 
 .sl-answer-tile__badge--retry {
   background: var(--sl-color-coral);
-  color: #fff;
+  color: var(--sl-color-on-primary);
 }
 
 .sl-answer-tile__retry {

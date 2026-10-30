@@ -4,7 +4,7 @@
   border: none;
   border-radius: var(--sl-radius-button);
   background: var(--sl-color-sky);
-  color: #fff;
+  color: var(--sl-color-on-primary);
   font-family: var(--sl-font-body);
   font-size: var(--sl-text-body-lg);
   font-weight: 600;

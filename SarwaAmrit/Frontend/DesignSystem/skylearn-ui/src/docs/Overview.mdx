@@ -13,6 +13,7 @@ Warm, bright design system for **K–8 edtech** — friendly sky blue, sun achie
 - **Coral**, not harsh red, for “try again” states
 - **Sun yellow** for rewards only — not primary CTAs
 - **Confetti** on lesson completion only
+- **Light and dark** appearance (`light` | `dark` | `system`) via `ThemeProvider`
 
 ## Packages
 
@@ -23,6 +24,9 @@ npm install @skylearn/ui
 ```tsx
 import '@skylearn/ui/styles.css';
 import { ThemeProvider, LessonCard, BigFriendlyButton } from '@skylearn/ui';
+
+// defaultColorScheme: 'light' | 'dark' | 'system'
+<ThemeProvider defaultColorScheme="system">…</ThemeProvider>
 ```
 
 ## Storybook

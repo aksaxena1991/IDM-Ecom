@@ -39,6 +39,10 @@
   --sl-color-outline: #e2e8f0;
   --sl-color-outline-strong: #94a3b8;
 
+  /* Overlays & text on filled buttons */
+  --sl-color-scrim: rgba(15, 23, 42, 0.35);
+  --sl-color-on-primary: #ffffff;
+
   /* Typography */
   --sl-font-display: 'Hubot Sans', 'Nunito', 'Quicksand', system-ui, sans-serif;
   --sl-font-body: 'Atkinson Hyperlegible', 'Nunito Sans', 'Inter', system-ui, sans-serif;

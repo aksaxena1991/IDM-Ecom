@@ -1,4 +1,5 @@
 @import './tokens/tokens.css';
+@import './tokens/theme-dark.css';
 @import './styles/layout.css';
 @import './styles/animations.css';
 @import './components/typography/Typography/Typography.css';

@@ -25,3 +25,22 @@
   height: 18px;
   accent-color: var(--sl-color-sky);
 }
+
+.sl-a11y-toolbar__item--select select {
+  min-height: 40px;
+  padding: var(--sl-space-2) var(--sl-space-3);
+  border: 1px solid var(--sl-color-outline);
+  border-radius: var(--sl-radius-chip);
+  background: var(--sl-color-surface-elevated);
+  color: var(--sl-color-ink);
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-small);
+}
+
+.sl-a11y-toolbar__item--select {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sl-space-1);
+  min-height: auto;
+  padding-block: var(--sl-space-2);
+}

@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { colors } from '../tokens/colors.js';
+import { colors, colorsDark } from '../tokens/colors.js';
 import { Typography } from '../components/typography/Typography/Typography.js';
+import { ThemeProvider } from '../components/theme/ThemeProvider/ThemeProvider.js';
+import { LessonCard } from '../components/display/LessonCard/LessonCard.js';
 
 const meta: Meta = {
   title: 'SkyLearn/Foundations',
@@ -104,3 +106,52 @@ export const ElevationAndSpacing: StoryObj = () => (
 );
 
 ElevationAndSpacing.storyName = 'Elevation & spacing';
+
+export const DarkTheme: StoryObj = () => (
+  <ThemeProvider defaultColorScheme="dark">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <Typography variant="h2">Dark theme</Typography>
+      <Typography variant="body">
+        Deep navy background with brighter sky/leaf accents. Toggle via Appearance in the Storybook toolbar or{' '}
+        <code>defaultColorScheme=&quot;dark&quot;</code>.
+      </Typography>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16 }}>
+        {Object.entries({
+          Background: colorsDark.surface.background,
+          Surface: colorsDark.surface.DEFAULT,
+          Elevated: colorsDark.surface.elevated,
+          Ink: colorsDark.ink.DEFAULT,
+          'Sky soft': colorsDark.sky.soft,
+          'Leaf soft': colorsDark.leaf.soft,
+        }).map(([name, hex]) => (
+          <div key={name}>
+            <div
+              style={{
+                height: 72,
+                borderRadius: 12,
+                background: hex,
+                border: '1px solid var(--sl-color-outline)',
+              }}
+            />
+            <Typography variant="caption" style={{ display: 'block', marginTop: 8 }}>
+              {name}
+              <br />
+              {hex}
+            </Typography>
+          </div>
+        ))}
+      </div>
+      <div style={{ maxWidth: 320 }}>
+        <LessonCard
+          title="Stars at night"
+          description="Count constellations"
+          progress={65}
+          icon="⭐"
+          active
+        />
+      </div>
+    </div>
+  </ThemeProvider>
+);
+
+DarkTheme.storyName = 'Dark theme';
